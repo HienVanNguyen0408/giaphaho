@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Be_Vietnam_Pro } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import ThemeSwitcher from '@/components/shared/ThemeSwitcher';
 import './globals.css';
 
 const beVietnam = Be_Vietnam_Pro({
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col font-sans">
         <ThemeProvider>
           {children}
+          <ThemeSwitcher />
         </ThemeProvider>
       </body>
     </html>

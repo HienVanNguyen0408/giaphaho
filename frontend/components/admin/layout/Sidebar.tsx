@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAdminAuth } from '@/components/admin/providers/AdminAuthProvider';
 import { useSidebar } from '@/components/admin/providers/SidebarContext';
+import { Suspense } from 'react';
 
 interface NavItem {
   href: string;
@@ -23,7 +24,7 @@ const navItems: NavItem[] = [
   { href: '/admin/activity-log', label: 'Nhật ký hoạt động', icon: '📋', superAdminOnly: true },
 ];
 
-export default function Sidebar() {
+function SidebarContent() {
   const pathname = usePathname();
   const { user } = useAdminAuth();
   const { mobileOpen, desktopCollapsed, closeMobile, toggleDesktop } = useSidebar();
@@ -115,5 +116,13 @@ export default function Sidebar() {
         )}
       </aside>
     </>
+  );
+}
+
+export default function Sidebar() {
+  return (
+    <Suspense fallback={<aside className="w-64 bg-stone-900 hidden lg:block" />}>
+      <SidebarContent />
+    </Suspense>
   );
 }

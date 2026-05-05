@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, FormEvent } from 'react';
+import { useEffect, useState, FormEvent, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getNewsBySlug, createNews, updateNews } from '@/lib/api';
 import type { NewsDetail } from '@/types';
 
-export default function TinTucEditPage() {
+function TinTucEditContent() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const id = params?.id ?? '';
@@ -187,5 +187,13 @@ export default function TinTucEditPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TinTucEditPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse space-y-4"><div className="h-10 bg-stone-200 rounded w-1/4"></div><div className="h-64 bg-stone-200 rounded"></div></div>}>
+      <TinTucEditContent />
+    </Suspense>
   );
 }

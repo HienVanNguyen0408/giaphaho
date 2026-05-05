@@ -10,7 +10,11 @@ export const metadata: Metadata = {
 async function getVideoData() {
   'use cache';
   cacheLife('hours');
-  return getVideos();
+  try {
+    return await getVideos();
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -45,7 +49,7 @@ function extractYouTubeId(url: string): string | null {
 
 export default async function VideoPage() {
   const res = await getVideoData();
-  const videos = res.data;
+  const videos = res?.data ?? [];
 
   return (
     <div className="min-h-screen bg-stone-50 py-12 px-4">

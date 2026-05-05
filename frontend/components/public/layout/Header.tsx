@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
 const NAV_LINKS = [
   { href: '/', label: 'Trang chủ' },
@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { href: '/tim-kiem', label: 'Tìm kiếm' },
 ];
 
-export default function Header() {
+function HeaderContent() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -172,5 +172,13 @@ export default function Header() {
         </nav>
       )}
     </header>
+  );
+}
+
+export default function Header() {
+  return (
+    <Suspense fallback={<header className="h-16 w-full" />}>
+      <HeaderContent />
+    </Suspense>
   );
 }

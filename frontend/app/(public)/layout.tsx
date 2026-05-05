@@ -1,6 +1,5 @@
 import Header from '@/components/public/layout/Header';
 import Footer from '@/components/public/layout/Footer';
-import ThemeSwitcher from '@/components/shared/ThemeSwitcher';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,7 +7,6 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
-      <ThemeSwitcher />
     </div>
   );
 }

@@ -11,14 +11,19 @@ interface PageProps {
 async function getMemberData(id: string) {
   'use cache';
   cacheLife('hours');
-  const res = await getMember(id);
-  return res.data;
+  try {
+    const res = await getMember(id);
+    return res.data;
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   try {
     const member = await getMemberData(id);
+    if (!member) return { title: 'Thành viên' };
     return {
       title: member.fullName,
       description: member.bio ?? `Trang thành viên ${member.fullName} — Gia Phả Họ Phùng Bát Tràng`,
@@ -31,6 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function MemberPage({ params }: PageProps) {
   const { id } = await params;
   const member = await getMemberData(id);
+  if (!member) return <div className="min-h-screen flex items-center justify-center text-stone-400">Không tìm thấy thành viên hoặc không thể kết nối. Vui lòng thử lại sau.</div>;
 
   const genderLabel =
     member.gender === 'MALE' ? 'Nam' : member.gender === 'FEMALE' ? 'Nữ' : member.gender;

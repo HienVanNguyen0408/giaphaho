@@ -11,22 +11,26 @@ interface PageProps {
 async function getArticle(slug: string) {
   'use cache';
   cacheLife('minutes');
-  return getNewsBySlug(slug);
+  try {
+    return await getNewsBySlug(slug);
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   try {
     const res = await getArticle(slug);
-    const article = res.data;
+    const article = res?.data;
     return {
-      title: article.title,
-      description: article.title,
+      title: article?.title ?? 'Bài viết',
+      description: article?.title,
       openGraph: {
-        title: article.title,
-        images: article.thumbnail ? [{ url: article.thumbnail }] : [],
+        title: article?.title,
+        images: article?.thumbnail ? [{ url: article.thumbnail }] : [],
         type: 'article',
-        publishedTime: article.publishedAt,
+        publishedTime: article?.publishedAt,
       },
     };
   } catch {
@@ -46,6 +50,7 @@ function formatDate(dateStr: string) {
 export default async function ArticlePage({ params }: PageProps) {
   const { slug } = await params;
   const res = await getArticle(slug);
+  if (!res) return <div className="min-h-screen flex items-center justify-center text-stone-400">Không thể tải bài viết. Vui lòng thử lại sau.</div>;
   const article = res.data;
 
   return (

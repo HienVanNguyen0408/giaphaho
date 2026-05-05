@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getMember, createMember, updateMember } from '@/lib/api';
 import MemberForm from '@/components/admin/gia-pha/MemberForm';
 import type { Member } from '@/types';
 
-export default function MemberEditPage() {
+function MemberEditContent() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const id = params?.id ?? '';
@@ -83,5 +83,13 @@ export default function MemberEditPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function MemberEditPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse space-y-4"><div className="h-10 bg-stone-200 rounded w-1/4"></div><div className="h-64 bg-stone-200 rounded"></div></div>}>
+      <MemberEditContent />
+    </Suspense>
   );
 }

@@ -16,7 +16,11 @@ interface PageProps {
 async function getNewsData(page: number) {
   'use cache';
   cacheLife('minutes');
-  return getNewsList(page, 9);
+  try {
+    return await getNewsList(page, 9);
+  } catch {
+    return null;
+  }
 }
 
 function formatDate(dateStr: string) {
@@ -31,6 +35,7 @@ export default async function TinTucPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const currentPage = Math.max(1, parseInt(sp.page ?? '1', 10));
   const res = await getNewsData(currentPage);
+  if (!res) return <div className="min-h-screen flex items-center justify-center text-stone-400">Không thể tải tin tức. Vui lòng thử lại sau.</div>;
   const { items, totalPages } = res.data;
 
   return (

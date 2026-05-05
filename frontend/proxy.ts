@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest): NextResponse {
+  // Exclude /admin/login to prevent redirect loop
+  if (request.nextUrl.pathname === '/admin/login') {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get('token');
   if (!token) {
     const loginUrl = new URL('/admin/login', request.url);

@@ -1,15 +1,20 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '@/lib/api';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [year, setYear] = useState('');
+
+  useEffect(() => {
+    setYear(new Date().getFullYear().toString());
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -91,9 +96,17 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-stone-600 text-xs mt-6">
-          Gia Phả Họ Phùng Bát Tràng © {new Date().getFullYear()}
+          Gia Phả Họ Phùng Bát Tràng © {year}
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-stone-900" />}>
+      <LoginContent />
+    </Suspense>
   );
 }
