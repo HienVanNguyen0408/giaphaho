@@ -1,4 +1,11 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load .env.dev in development, .env in production
+const envFile = process.env.NODE_ENV === 'production' ? '.env' : '.env.dev';
+dotenv.config({ path: path.resolve(process.cwd(), envFile) });
+// Fallback to .env if the specific file doesn't define everything
+dotenv.config({ path: path.resolve(process.cwd(), '.env'), override: false });
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
