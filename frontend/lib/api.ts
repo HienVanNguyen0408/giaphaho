@@ -64,7 +64,9 @@ export const getNewsList = (page = 1, limit = 10) =>
 
 export const getPinnedNews = () => apiFetch<NewsListItem[]>('/api/news/pinned');
 
-export const getNewsBySlug = (slug: string) => apiFetch<NewsDetail>(`/api/news/${slug}`);
+export const getNewsBySlug = (slug: string) => apiFetch<NewsDetail>(`/api/news/slug/${slug}`);
+
+export const getNewsById = (id: string) => apiFetch<NewsDetail>(`/api/news/${id}`);
 
 export const createNews = (data: {
   title: string;

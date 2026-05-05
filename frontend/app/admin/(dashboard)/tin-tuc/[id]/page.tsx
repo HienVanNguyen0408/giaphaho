@@ -6,6 +6,10 @@ import Link from 'next/link';
 import { getNewsBySlug, createNews, updateNews } from '@/lib/api';
 import type { NewsDetail } from '@/types';
 
+// Use a separate utility or simply fallback gracefully if it's admin id instead of slug.
+// Actually, backend might use getNewsById for admin but if we only have getNewsBySlug, we can update it in api.ts or use getNewsBySlug and backend needs to handle finding by ID or Slug.
+import { getNewsById } from '@/lib/api';
+
 function TinTucEditContent() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -25,8 +29,8 @@ function TinTucEditContent() {
   useEffect(() => {
     if (isNew) return;
     setFetchLoading(true);
-    // The API uses slug for public fetch; admin fetches by id — use id as slug-like identifier
-    getNewsBySlug(id)
+    // Use getNewsById since admin works with IDs
+    getNewsById(id)
       .then((res) => {
         const d: NewsDetail = res.data;
         setTitle(d.title);

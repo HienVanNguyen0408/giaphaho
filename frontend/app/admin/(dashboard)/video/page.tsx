@@ -180,41 +180,63 @@ export default function VideoAdminPage() {
         </div>
       )}
 
-      {/* Inline add form */}
+      {/* Inline add form / Popup logic is replaced by the popup below, but we can keep showAdd to trigger it */}
       {showAdd && (
-        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-5">
-          <h2 className="text-sm font-semibold text-stone-800 mb-4">Thêm video mới</h2>
-          <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={addTitle}
-              onChange={(e) => setAddTitle(e.target.value)}
-              placeholder="Tiêu đề video"
-              required
-              className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors"
-            />
-            <input
-              type="url"
-              value={addUrl}
-              onChange={(e) => setAddUrl(e.target.value)}
-              placeholder="URL YouTube (https://youtube.com/watch?v=...)"
-              required
-              className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors"
-            />
-            <button
-              type="submit"
-              disabled={adding}
-              className="px-5 py-2.5 text-sm font-semibold text-white bg-stone-800 hover:bg-stone-900 rounded-xl transition-colors disabled:opacity-60"
-            >
-              {adding ? 'Đang thêm...' : 'Thêm'}
-            </button>
-          </form>
-          {addUrl && extractYouTubeId(addUrl) && (
-            <p className="text-xs text-stone-400 mt-2">
-              ID YouTube: <span className="font-mono text-stone-600">{extractYouTubeId(addUrl)}</span>{' '}
-              — ảnh thumbnail sẽ được tự động lấy.
-            </p>
-          )}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-stone-100 bg-stone-50 flex justify-between items-center">
+              <h3 className="font-semibold text-stone-800">Thêm video mới</h3>
+              <button onClick={() => setShowAdd(false)} className="text-stone-400 hover:text-stone-600 transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleAdd} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">Tiêu đề video</label>
+                <input
+                  type="text"
+                  value={addTitle}
+                  onChange={(e) => setAddTitle(e.target.value)}
+                  required
+                  placeholder="Nhập tiêu đề video..."
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">URL YouTube</label>
+                <input
+                  type="url"
+                  value={addUrl}
+                  onChange={(e) => setAddUrl(e.target.value)}
+                  placeholder="https://youtube.com/watch?v=..."
+                  required
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors"
+                />
+                {addUrl && extractYouTubeId(addUrl) && (
+                  <p className="text-xs text-emerald-600 mt-2 flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    URL hợp lệ (ID: {extractYouTubeId(addUrl)})
+                  </p>
+                )}
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAdd(false)}
+                  className="px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100 rounded-xl transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={adding}
+                  className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-60"
+                >
+                  {adding ? 'Đang thêm...' : 'Thêm video'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

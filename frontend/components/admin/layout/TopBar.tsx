@@ -2,33 +2,265 @@
 
 import { useAdminAuth } from '@/components/admin/providers/AdminAuthProvider';
 import { useSidebar } from '@/components/admin/providers/SidebarContext';
+import type { Role } from '@/types';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { search } from '@/lib/api';
+import type { SearchResults } from '@/types';
+
+const roleMeta: Record<Role, { label: string; bg: string; text: string; border: string }> = {
+  SUPER_ADMIN: {
+    label: 'Admin tổng',
+    bg: 'rgba(245,158,11,0.1)',
+    text: 'rgba(217,119,6,0.9)',
+    border: 'rgba(245,158,11,0.25)',
+  },
+  CHI_ADMIN: {
+    label: 'Quản trị chi',
+    bg: 'rgba(56,189,248,0.08)',
+    text: 'rgba(14,165,233,0.85)',
+    border: 'rgba(56,189,248,0.2)',
+  },
+};
+
+function GlobalSearch() {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SearchResults | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearch = useCallback(async (q: string) => {
+    if (!q || q.length < 2) {
+      setResults(null);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await search(q);
+      setResults(res.data);
+      setShowDropdown(true);
+    } catch (err) {
+      console.error(err);
+      setResults(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (query) handleSearch(query);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [query, handleSearch]);
+
+  const totalCount = results
+    ? results.members.length + results.news.length + results.videos.length
+    : 0;
+
+  return (
+    <div className="relative hidden md:block" ref={dropdownRef}>
+      <div className="relative">
+        <svg
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+          style={{ color: 'rgba(168,162,158,0.5)' }}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (!e.target.value) setShowDropdown(false);
+          }}
+          onFocus={() => {
+            if (query && results) setShowDropdown(true);
+          }}
+          placeholder="Tìm kiếm hệ thống..."
+          className="w-64 lg:w-80 pl-9 pr-4 py-1.5 rounded-lg text-sm transition-colors"
+          style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: 'rgba(214,211,209,0.9)',
+          }}
+        />
+        {loading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
+        )}
+      </div>
+
+      {showDropdown && query && (
+        <div className="absolute top-full mt-2 left-0 w-80 bg-white rounded-xl shadow-2xl border border-stone-200 overflow-hidden z-50">
+          <div className="max-h-96 overflow-y-auto">
+            {!loading && totalCount === 0 ? (
+              <div className="p-4 text-center text-sm text-stone-500">
+                Không tìm thấy kết quả nào
+              </div>
+            ) : null}
+
+            {results && results.members.length > 0 && (
+              <div className="border-b border-stone-100 last:border-0">
+                <div className="px-3 py-2 bg-stone-50 text-xs font-semibold text-stone-500 uppercase">
+                  Thành viên ({results.members.length})
+                </div>
+                <ul className="py-1">
+                  {results.members.map((m) => (
+                    <li key={m.id}>
+                      <Link
+                        href={`/admin/gia-pha/${m.id}`}
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-stone-50 transition-colors"
+                      >
+                        <span className="text-sm font-medium text-stone-800 truncate">{m.fullName}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {results && results.news.length > 0 && (
+              <div className="border-b border-stone-100 last:border-0">
+                <div className="px-3 py-2 bg-stone-50 text-xs font-semibold text-stone-500 uppercase">
+                  Tin tức ({results.news.length})
+                </div>
+                <ul className="py-1">
+                  {results.news.map((n) => (
+                    <li key={n.id}>
+                      <Link
+                        href={`/admin/tin-tuc/${n.id}`}
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-stone-50 transition-colors"
+                      >
+                        <span className="text-sm font-medium text-stone-800 truncate">{n.title}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {results && results.videos.length > 0 && (
+              <div className="border-b border-stone-100 last:border-0">
+                <div className="px-3 py-2 bg-stone-50 text-xs font-semibold text-stone-500 uppercase">
+                  Video ({results.videos.length})
+                </div>
+                <ul className="py-1">
+                  {results.videos.map((v) => (
+                    <li key={v.id}>
+                      <Link
+                        href={`/admin/video`}
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-stone-50 transition-colors"
+                      >
+                        <span className="text-sm font-medium text-stone-800 truncate">{v.title}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function TopBar() {
   const { user, logout } = useAdminAuth();
   const { toggleMobile } = useSidebar();
 
+  const rm = user ? roleMeta[user.role] : null;
+
   return (
-    <header className="h-14 bg-white border-b border-stone-200 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+    <header
+      className="h-14 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 relative z-20"
+      style={{
+        background: 'rgba(15,10,6,0.95)',
+        borderBottom: '1px solid rgba(80,50,20,0.3)',
+        backdropFilter: 'blur(8px)',
+      }}
+    >
       <div className="flex items-center gap-3">
         {/* Hamburger — mobile only */}
         <button
           onClick={toggleMobile}
-          className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 transition-colors"
+          className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+          style={{ color: 'rgba(168,162,158,0.6)' }}
           aria-label="Mở menu"
         >
-          ☰
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
         </button>
-        <span className="text-sm text-stone-700">
-          Xin chào,{' '}
-          <span className="font-semibold text-stone-900">{user?.username ?? '...'}</span>
-        </span>
+
+        <GlobalSearch />
       </div>
-      <button
-        onClick={logout}
-        className="text-sm text-stone-500 hover:text-red-600 font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
-      >
-        Đăng xuất
-      </button>
+
+      <div className="flex items-center gap-4">
+        <div className="hidden sm:flex items-center gap-2.5">
+          <span className="text-sm" style={{ color: 'rgba(168,162,158,0.6)' }}>
+            Xin chào,{' '}
+            <span className="font-semibold" style={{ color: 'rgba(214,211,209,0.9)' }}>
+              {user?.username ?? '...'}
+            </span>
+          </span>
+
+          {rm && (
+            <span
+              className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+              style={{
+                background: rm.bg,
+                color: rm.text,
+                border: `1px solid ${rm.border}`,
+                letterSpacing: '0.05em',
+              }}
+            >
+              <span
+                className="w-1 h-1 rounded-full flex-shrink-0"
+                style={{ background: rm.text }}
+              />
+              {rm.label}
+            </span>
+          )}
+        </div>
+
+        <button
+          onClick={logout}
+          className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-all group"
+          style={{ color: 'rgba(168,162,158,0.55)' }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.color = '#fca5a5';
+            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(153,27,27,0.15)';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.color = 'rgba(168,162,158,0.55)';
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+          }}
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Đăng xuất
+        </button>
+      </div>
     </header>
   );
 }

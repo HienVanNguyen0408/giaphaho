@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import type { ComponentType } from 'react';
 import {
   ReactFlow,
@@ -10,6 +10,7 @@ import {
   ReactFlowProvider,
   useNodesState,
   useEdgesState,
+  useReactFlow,
   Handle,
   Position,
   type Node,
@@ -189,12 +190,84 @@ function TreeSkeleton() {
   );
 }
 
+// -------- Tree Search Component --------
+function TreeSearch({ nodes, onSelect }: { nodes: Node[], onSelect: (id: string) => void }) {
+  const [query, setQuery] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const { setCenter, fitView } = useReactFlow();
+
+  const filtered = query
+    ? nodes.filter(n => {
+        const member = (n.data as MemberNodeData).member;
+        return member.fullName.toLowerCase().includes(query.toLowerCase());
+      }).slice(0, 10)
+    : [];
+
+  const handleSelect = (node: Node) => {
+    setQuery('');
+    setShowResults(false);
+    onSelect(node.id);
+    
+    // Zoom and center on node
+    setCenter(node.position.x + 100, node.position.y + 60, { zoom: 1.5, duration: 800 });
+  };
+
+  return (
+    <div className="absolute top-4 left-16 z-10">
+      <div className="relative w-64 sm:w-80">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setShowResults(true);
+          }}
+          onFocus={() => setShowResults(true)}
+          placeholder="Tìm nhanh thành viên..."
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white/90 backdrop-blur text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-red-400 shadow-md"
+        />
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+
+        {showResults && query && (
+          <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-xl border border-stone-200 max-h-60 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <div className="p-3 text-xs text-stone-500 text-center">Không tìm thấy ai</div>
+            ) : (
+              <ul className="py-1">
+                {filtered.map(n => {
+                  const m = (n.data as MemberNodeData).member;
+                  return (
+                    <li key={n.id}>
+                      <button
+                        onClick={() => handleSelect(n)}
+                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-stone-800 flex flex-col transition-colors"
+                      >
+                        <span className="font-semibold">{m.fullName}</span>
+                        <span className="text-[10px] text-stone-500">
+                          {m.birthYear ? `SN: ${m.birthYear}` : ''} {m.chiId ? `| Chi: ${m.chiId.slice(0,6)}` : ''}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // -------- Inner Flow --------
 function FamilyTreeInner() {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getMembers()
@@ -219,7 +292,7 @@ function FamilyTreeInner() {
   if (loading) return <TreeSkeleton />;
 
   return (
-    <div className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full h-full bg-stone-50">
       <RF
         nodes={nodes}
         edges={edges}
@@ -230,13 +303,43 @@ function FamilyTreeInner() {
         onPaneClick={onPaneClick}
         fitView
         fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.2}
-        maxZoom={2}
+        minZoom={0.005}
+        maxZoom={3}
         className="bg-stone-50"
       >
         <Background color="#d6d3d1" gap={24} size={1} />
         <Controls />
-        <MiniMap maskColor="rgba(250, 250, 249, 0.8)" />
+        <MiniMap 
+          maskColor="rgba(250, 250, 249, 0.8)" 
+          pannable 
+          zoomable 
+          nodeColor="#e5e5e5" 
+          nodeStrokeColor="#9a1a1a" 
+        />
+        
+        {/* Search Bar */}
+        <TreeSearch nodes={nodes} onSelect={setSelectedId} />
+
+        {/* Fullscreen Button */}
+        <div className="absolute top-4 left-4 z-10 flex gap-2">
+          <button
+            onClick={() => {
+              if (!document.fullscreenElement) {
+                containerRef.current?.requestFullscreen().catch(err => {
+                  console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+              } else {
+                document.exitFullscreen();
+              }
+            }}
+            className="bg-white w-10 h-10 rounded-xl shadow-md border border-stone-200 text-stone-600 hover:text-stone-900 hover:border-red-400 transition-colors flex items-center justify-center group"
+            title="Xem toàn màn hình"
+          >
+            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+          </button>
+        </div>
       </RF>
       {selectedId && (
         <DetailPanel memberId={selectedId} onClose={() => setSelectedId(null)} />

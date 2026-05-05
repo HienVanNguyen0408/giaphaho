@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { cacheLife } from 'next/cache';
-import { getPinnedNews, getVideos, getSections, getNewsList } from '@/lib/api';
+import { getPinnedNews, getVideos, getSections, getNewsList, getDashboard } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: 'Trang chủ',
@@ -12,22 +12,24 @@ import ThanhTichSection from '@/components/public/home/ThanhTichSection';
 import TinTucSection from '@/components/public/home/TinTucSection';
 import VideoSection from '@/components/public/home/VideoSection';
 import DynamicSection from '@/components/public/home/DynamicSection';
-import type { NewsListItem, Video, Section } from '@/types';
+import type { NewsListItem, Video, Section, DashboardStats } from '@/types';
 
 async function getHomeData(): Promise<{
   pinnedNews: NewsListItem[];
   recentNews: NewsListItem[];
   videos: Video[];
   sections: Section[];
+  stats: DashboardStats | null;
 }> {
   'use cache';
-  cacheLife('hours');
+  cacheLife('minutes');
 
-  const [pinnedRes, newsRes, videosRes, sectionsRes] = await Promise.allSettled([
+  const [pinnedRes, newsRes, videosRes, sectionsRes, statsRes] = await Promise.allSettled([
     getPinnedNews(),
     getNewsList(1, 3),
     getVideos(),
     getSections(),
+    getDashboard(), // This returns member counts, etc.
   ]);
 
   const pinnedNews =
@@ -40,16 +42,18 @@ async function getHomeData(): Promise<{
       : [];
   const sections =
     sectionsRes.status === 'fulfilled' ? sectionsRes.value.data : [];
+  const stats = 
+    statsRes.status === 'fulfilled' ? statsRes.value.data : null;
 
-  return { pinnedNews, recentNews, videos, sections };
+  return { pinnedNews, recentNews, videos, sections, stats };
 }
 
 export default async function HomePage() {
-  const { pinnedNews, recentNews, videos, sections } = await getHomeData();
+  const { pinnedNews, recentNews, videos, sections, stats } = await getHomeData();
 
   return (
     <>
-      <HeroSection />
+      <HeroSection stats={stats} />
       <TinNoiBat news={pinnedNews} />
       <ThanhTichSection />
       <TinTucSection news={recentNews} />

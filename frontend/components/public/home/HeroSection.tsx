@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import type { DashboardStats } from '@/types';
 
-export default function HeroSection() {
+export default function HeroSection({ stats }: { stats: DashboardStats | null }) {
+  const memberCount = stats?.totalMembers ? `${stats.totalMembers}+` : '1500+';
+
   return (
     <section
       className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-red-950 via-red-900 to-amber-900"
@@ -77,9 +80,9 @@ export default function HeroSection() {
         {/* Stats row */}
         <div className="mt-14 grid grid-cols-3 gap-6 max-w-lg mx-auto text-center">
           {[
-            { value: '500+', label: 'Năm lịch sử' },
-            { value: '1000+', label: 'Thành viên' },
-            { value: '10+', label: 'Thế hệ' },
+            { value: '600+', label: 'Năm lịch sử' },
+            { value: memberCount, label: 'Thành viên' },
+            { value: '30+', label: 'Thế hệ' },
           ].map(({ value, label }) => (
             <div key={label} className="group">
               <p className="text-amber-400 font-bold text-2xl sm:text-3xl">{value}</p>

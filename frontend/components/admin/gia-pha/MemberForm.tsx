@@ -10,6 +10,20 @@ interface MemberFormProps {
   loading?: boolean;
 }
 
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-3 mb-4">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+        {children}
+      </span>
+      <div className="flex-1 h-px bg-stone-100" />
+    </div>
+  );
+}
+
+const inputCls =
+  'w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition-colors text-stone-800 placeholder-stone-400';
+
 export default function MemberForm({ initialData, onSubmit, loading = false }: MemberFormProps) {
   const [fullName, setFullName] = useState(initialData?.fullName ?? '');
   const [gender, setGender] = useState(initialData?.gender ?? '');
@@ -20,22 +34,17 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
     initialData?.deathYear != null ? String(initialData.deathYear) : '',
   );
   const [bio, setBio] = useState(initialData?.bio ?? '');
-  const [achievements, setAchievements] = useState<string[]>(
-    initialData?.achievements ?? [],
-  );
+  const [achievements, setAchievements] = useState<string[]>(initialData?.achievements ?? []);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData?.avatar ?? null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [parentId, setParentId] = useState(initialData?.parentId ?? '');
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Achievements helpers
   const addAchievement = () => setAchievements((prev) => [...prev, '']);
-  const updateAchievement = (idx: number, value: string) => {
+  const updateAchievement = (idx: number, value: string) =>
     setAchievements((prev) => prev.map((a, i) => (i === idx ? value : a)));
-  };
-  const removeAchievement = (idx: number) => {
+  const removeAchievement = (idx: number) =>
     setAchievements((prev) => prev.filter((_, i) => i !== idx));
-  };
 
   const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,169 +85,228 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-7">
       {formError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
+          <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
           {formError}
         </div>
       )}
 
-      {/* Full name */}
+      {/* ── Thông tin cơ bản ── */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">
-          Họ tên <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          required
-          placeholder="Nhập họ và tên"
-          className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors"
-        />
-      </div>
+        <SectionLabel>Thông tin cơ bản</SectionLabel>
+        <div className="space-y-4">
+          {/* Avatar + Full Name */}
+          <div className="flex items-start gap-4">
+            {/* Avatar preview */}
+            <div className="flex-shrink-0">
+              <div
+                className="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center relative"
+                style={{ background: '#f5f0e8', border: '2px dashed #d1c4b0' }}
+              >
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <svg className="w-6 h-6 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                )}
+                {avatarUploading && (
+                  <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                    <span className="w-4 h-4 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+              <label className="mt-1.5 flex justify-center cursor-pointer">
+                <span className="text-[10px] text-red-600 font-medium hover:text-red-700 transition-colors">
+                  {avatarUrl ? 'Đổi ảnh' : 'Tải ảnh'}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  disabled={avatarUploading}
+                  className="sr-only"
+                />
+              </label>
+            </div>
 
-      {/* Gender */}
-      <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">Giới tính</label>
-        <select
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors bg-white"
-        >
-          <option value="">Không rõ</option>
-          <option value="Nam">Nam</option>
-          <option value="Nữ">Nữ</option>
-        </select>
-      </div>
-
-      {/* Birth / Death year */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">Năm sinh</label>
-          <input
-            type="number"
-            value={birthYear}
-            onChange={(e) => setBirthYear(e.target.value)}
-            placeholder="VD: 1950"
-            min={1000}
-            max={2100}
-            className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">Năm mất</label>
-          <input
-            type="number"
-            value={deathYear}
-            onChange={(e) => setDeathYear(e.target.value)}
-            placeholder="VD: 2020"
-            min={1000}
-            max={2100}
-            className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors"
-          />
-        </div>
-      </div>
-
-      {/* Bio */}
-      <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">Tiểu sử</label>
-        <textarea
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          rows={4}
-          placeholder="Mô tả tiểu sử..."
-          className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors resize-none"
-        />
-      </div>
-
-      {/* Achievements */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-stone-700">Thành tựu</label>
-          <button
-            type="button"
-            onClick={addAchievement}
-            className="text-xs font-medium text-red-600 hover:text-red-700 transition-colors"
-          >
-            + Thêm
-          </button>
-        </div>
-        <div className="space-y-2">
-          {achievements.map((a, idx) => (
-            <div key={idx} className="flex gap-2">
+            {/* Name */}
+            <div className="flex-1">
+              <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+                Họ và tên <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                value={a}
-                onChange={(e) => updateAchievement(idx, e.target.value)}
-                placeholder={`Thành tựu ${idx + 1}`}
-                className="flex-1 px-4 py-2 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                placeholder="Nhập họ và tên đầy đủ"
+                className={inputCls}
               />
-              <button
-                type="button"
-                onClick={() => removeAchievement(idx)}
-                className="px-3 py-2 text-stone-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
-                aria-label="Xóa thành tựu"
-              >
-                ✕
-              </button>
             </div>
-          ))}
-          {achievements.length === 0 && (
-            <p className="text-xs text-stone-400 px-1">Chưa có thành tựu nào</p>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Avatar */}
-      <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">Ảnh đại diện</label>
-        <div className="flex items-center gap-4">
-          {avatarUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl}
-              alt="Preview"
-              className="w-16 h-16 rounded-xl object-cover border border-stone-200"
-            />
-          )}
-          <div className="flex-1">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              disabled={avatarUploading}
-              className="w-full text-sm text-stone-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-stone-100 file:text-stone-700 hover:file:bg-stone-200 transition-colors"
-            />
-            {avatarUploading && (
-              <p className="text-xs text-stone-400 mt-1">Đang tải ảnh...</p>
-            )}
+          {/* Gender — button group */}
+          <div>
+            <label className="block text-xs font-semibold text-stone-600 mb-1.5">Giới tính</label>
+            <div className="flex gap-2">
+              {['', 'Nam', 'Nữ'].map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setGender(g)}
+                  className="px-4 py-2 rounded-xl text-sm font-medium transition-all border"
+                  style={
+                    gender === g
+                      ? { background: 'rgba(153,27,27,0.08)', color: '#991b1b', border: '1px solid rgba(153,27,27,0.25)' }
+                      : { background: 'white', color: '#78716c', border: '1px solid #e7e5e4' }
+                  }
+                >
+                  {g === '' ? 'Không rõ' : g}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Birth / Death year */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-stone-600 mb-1.5">Năm sinh</label>
+              <input
+                type="number"
+                value={birthYear}
+                onChange={(e) => setBirthYear(e.target.value)}
+                placeholder="VD: 1950"
+                min={1000}
+                max={2100}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-stone-600 mb-1.5">Năm mất</label>
+              <input
+                type="number"
+                value={deathYear}
+                onChange={(e) => setDeathYear(e.target.value)}
+                placeholder="Để trống nếu còn sống"
+                min={1000}
+                max={2100}
+                className={inputCls}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Parent ID */}
+      {/* ── Quan hệ ── */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">
-          ID cha/mẹ
-        </label>
-        <input
-          type="text"
-          value={parentId}
-          onChange={(e) => setParentId(e.target.value)}
-          placeholder="ID của thành viên cha/mẹ (để trống nếu là gốc)"
-          className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors font-mono"
-        />
+        <SectionLabel>Quan hệ trong gia phả</SectionLabel>
+        <div>
+          <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+            ID cha / mẹ
+          </label>
+          <input
+            type="text"
+            value={parentId}
+            onChange={(e) => setParentId(e.target.value)}
+            placeholder="ID của thành viên cha/mẹ (để trống nếu là gốc)"
+            className={`${inputCls} font-mono text-xs`}
+          />
+          <p className="mt-1.5 text-[11px] text-stone-400">
+            Nhập ID của cha hoặc mẹ để gán quan hệ trong cây gia phả
+          </p>
+        </div>
+      </div>
+
+      {/* ── Tiểu sử & thành tựu ── */}
+      <div>
+        <SectionLabel>Tiểu sử & Thành tựu</SectionLabel>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-stone-600 mb-1.5">Tiểu sử</label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={4}
+              placeholder="Mô tả tiểu sử, cuộc đời..."
+              className={`${inputCls} resize-none`}
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-semibold text-stone-600">Thành tựu</label>
+              <button
+                type="button"
+                onClick={addAchievement}
+                className="flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-700 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Thêm
+              </button>
+            </div>
+            <div className="space-y-2">
+              {achievements.map((a, idx) => (
+                <div key={idx} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={a}
+                    onChange={(e) => updateAchievement(idx, e.target.value)}
+                    placeholder={`Thành tựu ${idx + 1}`}
+                    className={inputCls}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeAchievement(idx)}
+                    className="px-2.5 py-2 text-stone-400 hover:text-red-600 transition-colors rounded-xl hover:bg-red-50 flex-shrink-0"
+                    aria-label="Xóa"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+              {achievements.length === 0 && (
+                <p className="text-xs text-stone-400 px-1 py-1">Chưa có thành tựu nào được thêm</p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Submit */}
-      <div className="pt-2">
+      <div className="pt-1">
         <button
           type="submit"
           disabled={loading || avatarUploading}
-          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-700 to-amber-600 text-white font-semibold text-sm hover:from-red-800 hover:to-amber-700 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full py-3 rounded-xl font-semibold text-sm tracking-wide transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          style={{
+            background: 'linear-gradient(135deg, #991b1b, #b45309)',
+            color: '#fef3c7',
+            boxShadow: '0 2px 16px rgba(153,27,27,0.2)',
+          }}
         >
-          {loading ? 'Đang lưu...' : 'Lưu thành viên'}
+          {loading ? (
+            <>
+              <span className="w-3.5 h-3.5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(254,243,199,0.3)', borderTopColor: '#fef3c7' }} />
+              Đang lưu...
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Lưu thành viên
+            </>
+          )}
         </button>
       </div>
     </form>
