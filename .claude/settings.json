@@ -1,12 +1,4 @@
 {
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
-    }
-  },
   "permissions": {
     "allow": [
       "Bash(**)",
@@ -20,5 +12,16 @@
       "Bash(* --help *)"
     ],
     "defaultMode": "bypassPermissions"
+  },
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  },
+  "enabledPlugins": {
+    "vercel@claude-plugins-official": true
   }
 }
