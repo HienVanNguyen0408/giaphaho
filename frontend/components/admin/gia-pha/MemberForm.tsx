@@ -163,7 +163,7 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
                   className="px-4 py-2 rounded-xl text-sm font-medium transition-all border"
                   style={
                     gender === g
-                      ? { background: 'rgba(153,27,27,0.08)', color: '#991b1b', border: '1px solid rgba(153,27,27,0.25)' }
+                      ? { background: 'rgba(139,26,26,0.08)', color: '#8b1a1a', border: '1px solid rgba(139,26,26,0.25)' }
                       : { background: 'white', color: '#78716c', border: '1px solid #e7e5e4' }
                   }
                 >
@@ -289,9 +289,9 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
           disabled={loading || avatarUploading}
           className="w-full py-3 rounded-xl font-semibold text-sm tracking-wide transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{
-            background: 'linear-gradient(135deg, #991b1b, #b45309)',
+            background: 'linear-gradient(135deg, #8b1a1a, #b45309)',
             color: '#fef3c7',
-            boxShadow: '0 2px 16px rgba(153,27,27,0.2)',
+            boxShadow: '0 2px 16px rgba(139,26,26,0.2)',
           }}
         >
           {loading ? (

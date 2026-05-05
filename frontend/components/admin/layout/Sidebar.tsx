@@ -80,6 +80,20 @@ function LogIcon() {
   );
 }
 
+function SidebarRailIcon({ collapsed }: { collapsed: boolean }) {
+  return (
+    <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.9}>
+      <rect x="4" y="5" width="16" height="14" rx="2.5" />
+      <path strokeLinecap="round" d="M9 5v14" opacity="0.85" />
+      {collapsed ? (
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11 9l4 3-4 3" />
+      ) : (
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14 9l-4 3 4 3" />
+      )}
+    </svg>
+  );
+}
+
 const navItems: NavItem[] = [
   { href: '/admin', label: 'Tổng quan', icon: <GridIcon /> },
   { href: '/admin/gia-pha', label: 'Gia phả', icon: <TreeIcon /> },
@@ -138,7 +152,7 @@ function SidebarContent() {
 
       <aside
         className={`
-          fixed top-0 left-0 h-full z-30 flex flex-col transition-all duration-300
+          fixed top-0 left-0 h-full z-30 flex flex-col overflow-visible transition-all duration-300
           lg:relative lg:flex lg:z-auto
           ${mobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}
           ${desktopCollapsed ? 'lg:w-16' : 'lg:w-64'}
@@ -147,14 +161,17 @@ function SidebarContent() {
       >
         {/* Brand */}
         <div
-          className="flex items-center gap-3 px-4 py-5"
+          className={`
+            flex
+            ${showLabel ? 'items-center gap-3 px-4 py-5' : 'flex-col items-center gap-2 px-2 py-4'}
+          `}
           style={{ borderBottom: '1px solid rgba(80,50,20,0.3)' }}
         >
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center text-amber-100 font-bold text-sm flex-shrink-0 shadow-lg"
             style={{
-              background: 'linear-gradient(145deg, #9a1a1a, #b45309)',
-              boxShadow: '0 2px 12px rgba(153,27,27,0.35)',
+              background: 'linear-gradient(145deg, #8b1a1a, #b45309)',
+              boxShadow: '0 2px 12px rgba(139,26,26,0.35)',
               fontFamily: "'Cormorant Garamond', serif",
               fontSize: '1.1rem',
             }}
@@ -167,18 +184,23 @@ function SidebarContent() {
             </span>
           )}
           <button
-            className="ml-auto flex-shrink-0 w-6 h-6 items-center justify-center rounded transition-colors hidden lg:flex"
+            type="button"
+            className={`
+              hidden lg:flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200
+              hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70
+              ${showLabel ? 'ml-auto' : ''}
+            `}
             onClick={toggleDesktop}
             aria-label={desktopCollapsed ? 'Mở sidebar' : 'Thu gọn sidebar'}
-            style={{ color: 'rgba(120,80,30,0.6)' }}
+            title={desktopCollapsed ? 'Mở sidebar' : 'Thu gọn sidebar'}
+            style={{
+              color: 'rgba(254,243,199,0.78)',
+              background: 'rgba(245,158,11,0.08)',
+              border: '1px solid rgba(245,158,11,0.16)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+            }}
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              {desktopCollapsed ? (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              )}
-            </svg>
+            <SidebarRailIcon collapsed={desktopCollapsed} />
           </button>
         </div>
 
@@ -200,22 +222,36 @@ function SidebarContent() {
                   <Link
                     href={item.href}
                     onClick={closeMobile}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group relative"
+                    className={`
+                      group relative flex items-center rounded-xl text-sm font-medium transition-all
+                      ${showLabel ? 'gap-3 px-3 py-2.5' : 'mx-auto h-11 w-11 justify-center'}
+                    `}
                     title={!showLabel ? item.label : undefined}
                     style={
                       active
-                        ? {
-                            background: 'rgba(153,27,27,0.18)',
-                            color: 'rgba(252,165,165,0.9)',
-                            borderLeft: '2px solid rgba(239,68,68,0.7)',
-                            paddingLeft: '10px',
-                          }
-                        : {
-                            color: 'rgba(168,162,158,0.6)',
-                          }
+                        ? showLabel
+                          ? {
+                              background: 'rgba(139,26,26,0.18)',
+                              color: 'rgba(252,165,165,0.9)',
+                              borderLeft: '2px solid rgba(220,60,60,0.7)',
+                              paddingLeft: '10px',
+                            }
+                          : {
+                              background: 'linear-gradient(180deg, rgba(139,26,26,0.26), rgba(180,83,9,0.18))',
+                              color: 'rgba(254,226,226,0.96)',
+                              border: '1px solid rgba(248,113,113,0.24)',
+                              boxShadow: '0 8px 16px rgba(0,0,0,0.18)',
+                            }
+                        : showLabel
+                          ? {
+                              color: 'rgba(168,162,158,0.6)',
+                            }
+                          : {
+                              color: 'rgba(168,162,158,0.72)',
+                            }
                     }
                   >
-                    <span className="flex-shrink-0 w-4 h-4">{item.icon}</span>
+                    <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center">{item.icon}</span>
                     {showLabel && <span className="truncate">{item.label}</span>}
                   </Link>
                 </li>
@@ -234,8 +270,8 @@ function SidebarContent() {
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0"
                 style={{
-                  background: 'linear-gradient(145deg, rgba(153,27,27,0.5), rgba(180,83,9,0.4))',
-                  border: '1px solid rgba(153,27,27,0.4)',
+                  background: 'linear-gradient(145deg, rgba(139,26,26,0.5), rgba(180,83,9,0.4))',
+                  border: '1px solid rgba(139,26,26,0.4)',
                   color: '#fde68a',
                 }}
               >
@@ -263,8 +299,8 @@ function SidebarContent() {
             <div
               className="w-8 h-8 rounded-lg mx-auto flex items-center justify-center text-[11px] font-bold"
               style={{
-                background: 'linear-gradient(145deg, rgba(153,27,27,0.5), rgba(180,83,9,0.4))',
-                border: '1px solid rgba(153,27,27,0.4)',
+                background: 'linear-gradient(145deg, rgba(139,26,26,0.5), rgba(180,83,9,0.4))',
+                border: '1px solid rgba(139,26,26,0.4)',
                 color: '#fde68a',
               }}
               title={user.username}

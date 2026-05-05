@@ -48,7 +48,7 @@ function MemberEditContent() {
         <Link
           href="/admin/gia-pha"
           className="flex items-center gap-1.5 font-medium transition-colors"
-          style={{ color: 'rgba(153,27,27,0.8)' }}
+          style={{ color: 'rgba(139,26,26,0.8)' }}
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -70,7 +70,7 @@ function MemberEditContent() {
         >
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: 'linear-gradient(145deg, #9a1a1a, #b45309)' }}
+            style={{ background: 'linear-gradient(145deg, #8b1a1a, #b45309)' }}
           >
             <svg className="w-4 h-4 text-amber-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               {isNew ? (

@@ -42,6 +42,16 @@ export const NewsService = {
     return news;
   },
 
+  async getById(id: string) {
+    const news = await prisma.news.findUnique({ where: { id } });
+    if (!news) {
+      const error = new Error('News not found');
+      (error as Error & { statusCode: number }).statusCode = 404;
+      throw error;
+    }
+    return news;
+  },
+
   async create(data: { title: string; content: string; thumbnail?: string; isPinned?: boolean }): Promise<News> {
     const baseSlug = slugify(data.title);
     let slug = baseSlug;

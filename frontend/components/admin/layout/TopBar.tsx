@@ -248,7 +248,7 @@ export default function TopBar() {
           style={{ color: 'rgba(168,162,158,0.55)' }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.color = '#fca5a5';
-            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(153,27,27,0.15)';
+            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(139,26,26,0.15)';
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLButtonElement).style.color = 'rgba(168,162,158,0.55)';

@@ -12,6 +12,7 @@ router.post('/', authenticate, requireRole(Role.SUPER_ADMIN), NewsController.cre
 router.patch('/:id/pin', authenticate, requireRole(Role.SUPER_ADMIN), NewsController.togglePin);
 router.put('/:id', authenticate, requireRole(Role.SUPER_ADMIN), NewsController.update);
 router.delete('/:id', authenticate, requireRole(Role.SUPER_ADMIN), NewsController.delete);
-router.get('/:slug', NewsController.getBySlug);
+router.get('/slug/:slug', NewsController.getBySlug);
+router.get('/:id', NewsController.getById);
 
 export default router;

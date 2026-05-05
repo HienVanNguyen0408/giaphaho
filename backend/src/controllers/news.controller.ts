@@ -30,6 +30,21 @@ export const NewsController = {
     }
   },
 
+  async getById(req: Request, res: Response): Promise<void> {
+    const id = String(req.params.id);
+    try {
+      const news = await NewsService.getById(id);
+      sendSuccess(res, news);
+    } catch (err) {
+      const error = err as Error & { statusCode?: number };
+      if (error.statusCode === 404) {
+        sendError(res, error.message, 404);
+      } else {
+        throw err;
+      }
+    }
+  },
+
   async create(req: Request, res: Response): Promise<void> {
     const news = await NewsService.create(req.body);
     sendCreated(res, news);

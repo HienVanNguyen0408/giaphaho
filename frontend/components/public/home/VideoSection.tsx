@@ -53,13 +53,15 @@ export default function VideoSection({ videos }: { videos: Video[] }) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-10">
-          <p className="text-amber-600 text-xs font-semibold uppercase tracking-widest mb-2">
+          <p className="text-amber-700 text-xs font-semibold uppercase tracking-widest mb-2">
             Hình ảnh & âm thanh
           </p>
           <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-3">Video Dòng Họ</h2>
           <div className="flex items-center justify-center gap-3" aria-hidden="true">
             <span className="block h-px w-12 bg-amber-300" />
-            <span className="text-amber-500 text-sm">▶</span>
+            <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+            </svg>
             <span className="block h-px w-12 bg-amber-300" />
           </div>
         </div>

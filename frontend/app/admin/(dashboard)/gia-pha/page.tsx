@@ -25,7 +25,7 @@ function AvatarCell({ member }: { member: Member }) {
     .map((w) => w[0])
     .join('')
     .toUpperCase();
-  const colors = ['#9a1a1a', '#b45309', '#1d4ed8', '#065f46', '#6d28d9'];
+  const colors = ['#8b1a1a', '#b45309', '#1d4ed8', '#065f46', '#6d28d9'];
   const color = colors[member.fullName.charCodeAt(0) % colors.length];
   return (
     <div
@@ -118,7 +118,7 @@ export default function GiaPhaAdminPage() {
           <div className="flex items-center gap-3 mb-1">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'linear-gradient(145deg, #9a1a1a, #b45309)' }}
+              style={{ background: 'linear-gradient(145deg, #8b1a1a, #b45309)' }}
             >
               <svg className="w-5 h-5 text-amber-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -149,8 +149,8 @@ export default function GiaPhaAdminPage() {
           href="/admin/gia-pha/new"
           className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-amber-50 rounded-xl transition-all shadow-sm flex-shrink-0"
           style={{
-            background: 'linear-gradient(135deg, #991b1b, #b45309)',
-            boxShadow: '0 2px 12px rgba(153,27,27,0.2)',
+            background: 'linear-gradient(135deg, #8b1a1a, #b45309)',
+            boxShadow: '0 2px 12px rgba(139,26,26,0.2)',
           }}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

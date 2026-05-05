@@ -13,10 +13,10 @@ const THEMES_META: {
   dot1: string;
   dot2: string;
 }[] = [
-  { id: 'bachLien', name: 'Bạch Liên', desc: 'Ấm áp & sáng', bg: '#faf7f0', fg: '#1c1208', dot1: '#991b1b', dot2: '#ca8a04' },
-  { id: 'sonMai',   name: 'Sơn Mài',   desc: 'Vàng & đen',   bg: '#0c0804', fg: '#f0deb8', dot1: '#c9963e', dot2: '#d4af37' },
-  { id: 'giayCo',  name: 'Giấy Cổ',   desc: 'Cổ điển nâu',  bg: '#f2e8d0', fg: '#2a1a06', dot1: '#8b3a0f', dot2: '#b07820' },
-  { id: 'lamNgoc', name: 'Lam Ngọc',  desc: 'Tối & ngọc bích', bg: '#080c18', fg: '#e4ecf5', dot1: '#0d9488', dot2: '#d4af37' },
+  { id: 'bachLien', name: 'Bạch Liên', desc: 'Ấm áp & sáng', bg: '#faf7f0', fg: '#1c1208', dot1: '#8b1a1a', dot2: '#ca8a04' },
+  { id: 'sonMai',   name: 'Sơn Mài',   desc: 'Vàng & đen',   bg: '#0c0804', fg: '#f0deb8', dot1: '#d4a03c', dot2: '#d4af37' },
+  { id: 'giayCo',  name: 'Giấy Cổ',   desc: 'Cổ điển nâu',  bg: '#f2e8d0', fg: '#2a1a06', dot1: '#7c2d12', dot2: '#b07820' },
+  { id: 'lamNgoc', name: 'Lam Ngọc',  desc: 'Tối & ngọc bích', bg: '#080c18', fg: '#e4ecf5', dot1: '#14b8a6', dot2: '#d4af37' },
 ];
 
 export default function ThemeSwitcher() {

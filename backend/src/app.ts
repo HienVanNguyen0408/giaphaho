@@ -27,10 +27,26 @@ import { activityLogger } from './middlewares/logger.middleware';
 const app = express();
 
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+const origins = FRONTEND_URL.split(',').map((o) => o.trim().replace(/\/$/, ''));
 
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      
+      const isLocal =
+        origin.startsWith('http://localhost:') ||
+        origin === 'http://localhost' ||
+        origin.startsWith('http://127.0.0.1:') ||
+        origin === 'http://127.0.0.1';
+
+      if (isLocal || origins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked for origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   }),
 );

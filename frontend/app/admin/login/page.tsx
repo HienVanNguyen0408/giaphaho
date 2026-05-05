@@ -66,7 +66,7 @@ function GeometricBackground() {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full pointer-events-none"
         style={{
           background:
-            'radial-gradient(circle, rgba(153,27,27,0.10) 0%, rgba(180,83,9,0.06) 35%, transparent 65%)',
+            'radial-gradient(circle, rgba(139,26,26,0.10) 0%, rgba(180,83,9,0.06) 35%, transparent 65%)',
         }}
       />
     </>
@@ -168,8 +168,8 @@ function LoginContent() {
             <div
               className="relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl"
               style={{
-                background: 'linear-gradient(145deg, #9a1a1a, #c26010)',
-                boxShadow: '0 8px 40px rgba(153,27,27,0.45), 0 0 0 1px rgba(212,175,55,0.2)',
+                background: 'linear-gradient(145deg, #8b1a1a, #c26010)',
+                boxShadow: '0 8px 40px rgba(139,26,26,0.45), 0 0 0 1px rgba(212,175,55,0.2)',
               }}
             >
               <span
@@ -334,9 +334,9 @@ function LoginContent() {
                 disabled={loading}
                 className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
                 style={{
-                  background: loading ? 'rgba(120,40,10,0.8)' : 'linear-gradient(135deg, #991b1b 0%, #b45309 100%)',
+                  background: loading ? 'rgba(120,40,10,0.8)' : 'linear-gradient(135deg, #8b1a1a 0%, #b45309 100%)',
                   color: '#fef3c7',
-                  boxShadow: '0 4px 24px rgba(153,27,27,0.28)',
+                  boxShadow: '0 4px 24px rgba(139,26,26,0.28)',
                   letterSpacing: '0.05em',
                 }}
               >

@@ -314,7 +314,7 @@ function FamilyTreeInner() {
           pannable 
           zoomable 
           nodeColor="#e5e5e5" 
-          nodeStrokeColor="#9a1a1a" 
+          nodeStrokeColor="#8b1a1a" 
         />
         
         {/* Search Bar */}

@@ -15,7 +15,9 @@ import type {
   SearchResults,
 } from '@/types';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+const SERVER_API_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080').replace(/\/$/, '');
+const BROWSER_API_PROXY_BASE = '/proxy';
+const BASE_URL = typeof window === 'undefined' ? SERVER_API_URL : BROWSER_API_PROXY_BASE;
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<ApiResponse<T>> {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -23,7 +25,13 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<ApiRespons
     headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   });
-  const json = (await res.json()) as ApiResponse<T>;
+  if (res.status === 204) {
+    return { success: true, data: null as T, message: '' };
+  }
+
+  const raw = await res.text();
+  const json = raw ? (JSON.parse(raw) as ApiResponse<T>) : ({ success: res.ok, data: null as T, message: '' } satisfies ApiResponse<T>);
+
   if (!res.ok) {
     const err = Object.assign(new Error(json.message ?? `API error ${res.status}`), {
       statusCode: res.status,

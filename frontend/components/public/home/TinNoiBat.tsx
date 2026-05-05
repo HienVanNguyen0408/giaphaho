@@ -15,7 +15,10 @@ export default function TinNoiBat({ news }: { news: NewsListItem[] }) {
     return (
       <section className="py-12 px-4 max-w-6xl mx-auto" aria-label="Tin nổi bật">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-amber-600 text-xl" aria-hidden="true">📌</span>
+          <svg className="w-5 h-5 text-amber-700 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path fillRule="evenodd" d="M10.293 2.293a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L13 6.414V14a1 1 0 11-2 0V6.414L9.707 7.707a1 1 0 01-1.414-1.414l2-2z" clipRule="evenodd" />
+          <path d="M5 10a1 1 0 011-1h2a1 1 0 110 2H6a1 1 0 01-1-1zm7 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" />
+        </svg>
           <h2 className="text-2xl font-bold text-stone-800">Tin Nổi Bật</h2>
           <span className="flex-1 h-px bg-amber-200" aria-hidden="true" />
         </div>
@@ -31,7 +34,10 @@ export default function TinNoiBat({ news }: { news: NewsListItem[] }) {
   return (
     <section className="py-12 px-4 max-w-6xl mx-auto" aria-label="Tin nổi bật">
       <div className="flex items-center gap-3 mb-6">
-        <span className="text-amber-600 text-xl" aria-hidden="true">📌</span>
+        <svg className="w-5 h-5 text-amber-700 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path fillRule="evenodd" d="M10.293 2.293a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L13 6.414V14a1 1 0 11-2 0V6.414L9.707 7.707a1 1 0 01-1.414-1.414l2-2z" clipRule="evenodd" />
+          <path d="M5 10a1 1 0 011-1h2a1 1 0 110 2H6a1 1 0 01-1-1zm7 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" />
+        </svg>
         <h2 className="text-2xl font-bold text-stone-800">Tin Nổi Bật</h2>
         <span className="flex-1 h-px bg-amber-200" aria-hidden="true" />
       </div>
@@ -64,13 +70,13 @@ export default function TinNoiBat({ news }: { news: NewsListItem[] }) {
 
           {/* Content */}
           <div className="md:w-1/2 p-6 md:p-8 flex flex-col justify-center">
-            <p className="text-amber-600 text-xs font-medium uppercase tracking-wider mb-3">
+            <p className="text-amber-700 text-xs font-medium uppercase tracking-wider mb-3">
               {formatDate(featured.publishedAt)}
             </p>
             <h3 className="text-stone-900 text-xl md:text-2xl font-bold leading-snug mb-4 group-hover:text-red-800 transition-colors">
               {featured.title}
             </h3>
-            <span className="inline-flex items-center gap-1.5 text-sm text-amber-600 font-medium group-hover:gap-2.5 transition-all">
+            <span className="inline-flex items-center gap-1.5 text-sm text-amber-700 font-medium group-hover:gap-2.5 transition-all">
               Đọc tiếp
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
