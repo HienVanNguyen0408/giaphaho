@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(**)",
+      "Read(**)",
+      "Write(**)"
+    ],
+    "deny": [
+      "Bash(git push *)",
+      "Bash(rm -rf *)",
+      "Bash(* --version)",
+      "Bash(* --help *)"
+    ],
+    "defaultMode": "bypassPermissions"
+  }
+}
