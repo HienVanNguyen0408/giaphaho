@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ====== AUTH ======
+model User {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  username  String        @unique
+  password  String
+  role      Role          @default(CHI_ADMIN)
+  chiId     String?       @db.ObjectId
+  createdAt DateTime      @default(now())
+  logs      ActivityLog[]
+}
+
+enum Role {
+  SUPER_ADMIN
+  CHI_ADMIN
+}
+
+// ====== GIA PHẢ ======
+model Member {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  fullName     String
+  avatar       String?
+  birthYear    Int?
+  deathYear    Int?
+  gender       String?
+  bio          String?
+  achievements String[]
+  parentId     String?   @db.ObjectId
+  parent       Member?   @relation("MemberChildren", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children     Member[]  @relation("MemberChildren")
+  chiId        String?   @db.ObjectId
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// ====== TIN TỨC ======
+model News {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String   @unique
+  content     String
+  thumbnail   String?
+  isPinned    Boolean  @default(false)
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ====== VIDEO ======
+model Video {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  youtubeUrl   String
+  thumbnailUrl String?
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+// ====== SECTION ĐỘNG ======
+model Section {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  newsId    String?  @db.ObjectId
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+// ====== FOOTER ======
+model FooterConfig {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  contact     String
+  description String
+  copyright   String
+}
+
+// ====== NOTIFICATION ======
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ====== ACTIVITY LOG ======
+model ActivityLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  target    String
+  targetId  String?
+  detail    String?
+  createdAt DateTime @default(now())
+}
