@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import type { ComponentType } from 'react';
 import {
   ReactFlow,
@@ -23,6 +23,7 @@ import { getMembers } from '@/lib/api';
 import { flatToFlowGraph } from '@/lib/treeUtils';
 import type { Member, MemberDetail } from '@/types';
 import { getMember } from '@/lib/api';
+import LineageModal from './LineageModal';
 
 // Cast ReactFlow to avoid React 19 generic component JSX type issue
 const RF = ReactFlow as ComponentType<ReactFlowProps>;
@@ -78,7 +79,15 @@ function MemberNode({ data, selected }: NodeProps) {
 const nodeTypes = { memberNode: MemberNode };
 
 // -------- Detail Panel --------
-function DetailPanel({ memberId, onClose }: { memberId: string; onClose: () => void }) {
+function DetailPanel({
+  memberId,
+  onClose,
+  onViewLineage,
+}: {
+  memberId: string;
+  onClose: () => void;
+  onViewLineage: (id: string, name: string) => void;
+}) {
   const [detail, setDetail] = useState<MemberDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -160,12 +169,20 @@ function DetailPanel({ memberId, onClose }: { memberId: string; onClose: () => v
           {detail.bio && (
             <p className="text-xs text-stone-600 leading-relaxed">{detail.bio}</p>
           )}
-          <a
-            href={`/thanh-vien/${detail.id}`}
-            className="block text-center text-xs font-medium text-white bg-red-700 hover:bg-red-800 rounded-lg py-1.5 transition-colors"
-          >
-            Xem trang đầy đủ →
-          </a>
+          <div className="space-y-2 pt-1">
+            <button
+              onClick={() => onViewLineage(detail.id, detail.fullName)}
+              className="block w-full text-center text-xs font-medium text-white bg-amber-700 hover:bg-amber-800 rounded-lg py-1.5 transition-colors"
+            >
+              Xem cây trực hệ
+            </button>
+            <a
+              href={`/thanh-vien/${detail.id}`}
+              className="block text-center text-xs font-medium text-white bg-red-700 hover:bg-red-800 rounded-lg py-1.5 transition-colors"
+            >
+              Xem trang đầy đủ →
+            </a>
+          </div>
         </div>
       ) : (
         <p className="p-4 text-xs text-stone-500 text-center">Không tìm thấy thông tin.</p>
@@ -194,7 +211,7 @@ function TreeSkeleton() {
 function TreeSearch({ nodes, onSelect }: { nodes: Node[], onSelect: (id: string) => void }) {
   const [query, setQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
-  const { setCenter, fitView } = useReactFlow();
+  const { setCenter } = useReactFlow();
 
   const filtered = query
     ? nodes.filter(n => {
@@ -207,8 +224,6 @@ function TreeSearch({ nodes, onSelect }: { nodes: Node[], onSelect: (id: string)
     setQuery('');
     setShowResults(false);
     onSelect(node.id);
-    
-    // Zoom and center on node
     setCenter(node.position.x + 100, node.position.y + 60, { zoom: 1.5, duration: 800 });
   };
 
@@ -267,7 +282,13 @@ function FamilyTreeInner() {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [lineageTarget, setLineageTarget] = useState<{ id: string; name: string } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const allMembers = useMemo(
+    () => nodes.map((n) => (n.data as MemberNodeData).member),
+    [nodes],
+  );
 
   useEffect(() => {
     getMembers()
@@ -301,6 +322,7 @@ function FamilyTreeInner() {
         nodeTypes={nodeTypes}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
+        nodesDraggable={false}
         fitView
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.005}
@@ -309,14 +331,14 @@ function FamilyTreeInner() {
       >
         <Background color="#d6d3d1" gap={24} size={1} />
         <Controls />
-        <MiniMap 
-          maskColor="rgba(250, 250, 249, 0.8)" 
-          pannable 
-          zoomable 
-          nodeColor="#e5e5e5" 
-          nodeStrokeColor="#8b1a1a" 
+        <MiniMap
+          maskColor="rgba(250, 250, 249, 0.8)"
+          pannable
+          zoomable
+          nodeColor="#e5e5e5"
+          nodeStrokeColor="#8b1a1a"
         />
-        
+
         {/* Search Bar */}
         <TreeSearch nodes={nodes} onSelect={setSelectedId} />
 
@@ -342,7 +364,19 @@ function FamilyTreeInner() {
         </div>
       </RF>
       {selectedId && (
-        <DetailPanel memberId={selectedId} onClose={() => setSelectedId(null)} />
+        <DetailPanel
+          memberId={selectedId}
+          onClose={() => setSelectedId(null)}
+          onViewLineage={(id, name) => setLineageTarget({ id, name })}
+        />
+      )}
+      {lineageTarget && (
+        <LineageModal
+          memberId={lineageTarget.id}
+          memberName={lineageTarget.name}
+          allMembers={allMembers}
+          onClose={() => setLineageTarget(null)}
+        />
       )}
     </div>
   );

@@ -83,4 +83,9 @@ export const MemberController = {
     await MemberService.delete(id);
     res.status(204).send();
   },
+
+  async recalculateStats(_req: Request, res: Response): Promise<void> {
+    await MemberService.recalculateAllStats();
+    sendSuccess(res, null, 'Đã tính lại số liệu toàn bộ gia phả');
+  },
 };

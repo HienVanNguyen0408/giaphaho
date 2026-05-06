@@ -33,4 +33,10 @@ export const SectionController = {
     const result = await SectionService.toggle(id);
     sendSuccess(res, result);
   },
+
+  async reorder(req: Request, res: Response): Promise<void> {
+    const { orderedIds } = req.body as { orderedIds: string[] };
+    await SectionService.reorder(orderedIds);
+    sendSuccess(res, null, 'Đã cập nhật thứ tự');
+  },
 };

@@ -12,6 +12,12 @@ export const MemberService = {
         gender: true,
         chiId: true,
         parentId: true,
+        descendantsCount: true,
+        generation: true,
+        siblingsCount: true,
+        spousesCount: true,
+        sonsCount: true,
+        daughtersCount: true,
       },
     });
   },
@@ -93,5 +99,44 @@ export const MemberService = {
       data: { parentId: null },
     });
     return prisma.member.delete({ where: { id } });
+  },
+
+  async recalculateAllStats() {
+    const members = await prisma.member.findMany();
+    const memberMap = new Map(members.map((m) => [m.id, m]));
+
+    const getGeneration = (id: string, visited = new Set<string>()): number => {
+      if (visited.has(id)) return 1;
+      visited.add(id);
+      const m = memberMap.get(id);
+      if (!m || !m.parentId) return 1;
+      return 1 + getGeneration(m.parentId, visited);
+    };
+
+    const getDescendantsCount = (id: string, visited = new Set<string>()): number => {
+      if (visited.has(id)) return 0;
+      visited.add(id);
+      const children = members.filter((m) => m.parentId === id);
+      return children.length + children.reduce((sum, c) => sum + getDescendantsCount(c.id, new Set(visited)), 0);
+    };
+
+    await prisma.$transaction(
+      members.map((member) => {
+        const children = members.filter((m) => m.parentId === member.id);
+        const siblings = member.parentId
+          ? members.filter((m) => m.parentId === member.parentId && m.id !== member.id)
+          : [];
+        return prisma.member.update({
+          where: { id: member.id },
+          data: {
+            generation: getGeneration(member.id),
+            siblingsCount: siblings.length,
+            sonsCount: children.filter((c) => c.gender === 'Nam').length,
+            daughtersCount: children.filter((c) => c.gender === 'Nữ').length,
+            descendantsCount: getDescendantsCount(member.id),
+          },
+        });
+      }),
+    );
   },
 };

@@ -14,6 +14,12 @@ function makeMember(overrides: Partial<Member> & { id: string; fullName: string 
     achievements: [],
     parentId: null,
     chiId: null,
+    descendantsCount: null,
+    generation: null,
+    siblingsCount: null,
+    spousesCount: null,
+    sonsCount: null,
+    daughtersCount: null,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };

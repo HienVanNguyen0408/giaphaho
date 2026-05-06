@@ -124,6 +124,9 @@ export const toggleSection = (id: string) =>
 export const deleteSection = (id: string) =>
   apiFetch<null>(`/api/sections/${id}`, { method: 'DELETE' });
 
+export const reorderSections = (orderedIds: string[]) =>
+  apiFetch<null>('/api/sections/reorder', { method: 'PATCH', body: JSON.stringify({ orderedIds }) });
+
 // ====== FOOTER ======
 export const getFooter = () => apiFetch<FooterConfig>('/api/footer');
 
@@ -141,6 +144,9 @@ export const getActivityLogs = (page = 1, limit = 20) =>
   apiFetch<{ items: ActivityLog[]; total: number; page: number; totalPages: number }>(
     `/api/activity-logs?page=${page}&limit=${limit}`,
   );
+
+export const recalculateMemberStats = () =>
+  apiFetch<null>('/api/members/recalculate-stats', { method: 'POST' });
 
 // ====== DASHBOARD ======
 export const getDashboard = () => apiFetch<DashboardStats>('/api/dashboard');

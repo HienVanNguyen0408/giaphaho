@@ -6,6 +6,78 @@ import DataTable, { Column } from '@/components/shared/DataTable';
 import { useAdminAuth } from '@/components/admin/providers/AdminAuthProvider';
 import type { ActivityLog } from '@/types';
 
+const ACTION_LABELS: Record<string, string> = {
+  create: 'Thêm mới',
+  update: 'Cập nhật',
+  delete: 'Xóa',
+  login: 'Đăng nhập',
+  logout: 'Đăng xuất',
+  toggle: 'Thay đổi trạng thái',
+  reorder: 'Sắp xếp lại',
+  upload: 'Tải lên tệp',
+  pin: 'Ghim',
+  unpin: 'Bỏ ghim',
+  mark_read: 'Đánh dấu đã đọc',
+  recalculate: 'Tính lại số liệu',
+};
+
+const TARGET_LABELS: Record<string, string> = {
+  member: 'thành viên',
+  news: 'bài viết',
+  video: 'video',
+  section: 'mục trang chủ',
+  footer: 'thông tin liên hệ',
+  notification: 'thông báo',
+  user: 'tài khoản',
+  image: 'hình ảnh',
+  file: 'tệp',
+};
+
+function formatActivity(action: string, target: string): string {
+  const a = ACTION_LABELS[action.toLowerCase()] ?? action;
+  const t = TARGET_LABELS[target.toLowerCase()] ?? target;
+  if (action.toLowerCase() === 'login' || action.toLowerCase() === 'logout') return a;
+  return `${a} ${t}`;
+}
+
+function formatDetail(detail: string | null): string {
+  if (!detail) return '';
+  try {
+    const parsed = JSON.parse(detail);
+    if (typeof parsed === 'object' && parsed !== null) {
+      const fieldLabels: Record<string, string> = {
+        fullName: 'Họ tên',
+        title: 'Tiêu đề',
+        name: 'Tên',
+        isActive: 'Hiển thị',
+        isPinned: 'Ghim',
+        gender: 'Giới tính',
+        birthYear: 'Năm sinh',
+        deathYear: 'Năm mất',
+        order: 'Thứ tự',
+        youtubeUrl: 'Link YouTube',
+      };
+      const entries = Object.entries(parsed).slice(0, 3);
+      return entries
+        .map(([k, v]) => {
+          const label = fieldLabels[k] ?? k;
+          const val =
+            typeof v === 'boolean' ? (v ? 'Có' : 'Không') : String(v ?? '');
+          return `${label}: ${val}`;
+        })
+        .join(' • ');
+    }
+    return detail;
+  } catch {
+    return detail;
+  }
+}
+
+const ROLE_LABEL: Record<string, string> = {
+  SUPER_ADMIN: 'Quản trị viên',
+  CHI_ADMIN: 'Quản lý chi',
+};
+
 export default function ActivityLogPage() {
   const { user } = useAdminAuth();
   const [logs, setLogs] = useState<ActivityLog[]>([]);
@@ -37,38 +109,32 @@ export default function ActivityLogPage() {
       header: 'Người dùng',
       render: (row) => (
         <div>
-          <p className="font-medium text-stone-900 text-sm">{row.user?.username ?? row.userId}</p>
-          <p className="text-xs text-stone-400">{row.user?.role}</p>
+          <p className="font-medium text-stone-900 text-sm">{row.user?.username ?? 'Hệ thống'}</p>
+          <p className="text-xs text-stone-400">{ROLE_LABEL[row.user?.role ?? ''] ?? row.user?.role ?? ''}</p>
         </div>
       ),
-      width: '150px',
+      width: '140px',
     },
     {
       key: 'action',
-      header: 'Hành động',
-      width: '120px',
+      header: 'Thao tác',
       render: (row) => (
-        <span className="px-2 py-0.5 bg-stone-100 text-stone-700 text-xs font-medium rounded-full">
-          {row.action}
+        <span className="text-stone-800 text-sm font-medium">
+          {formatActivity(row.action, row.target)}
         </span>
-      ),
-    },
-    {
-      key: 'target',
-      header: 'Đối tượng',
-      width: '130px',
-      render: (row) => (
-        <span className="text-stone-600 text-sm">{row.target}</span>
       ),
     },
     {
       key: 'detail',
-      header: 'Chi tiết',
-      render: (row) => (
-        <span className="text-stone-500 text-sm truncate max-w-xs block">
-          {row.detail ?? <span className="text-stone-300">—</span>}
-        </span>
-      ),
+      header: 'Chi tiết thay đổi',
+      render: (row) => {
+        const text = formatDetail(row.detail);
+        return text ? (
+          <span className="text-stone-500 text-xs">{text}</span>
+        ) : (
+          <span className="text-stone-300 text-xs">—</span>
+        );
+      },
     },
     {
       key: 'createdAt',
@@ -88,7 +154,7 @@ export default function ActivityLogPage() {
         <div className="text-5xl mb-4">🔒</div>
         <h1 className="text-xl font-bold text-stone-800 mb-2">Không có quyền truy cập</h1>
         <p className="text-stone-500 text-sm">
-          Trang này chỉ dành cho Quản trị viên cao cấp (SUPER_ADMIN).
+          Trang này chỉ dành cho Quản trị viên cao cấp.
         </p>
       </div>
     );
@@ -114,7 +180,6 @@ export default function ActivityLogPage() {
         emptyMessage="Chưa có nhật ký nào"
       />
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-stone-500">

@@ -6,6 +6,8 @@ import type { Member } from '@/types';
 
 interface MemberFormProps {
   initialData?: Partial<Member>;
+  members?: Member[];
+  selfId?: string;
   onSubmit: (data: Partial<Member>) => Promise<void>;
   loading?: boolean;
 }
@@ -24,7 +26,13 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 const inputCls =
   'w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition-colors text-stone-800 placeholder-stone-400';
 
-export default function MemberForm({ initialData, onSubmit, loading = false }: MemberFormProps) {
+export default function MemberForm({
+  initialData,
+  members = [],
+  selfId,
+  onSubmit,
+  loading = false,
+}: MemberFormProps) {
   const [fullName, setFullName] = useState(initialData?.fullName ?? '');
   const [gender, setGender] = useState(initialData?.gender ?? '');
   const [birthYear, setBirthYear] = useState<string>(
@@ -38,6 +46,11 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData?.avatar ?? null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [parentId, setParentId] = useState(initialData?.parentId ?? '');
+  const [parentSearch, setParentSearch] = useState('');
+  const [showParentDropdown, setShowParentDropdown] = useState(false);
+  const [spousesCount, setSpousesCount] = useState<string>(
+    initialData?.spousesCount != null ? String(initialData.spousesCount) : '',
+  );
   const [formError, setFormError] = useState<string | null>(null);
 
   const addAchievement = () => setAchievements((prev) => [...prev, '']);
@@ -60,6 +73,15 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
     }
   };
 
+  const availableParents = members.filter((m) => m.id !== selfId);
+  const selectedParent = availableParents.find((m) => m.id === parentId);
+
+  const filteredParents = parentSearch.trim()
+    ? availableParents.filter((m) =>
+        m.fullName.toLowerCase().includes(parentSearch.toLowerCase()),
+      )
+    : availableParents.slice(0, 20);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!fullName.trim()) {
@@ -76,6 +98,7 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
       achievements: achievements.filter((a) => a.trim()),
       avatar: avatarUrl,
       parentId: parentId.trim() || null,
+      spousesCount: spousesCount ? Number(spousesCount) : null,
     };
     try {
       await onSubmit(data);
@@ -83,6 +106,13 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
       setFormError(err instanceof Error ? err.message : 'Lưu thất bại');
     }
   };
+
+  const hasStats =
+    initialData?.generation != null ||
+    initialData?.siblingsCount != null ||
+    initialData?.sonsCount != null ||
+    initialData?.daughtersCount != null ||
+    initialData?.descendantsCount != null;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-7">
@@ -101,7 +131,6 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
         <div className="space-y-4">
           {/* Avatar + Full Name */}
           <div className="flex items-start gap-4">
-            {/* Avatar preview */}
             <div className="flex-shrink-0">
               <div
                 className="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center relative"
@@ -135,7 +164,6 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
               </label>
             </div>
 
-            {/* Name */}
             <div className="flex-1">
               <label className="block text-xs font-semibold text-stone-600 mb-1.5">
                 Họ và tên <span className="text-red-500">*</span>
@@ -151,15 +179,15 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
             </div>
           </div>
 
-          {/* Gender — button group */}
+          {/* Gender */}
           <div>
             <label className="block text-xs font-semibold text-stone-600 mb-1.5">Giới tính</label>
             <div className="flex gap-2">
-              {['', 'Nam', 'Nữ'].map((g) => (
+              {['Nam', 'Nữ'].map((g) => (
                 <button
                   key={g}
                   type="button"
-                  onClick={() => setGender(g)}
+                  onClick={() => setGender(gender === g ? '' : g)}
                   className="px-4 py-2 rounded-xl text-sm font-medium transition-all border"
                   style={
                     gender === g
@@ -167,9 +195,18 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
                       : { background: 'white', color: '#78716c', border: '1px solid #e7e5e4' }
                   }
                 >
-                  {g === '' ? 'Không rõ' : g}
+                  {g}
                 </button>
               ))}
+              {gender && (
+                <button
+                  type="button"
+                  onClick={() => setGender('')}
+                  className="px-3 py-2 rounded-xl text-xs font-medium text-stone-400 hover:text-stone-600 transition-colors border border-stone-200 hover:border-stone-300"
+                >
+                  Xóa
+                </button>
+              )}
             </div>
           </div>
 
@@ -206,22 +243,132 @@ export default function MemberForm({ initialData, onSubmit, loading = false }: M
       {/* ── Quan hệ ── */}
       <div>
         <SectionLabel>Quan hệ trong gia phả</SectionLabel>
-        <div>
-          <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-            ID cha / mẹ
-          </label>
-          <input
-            type="text"
-            value={parentId}
-            onChange={(e) => setParentId(e.target.value)}
-            placeholder="ID của thành viên cha/mẹ (để trống nếu là gốc)"
-            className={`${inputCls} font-mono text-xs`}
-          />
-          <p className="mt-1.5 text-[11px] text-stone-400">
-            Nhập ID của cha hoặc mẹ để gán quan hệ trong cây gia phả
-          </p>
+        <div className="space-y-4">
+          {/* Parent selector */}
+          <div>
+            <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+              Cha / Mẹ
+            </label>
+            {members.length > 0 ? (
+              <div className="relative">
+                <div
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm bg-white cursor-pointer flex items-center justify-between hover:border-red-400 transition-colors"
+                  onClick={() => setShowParentDropdown((v) => !v)}
+                >
+                  {selectedParent ? (
+                    <span className="text-stone-800 font-medium">{selectedParent.fullName}</span>
+                  ) : (
+                    <span className="text-stone-400">Không có (gốc gia phả)</span>
+                  )}
+                  <svg className="w-4 h-4 text-stone-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+
+                {showParentDropdown && (
+                  <div className="absolute top-full mt-1 w-full bg-white border border-stone-200 rounded-xl shadow-xl z-20 overflow-hidden">
+                    <div className="p-2 border-b border-stone-100">
+                      <input
+                        type="text"
+                        value={parentSearch}
+                        onChange={(e) => setParentSearch(e.target.value)}
+                        placeholder="Tìm theo tên..."
+                        className="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:border-red-400"
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <ul className="max-h-52 overflow-y-auto py-1">
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => { setParentId(''); setShowParentDropdown(false); setParentSearch(''); }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-stone-500 hover:bg-stone-50 transition-colors italic"
+                        >
+                          Không có (gốc gia phả)
+                        </button>
+                      </li>
+                      {filteredParents.map((m) => (
+                        <li key={m.id}>
+                          <button
+                            type="button"
+                            onClick={() => { setParentId(m.id); setShowParentDropdown(false); setParentSearch(''); }}
+                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-red-50 transition-colors flex flex-col ${
+                              m.id === parentId ? 'bg-red-50 text-red-700' : 'text-stone-800'
+                            }`}
+                          >
+                            <span className="font-medium">{m.fullName}</span>
+                            {(m.birthYear || m.deathYear) && (
+                              <span className="text-xs text-stone-400">
+                                {m.birthYear ?? '?'} – {m.deathYear ?? 'nay'}
+                              </span>
+                            )}
+                          </button>
+                        </li>
+                      ))}
+                      {filteredParents.length === 0 && (
+                        <li className="px-4 py-3 text-sm text-stone-400 text-center">
+                          Không tìm thấy thành viên
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <input
+                type="text"
+                value={parentId}
+                onChange={(e) => setParentId(e.target.value)}
+                placeholder="ID của thành viên cha/mẹ (để trống nếu là gốc)"
+                className={`${inputCls} font-mono text-xs`}
+              />
+            )}
+          </div>
+
+          {/* Spouses count */}
+          <div>
+            <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+              Số vợ/chồng
+            </label>
+            <input
+              type="number"
+              value={spousesCount}
+              onChange={(e) => setSpousesCount(e.target.value)}
+              placeholder="0"
+              min={0}
+              max={99}
+              className={inputCls}
+            />
+          </div>
         </div>
       </div>
+
+      {/* ── Số liệu thống kê (chỉ xem) ── */}
+      {hasStats && (
+        <div>
+          <SectionLabel>Số liệu thống kê</SectionLabel>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { label: 'Đời thứ', value: initialData?.generation },
+              { label: 'Số anh chị em', value: initialData?.siblingsCount },
+              { label: 'Số con trai', value: initialData?.sonsCount },
+              { label: 'Số con gái', value: initialData?.daughtersCount },
+              { label: 'Số con cháu', value: initialData?.descendantsCount },
+            ].map(({ label, value }) => (
+              <div key={label} className="bg-stone-50 rounded-xl px-4 py-3 text-center">
+                <div className="text-2xl font-bold text-stone-800">
+                  {value ?? '—'}
+                </div>
+                <div className="text-xs text-stone-500 mt-0.5">{label}</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-stone-400 mt-2">
+            Số liệu được tính tự động — dùng nút &quot;Tính lại số liệu&quot; để cập nhật.
+          </p>
+        </div>
+      )}
 
       {/* ── Tiểu sử & thành tựu ── */}
       <div>

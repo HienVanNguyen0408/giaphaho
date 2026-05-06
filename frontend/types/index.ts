@@ -20,6 +20,12 @@ export interface Member {
   achievements: string[];
   parentId: string | null;
   chiId: string | null;
+  descendantsCount: number | null;
+  generation: number | null;
+  siblingsCount: number | null;
+  spousesCount: number | null;
+  sonsCount: number | null;
+  daughtersCount: number | null;
   createdAt: string;
   updatedAt: string;
 }

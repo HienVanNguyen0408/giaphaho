@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getMember, createMember, updateMember } from '@/lib/api';
+import { getMember, getMembers, createMember, updateMember } from '@/lib/api';
 import MemberForm from '@/components/admin/gia-pha/MemberForm';
 import type { Member } from '@/types';
 
@@ -14,17 +14,28 @@ function MemberEditContent() {
   const isNew = id === 'new';
 
   const [initialData, setInitialData] = useState<Partial<Member> | undefined>(undefined);
+  const [allMembers, setAllMembers] = useState<Member[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [fetchLoading, setFetchLoading] = useState(!isNew);
+  const [fetchLoading, setFetchLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (isNew) return;
-    setFetchLoading(true);
-    getMember(id)
-      .then((res) => setInitialData(res.data))
-      .catch((err) => setLoadError(err instanceof Error ? err.message : 'Không thể tải dữ liệu'))
-      .finally(() => setFetchLoading(false));
+    const fetchAll = async () => {
+      setFetchLoading(true);
+      try {
+        const membersRes = await getMembers();
+        setAllMembers(membersRes.data);
+        if (!isNew) {
+          const memberRes = await getMember(id);
+          setInitialData(memberRes.data);
+        }
+      } catch (err) {
+        setLoadError(err instanceof Error ? err.message : 'Không thể tải dữ liệu');
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+    fetchAll();
   }, [id, isNew]);
 
   const handleSubmit = async (data: Partial<Member>) => {
@@ -121,6 +132,8 @@ function MemberEditContent() {
           ) : (
             <MemberForm
               initialData={isNew ? undefined : initialData}
+              members={allMembers}
+              selfId={isNew ? undefined : id}
               onSubmit={handleSubmit}
               loading={saving}
             />

@@ -75,3 +75,37 @@ export function flatToFlowGraph(members: Member[]): FlowGraph {
 
   return { nodes, edges };
 }
+
+export function getLineageMembers(targetId: string, allMembers: Member[]): Member[] {
+  const lineageIds = new Set<string>([targetId]);
+
+  // Walk up ancestor chain
+  let currentId: string | null = targetId;
+  while (currentId) {
+    const member = allMembers.find((m) => m.id === currentId);
+    const parentId = member?.parentId ?? null;
+    if (parentId && !lineageIds.has(parentId)) {
+      lineageIds.add(parentId);
+      currentId = parentId;
+    } else {
+      break;
+    }
+  }
+
+  // BFS down descendants
+  const queue = [targetId];
+  const visited = new Set<string>();
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    if (visited.has(id)) continue;
+    visited.add(id);
+    for (const m of allMembers) {
+      if (m.parentId === id && !lineageIds.has(m.id)) {
+        lineageIds.add(m.id);
+        queue.push(m.id);
+      }
+    }
+  }
+
+  return allMembers.filter((m) => lineageIds.has(m.id));
+}
