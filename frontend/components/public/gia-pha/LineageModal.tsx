@@ -65,11 +65,10 @@ function MemberNode({ data, selected }: NodeProps) {
 
 const nodeTypes = { memberNode: MemberNode };
 
-function LineageTreeInner({ memberId, allMembers }: { memberId: string; allMembers: Member[] }) {
+function LineageTreeInner({ lineageMembers }: { lineageMembers: Member[] }) {
   const { nodes, edges } = useMemo(() => {
-    const lineageMembers = getLineageMembers(memberId, allMembers);
     return flatToFlowGraph(lineageMembers);
-  }, [memberId, allMembers]);
+  }, [lineageMembers]);
 
   return (
     <RF
@@ -105,13 +104,29 @@ interface LineageModalProps {
 }
 
 export default function LineageModal({ memberId, memberName, allMembers, onClose }: LineageModalProps) {
+  const lineageMembers = useMemo(() => getLineageMembers(memberId, allMembers), [memberId, allMembers]);
+
+  const generations = useMemo(() => {
+    const gens = lineageMembers.map((m) => m.generation).filter((g): g is number => g != null);
+    if (gens.length === 0) return null;
+    return Math.max(...gens) - Math.min(...gens) + 1;
+  }, [lineageMembers]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
         <div className="bg-gradient-to-r from-red-700 to-amber-600 px-5 py-4 flex items-center justify-between flex-shrink-0">
           <div>
-            <h3 className="text-white font-semibold text-base">Cây trực hệ</h3>
-            <p className="text-white/70 text-xs mt-0.5">{memberName}</p>
+            <h3 className="text-white font-semibold text-base">Cây trực hệ — {memberName}</h3>
+            <div className="flex items-center gap-3 mt-1">
+              <span className="text-white/80 text-xs">{lineageMembers.length} thành viên</span>
+              {generations != null && (
+                <>
+                  <span className="text-white/40 text-xs">·</span>
+                  <span className="text-white/80 text-xs">{generations} đời</span>
+                </>
+              )}
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -123,7 +138,7 @@ export default function LineageModal({ memberId, memberName, allMembers, onClose
         </div>
         <div className="flex-1 relative">
           <ReactFlowProvider>
-            <LineageTreeInner memberId={memberId} allMembers={allMembers} />
+            <LineageTreeInner lineageMembers={lineageMembers} />
           </ReactFlowProvider>
         </div>
       </div>

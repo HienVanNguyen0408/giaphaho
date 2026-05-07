@@ -8,7 +8,9 @@ export const MemberService = {
         fullName: true,
         avatar: true,
         birthYear: true,
+        birthDate: true,
         deathYear: true,
+        deathDate: true,
         gender: true,
         chiId: true,
         parentId: true,
@@ -20,6 +22,34 @@ export const MemberService = {
         daughtersCount: true,
       },
     });
+  },
+
+  async getPage(page: number, limit: number, name?: string) {
+    const where = name ? { fullName: { contains: name, mode: 'insensitive' as const } } : {};
+    const skip = (page - 1) * limit;
+    const select = {
+      id: true,
+      fullName: true,
+      avatar: true,
+      birthYear: true,
+      birthDate: true,
+      deathYear: true,
+      deathDate: true,
+      gender: true,
+      chiId: true,
+      parentId: true,
+      descendantsCount: true,
+      generation: true,
+      siblingsCount: true,
+      spousesCount: true,
+      sonsCount: true,
+      daughtersCount: true,
+    };
+    const [items, total] = await prisma.$transaction([
+      prisma.member.findMany({ where, select, skip, take: limit, orderBy: { fullName: 'asc' } }),
+      prisma.member.count({ where }),
+    ]);
+    return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
   },
 
   async getById(id: string) {
@@ -43,7 +73,9 @@ export const MemberService = {
       fullName: string;
       avatar?: string;
       birthYear?: number;
+      birthDate?: string;
       deathYear?: number;
+      deathDate?: string;
       gender?: string;
       bio?: string;
       achievements?: string[];
@@ -67,7 +99,9 @@ export const MemberService = {
       fullName?: string;
       avatar?: string;
       birthYear?: number;
+      birthDate?: string;
       deathYear?: number;
+      deathDate?: string;
       gender?: string;
       bio?: string;
       achievements?: string[];

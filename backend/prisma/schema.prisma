@@ -29,7 +29,9 @@ model Member {
   fullName     String
   avatar       String?
   birthYear    Int?
+  birthDate    String?
   deathYear    Int?
+  deathDate    String?
   gender       String?
   bio          String?
   achievements String[]

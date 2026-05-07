@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { getMembers, deleteMember, recalculateMemberStats } from '@/lib/api';
+import { getMembersPage, deleteMember, recalculateMemberStats } from '@/lib/api';
+import { getCachedAllMembers, invalidateMembersCache } from '@/lib/memberCache';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import FamilyTree from '@/components/public/gia-pha/FamilyTree';
 import LineageModal from '@/components/public/gia-pha/LineageModal';
-import type { Member } from '@/types';
+import type { Member, PaginatedResponse } from '@/types';
 
 function AvatarCell({ member }: { member: Member }) {
   if (member.avatar) {
@@ -54,47 +55,62 @@ function GenderBadge({ gender }: { gender: string | null }) {
   );
 }
 
+const PAGE_SIZE = 12;
+
 export default function GiaPhaAdminPage() {
-  const [members, setMembers] = useState<Member[]>([]);
+  const [pagedData, setPagedData] = useState<PaginatedResponse<Member> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterName, setFilterName] = useState('');
+  const [debouncedName, setDebouncedName] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'grid' | 'tree'>('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [lineageTarget, setLineageTarget] = useState<{ id: string; name: string } | null>(null);
+  const [lineageMembers, setLineageMembers] = useState<Member[]>([]);
+  const [lineageLoading, setLineageLoading] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
-  const pageSize = 12;
+  const [refreshKey, setRefreshKey] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchMembers = () => {
+  // Debounce filter input
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedName(filterName), 350);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [filterName]);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => { setCurrentPage(1); }, [debouncedName]);
+
+  // Fetch paginated data (table/grid only)
+  useEffect(() => {
+    if (viewMode === 'tree') return;
     setLoading(true);
-    getMembers()
-      .then((res) => setMembers(res.data))
+    getMembersPage(currentPage, PAGE_SIZE, debouncedName || undefined)
+      .then((res) => setPagedData(res.data))
       .catch((err) => setError(err instanceof Error ? err.message : 'Lỗi tải dữ liệu'))
       .finally(() => setLoading(false));
-  };
+  }, [currentPage, debouncedName, viewMode, refreshKey]);
 
-  useEffect(() => {
-    fetchMembers();
+  const triggerRefresh = useCallback(() => {
+    invalidateMembersCache();
+    setRefreshKey((k) => k + 1);
   }, []);
 
-  const filtered = useMemo(() => {
-    if (!filterName.trim()) return members;
-    const q = filterName.toLowerCase();
-    return members.filter((m) => m.fullName.toLowerCase().includes(q));
-  }, [members, filterName]);
-
-  const paginatedMembers = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filtered.slice(start, start + pageSize);
-  }, [filtered, currentPage, pageSize]);
-
-  const totalPages = Math.ceil(filtered.length / pageSize);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filterName, viewMode]);
+  const handleOpenLineage = useCallback(async (id: string, name: string) => {
+    setLineageLoading(true);
+    try {
+      const all = await getCachedAllMembers();
+      setLineageMembers(all);
+      setLineageTarget({ id, name });
+    } catch {
+      setError('Không thể tải dữ liệu cây trực hệ');
+    } finally {
+      setLineageLoading(false);
+    }
+  }, []);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -102,7 +118,7 @@ export default function GiaPhaAdminPage() {
     try {
       await deleteMember(deleteTarget.id);
       setDeleteTarget(null);
-      fetchMembers();
+      triggerRefresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Xóa thất bại');
     } finally {
@@ -115,7 +131,7 @@ export default function GiaPhaAdminPage() {
     setError(null);
     try {
       await recalculateMemberStats();
-      fetchMembers();
+      triggerRefresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Tính lại thất bại');
     } finally {
@@ -123,8 +139,9 @@ export default function GiaPhaAdminPage() {
     }
   };
 
-  const alive = members.filter((m) => !m.deathYear).length;
-  const deceased = members.filter((m) => m.deathYear).length;
+  const members = pagedData?.items ?? [];
+  const total = pagedData?.total ?? 0;
+  const totalPages = pagedData?.totalPages ?? 1;
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
@@ -143,20 +160,10 @@ export default function GiaPhaAdminPage() {
             <h1 className="text-2xl font-bold text-stone-900">Gia phả</h1>
           </div>
           <div className="flex items-center gap-3 pl-12 flex-wrap">
-            <span className="text-sm text-stone-500">
-              <span className="font-semibold text-stone-700">{members.length}</span> thành viên
-            </span>
-            {!loading && members.length > 0 && (
-              <>
-                <span className="text-stone-300 text-xs">·</span>
-                <span className="text-xs text-emerald-600 font-medium">{alive} đang sống</span>
-                {deceased > 0 && (
-                  <>
-                    <span className="text-stone-300 text-xs">·</span>
-                    <span className="text-xs text-stone-400">{deceased} đã mất</span>
-                  </>
-                )}
-              </>
+            {!loading && pagedData && (
+              <span className="text-sm text-stone-500">
+                <span className="font-semibold text-stone-700">{total}</span> thành viên
+              </span>
             )}
           </div>
         </div>
@@ -202,26 +209,30 @@ export default function GiaPhaAdminPage() {
       {/* ── Filter & View Mode ── */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative max-w-xs w-full">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              value={filterName}
-              onChange={(e) => setFilterName(e.target.value)}
-              placeholder="Tìm theo tên..."
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors shadow-sm"
-            />
-            {filterName && (
-              <button onClick={() => setFilterName('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </div>
-          {filterName && <span className="text-xs text-stone-500">{filtered.length} kết quả</span>}
+          {viewMode !== 'tree' && (
+            <div className="relative max-w-xs w-full">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={filterName}
+                onChange={(e) => setFilterName(e.target.value)}
+                placeholder="Tìm theo tên..."
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors shadow-sm"
+              />
+              {filterName && (
+                <button onClick={() => setFilterName('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
+          {viewMode !== 'tree' && debouncedName && pagedData && (
+            <span className="text-xs text-stone-500">{total} kết quả</span>
+          )}
         </div>
 
         <div className="flex items-center bg-white border border-stone-200 rounded-xl p-1 shadow-sm">
@@ -282,32 +293,25 @@ export default function GiaPhaAdminPage() {
                       <td className="px-5 py-4"><div className="h-3 w-16 bg-stone-100 rounded ml-auto" /></td>
                     </tr>
                   ))
-                ) : paginatedMembers.length === 0 ? (
+                ) : members.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-5 py-16 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <svg className="w-10 h-10 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                        <p className="text-stone-400 text-sm">{filterName ? `Không tìm thấy "${filterName}"` : 'Chưa có thành viên nào'}</p>
+                        <p className="text-stone-400 text-sm">{debouncedName ? `Không tìm thấy "${debouncedName}"` : 'Chưa có thành viên nào'}</p>
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  paginatedMembers.map((member) => (
+                  members.map((member) => (
                     <tr key={member.id} className="hover:bg-stone-50/60 transition-colors group">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <AvatarCell member={member} />
                           <div>
                             <p className="font-semibold text-stone-900 group-hover:text-red-700 transition-colors">{member.fullName}</p>
-                            {member.parentId && (
-                              <p className="text-[11px] text-stone-400 mt-0.5">
-                                {members.find(m => m.id === member.parentId)?.fullName
-                                  ? `Con của: ${members.find(m => m.id === member.parentId)?.fullName}`
-                                  : `Con của ID: ${member.parentId.slice(0, 8)}…`}
-                              </p>
-                            )}
                           </div>
                         </div>
                       </td>
@@ -320,14 +324,15 @@ export default function GiaPhaAdminPage() {
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
-                            onClick={() => setLineageTarget({ id: member.id, name: member.fullName })}
-                            className="px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors"
+                            onClick={() => handleOpenLineage(member.id, member.fullName)}
+                            disabled={lineageLoading}
+                            className="px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
                             style={{ color: '#92400e', background: 'rgba(180,83,9,0.06)' }}
                             onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(180,83,9,0.12)')}
                             onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(180,83,9,0.06)')}
                             title="Xem cây trực hệ"
                           >
-                            Cây trực hệ
+                            {lineageLoading ? '...' : 'Cây trực hệ'}
                           </button>
                           <Link
                             href={`/admin/gia-pha/${member.id}`}
@@ -371,10 +376,10 @@ export default function GiaPhaAdminPage() {
                 <div className="space-y-2 mt-4"><div className="h-3 w-full bg-stone-100 rounded" /><div className="h-3 w-2/3 bg-stone-100 rounded" /></div>
               </div>
             ))
-          ) : paginatedMembers.length === 0 ? (
+          ) : members.length === 0 ? (
             <div className="col-span-full py-16 text-center"><p className="text-stone-400 text-sm">Không tìm thấy thành viên nào</p></div>
           ) : (
-            paginatedMembers.map((member) => (
+            members.map((member) => (
               <div key={member.id} className="bg-white rounded-2xl border border-stone-200 p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col">
                 <div className="flex items-start gap-3 mb-3">
                   <AvatarCell member={member} />
@@ -390,11 +395,12 @@ export default function GiaPhaAdminPage() {
                 </div>
                 <div className="flex items-center gap-1.5 pt-3 border-t border-stone-100 mt-auto">
                   <button
-                    onClick={() => setLineageTarget({ id: member.id, name: member.fullName })}
-                    className="flex-1 text-center px-2 py-1.5 text-xs font-medium rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
+                    onClick={() => handleOpenLineage(member.id, member.fullName)}
+                    disabled={lineageLoading}
+                    className="flex-1 text-center px-2 py-1.5 text-xs font-medium rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors disabled:opacity-50"
                     title="Xem cây trực hệ"
                   >
-                    Cây trực hệ
+                    {lineageLoading ? '...' : 'Cây trực hệ'}
                   </button>
                   <Link href={`/admin/gia-pha/${member.id}`} className="flex-1 text-center px-2 py-1.5 text-xs font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">
                     Sửa
@@ -428,12 +434,14 @@ export default function GiaPhaAdminPage() {
       {(viewMode === 'table' || viewMode === 'grid') && totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-stone-200 pt-4 mt-4">
           <p className="text-sm text-stone-500">
-            Hiển thị <span className="font-medium">{(currentPage - 1) * pageSize + 1}</span> đến <span className="font-medium">{Math.min(currentPage * pageSize, filtered.length)}</span> trong số <span className="font-medium">{filtered.length}</span> kết quả
+            Hiển thị <span className="font-medium">{(currentPage - 1) * PAGE_SIZE + 1}</span> đến{' '}
+            <span className="font-medium">{Math.min(currentPage * PAGE_SIZE, total)}</span> trong số{' '}
+            <span className="font-medium">{total}</span> kết quả
           </p>
           <div className="flex items-center gap-1">
-            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1.5 text-sm font-medium text-stone-600 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Trước</button>
+            <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1.5 text-sm font-medium text-stone-600 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Trước</button>
             <div className="px-4 py-1.5 text-sm font-medium text-stone-800 bg-stone-100 rounded-lg">{currentPage} / {totalPages}</div>
-            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 text-sm font-medium text-stone-600 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Sau</button>
+            <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 text-sm font-medium text-stone-600 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Sau</button>
           </div>
         </div>
       )}
@@ -449,11 +457,11 @@ export default function GiaPhaAdminPage() {
         onCancel={() => setDeleteTarget(null)}
       />
 
-      {lineageTarget && (
+      {lineageTarget && lineageMembers.length > 0 && (
         <LineageModal
           memberId={lineageTarget.id}
           memberName={lineageTarget.name}
-          allMembers={members}
+          allMembers={lineageMembers}
           onClose={() => setLineageTarget(null)}
         />
       )}

@@ -3,9 +3,17 @@ import { MemberService } from '../services/member.service';
 import { sendSuccess, sendCreated, sendError } from '../utils/response';
 
 export const MemberController = {
-  async getAll(_req: Request, res: Response): Promise<void> {
-    const members = await MemberService.getAll();
-    sendSuccess(res, members);
+  async getAll(req: Request, res: Response): Promise<void> {
+    if (req.query['page'] !== undefined) {
+      const page = Math.max(1, Number(req.query['page']) || 1);
+      const limit = Math.max(1, Math.min(100, Number(req.query['limit']) || 12));
+      const name = req.query['name'] ? String(req.query['name']) : undefined;
+      const result = await MemberService.getPage(page, limit, name);
+      sendSuccess(res, result);
+    } else {
+      const members = await MemberService.getAll();
+      sendSuccess(res, members);
+    }
   },
 
   async getById(req: Request, res: Response): Promise<void> {
@@ -28,7 +36,9 @@ export const MemberController = {
       fullName: string;
       avatar?: string;
       birthYear?: number;
+      birthDate?: string;
       deathYear?: number;
+      deathDate?: string;
       gender?: string;
       bio?: string;
       achievements?: string[];
@@ -54,7 +64,9 @@ export const MemberController = {
       fullName?: string;
       avatar?: string;
       birthYear?: number;
+      birthDate?: string;
       deathYear?: number;
+      deathDate?: string;
       gender?: string;
       bio?: string;
       achievements?: string[];

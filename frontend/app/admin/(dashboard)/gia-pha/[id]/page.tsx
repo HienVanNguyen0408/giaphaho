@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getMember, getMembers, createMember, updateMember } from '@/lib/api';
+import { invalidateMembersCache } from '@/lib/memberCache';
 import MemberForm from '@/components/admin/gia-pha/MemberForm';
 import type { Member } from '@/types';
 
@@ -46,6 +47,7 @@ function MemberEditContent() {
       } else {
         await updateMember(id, data);
       }
+      invalidateMembersCache();
       router.push('/admin/gia-pha');
     } finally {
       setSaving(false);

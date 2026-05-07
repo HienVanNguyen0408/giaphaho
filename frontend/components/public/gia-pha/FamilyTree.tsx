@@ -19,8 +19,8 @@ import {
   type ReactFlowProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { getMembers } from '@/lib/api';
 import { flatToFlowGraph } from '@/lib/treeUtils';
+import { getCachedAllMembers } from '@/lib/memberCache';
 import type { Member, MemberDetail } from '@/types';
 import { getMember } from '@/lib/api';
 import LineageModal from './LineageModal';
@@ -138,12 +138,56 @@ function DetailPanel({
               </div>
             )}
             <h4 className="font-bold text-stone-900 text-center">{detail.fullName}</h4>
-            {(detail.birthYear || detail.deathYear) && (
-              <p className="text-xs text-stone-500">
-                {detail.birthYear ?? '?'} – {detail.deathYear ?? 'nay'}
+          </div>
+
+          {/* Stats: đời thứ & số con cháu */}
+          {(detail.generation != null || detail.descendantsCount != null) && (
+            <div className="flex gap-2">
+              {detail.generation != null && (
+                <div className="flex-1 bg-red-50 rounded-xl px-3 py-2 text-center">
+                  <p className="text-base font-bold text-red-700">{detail.generation}</p>
+                  <p className="text-[10px] text-stone-500">Đời thứ</p>
+                </div>
+              )}
+              {detail.descendantsCount != null && (
+                <div className="flex-1 bg-amber-50 rounded-xl px-3 py-2 text-center">
+                  <p className="text-base font-bold text-amber-700">{detail.descendantsCount}</p>
+                  <p className="text-[10px] text-stone-500">Con cháu</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Ngày sinh / ngày mất */}
+          <div className="space-y-1.5">
+            {(detail.birthDate || detail.birthYear) && (
+              <p className="text-xs text-stone-600 flex gap-1">
+                <span className="font-medium text-stone-500 w-20 flex-shrink-0">Ngày sinh:</span>
+                <span>
+                  {detail.birthDate
+                    ? new Date(detail.birthDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    : detail.birthYear}
+                </span>
+              </p>
+            )}
+            {(detail.deathDate || detail.deathYear) && (
+              <p className="text-xs text-stone-600 flex gap-1">
+                <span className="font-medium text-stone-500 w-20 flex-shrink-0">Ngày mất:</span>
+                <span>
+                  {detail.deathDate
+                    ? new Date(detail.deathDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    : detail.deathYear}
+                </span>
+              </p>
+            )}
+            {!detail.deathDate && !detail.deathYear && (
+              <p className="text-xs text-emerald-600 flex gap-1">
+                <span className="font-medium text-stone-500 w-20 flex-shrink-0">Tình trạng:</span>
+                <span>Còn sống</span>
               </p>
             )}
           </div>
+
           {detail.parent && (
             <p className="text-xs text-stone-600">
               <span className="font-medium">Cha/Mẹ: </span>
@@ -154,7 +198,7 @@ function DetailPanel({
           )}
           {detail.children.length > 0 && (
             <div className="text-xs text-stone-600">
-              <p className="font-medium mb-1">Con cái:</p>
+              <p className="font-medium mb-1">Con cái ({detail.children.length}):</p>
               <ul className="space-y-0.5 pl-2">
                 {detail.children.map((c) => (
                   <li key={c.id}>
@@ -291,9 +335,9 @@ function FamilyTreeInner() {
   );
 
   useEffect(() => {
-    getMembers()
-      .then((res) => {
-        const { nodes: n, edges: e } = flatToFlowGraph(res.data);
+    getCachedAllMembers()
+      .then((members) => {
+        const { nodes: n, edges: e } = flatToFlowGraph(members);
         setNodes(n as unknown as Node[]);
         setEdges(e);
       })

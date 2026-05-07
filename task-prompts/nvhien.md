@@ -45,3 +45,11 @@ Sửa các thông tin sau:
     Bổ sung thêm thông tin của từng thành viên cần lưu trữ thêm dữ liệu là: Số con cháu, Số đời, Số anh chị em, Số vợ chồng, Số con trai, Số con gái. cần có tính năng cập nhật lại dữ liệu số lượng này trong gia phả cần khi muốn cập nhật lại số lượng này thì có thể cập nhật lại số lượng này trong gia phả cần khi muốn cập nhật lại số lượng
     Thao tác trong video admin cũng thế cần có sắp xếp kéo thả để sắp xếp thứ tự hiển thị video trên trang chủ, hoặc có các template gợi ý layout có sẵn để chọn lựa
     
+
+
+Thực hiện yêu cầu sau:
+    - Số lượng con cháu, số đời cần hiển thị ở chi tiết trong cây gia phả, trực hệ
+    - Thông tin chi tiết của các thành viên cần có thêm ngày tháng năm sinh, ngày tháng năm mất
+
+
+DỮ liệu tree gia phả sau khi load api rồi có đang lưu trong storage client k thế

@@ -1,5 +1,6 @@
 import type {
   ApiResponse,
+  PaginatedResponse,
   User,
   Member,
   MemberDetail,
@@ -54,6 +55,11 @@ export const getMe = () => apiFetch<User>('/api/auth/me');
 
 // ====== MEMBERS ======
 export const getMembers = () => apiFetch<Member[]>('/api/members');
+
+export const getMembersPage = (page = 1, limit = 12, name?: string) =>
+  apiFetch<PaginatedResponse<Member>>(
+    `/api/members?page=${page}&limit=${limit}${name ? `&name=${encodeURIComponent(name)}` : ''}`,
+  );
 
 export const getMember = (id: string) => apiFetch<MemberDetail>(`/api/members/${id}`);
 

@@ -14,7 +14,9 @@ export interface Member {
   fullName: string;
   avatar: string | null;
   birthYear: number | null;
+  birthDate: string | null;
   deathYear: number | null;
+  deathDate: string | null;
   gender: string | null;
   bio: string | null;
   achievements: string[];

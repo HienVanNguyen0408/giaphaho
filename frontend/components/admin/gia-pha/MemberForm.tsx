@@ -38,9 +38,11 @@ export default function MemberForm({
   const [birthYear, setBirthYear] = useState<string>(
     initialData?.birthYear != null ? String(initialData.birthYear) : '',
   );
+  const [birthDate, setBirthDate] = useState<string>(initialData?.birthDate ?? '');
   const [deathYear, setDeathYear] = useState<string>(
     initialData?.deathYear != null ? String(initialData.deathYear) : '',
   );
+  const [deathDate, setDeathDate] = useState<string>(initialData?.deathDate ?? '');
   const [bio, setBio] = useState(initialData?.bio ?? '');
   const [achievements, setAchievements] = useState<string[]>(initialData?.achievements ?? []);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData?.avatar ?? null);
@@ -93,7 +95,9 @@ export default function MemberForm({
       fullName: fullName.trim(),
       gender: gender || null,
       birthYear: birthYear ? Number(birthYear) : null,
+      birthDate: birthDate || null,
       deathYear: deathYear ? Number(deathYear) : null,
+      deathDate: deathDate || null,
       bio: bio.trim() || null,
       achievements: achievements.filter((a) => a.trim()),
       avatar: avatarUrl,
@@ -210,7 +214,7 @@ export default function MemberForm({
             </div>
           </div>
 
-          {/* Birth / Death year */}
+          {/* Birth year + Birth date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-stone-600 mb-1.5">Năm sinh</label>
@@ -225,6 +229,21 @@ export default function MemberForm({
               />
             </div>
             <div>
+              <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+                Ngày sinh <span className="text-stone-400 font-normal">(đầy đủ)</span>
+              </label>
+              <input
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          </div>
+
+          {/* Death year + Death date */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <label className="block text-xs font-semibold text-stone-600 mb-1.5">Năm mất</label>
               <input
                 type="number"
@@ -233,6 +252,17 @@ export default function MemberForm({
                 placeholder="Để trống nếu còn sống"
                 min={1000}
                 max={2100}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+                Ngày mất <span className="text-stone-400 font-normal">(đầy đủ)</span>
+              </label>
+              <input
+                type="date"
+                value={deathDate}
+                onChange={(e) => setDeathDate(e.target.value)}
                 className={inputCls}
               />
             </div>
