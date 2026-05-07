@@ -91,3 +91,5 @@ Khi xem chi tiết của thành viên đó trong cây trực hệ cần có acti
 Đây là thông tin cây Gia Phả của Chi nhánh 2(bắt đầu chi Trưởng Nhánh 2 - Phùng Huy Vĩ)
 /home/nvhien/nvhien-2026/giaphaho/task-prompts/giapha/chinhanh_2/anh1.jpg
 /home/nvhien/nvhien-2026/giaphaho/task-prompts/giapha/chinhanh_2/anh2.jpg
+
+Lamf đi rồi seed dữ liệu 2 chi nhánh đó vào ddatabase cho tôi, nối tiếp tên chi Trưởng đã có sẵn trước đó rồi cho tôi
