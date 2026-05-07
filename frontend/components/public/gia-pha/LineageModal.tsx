@@ -10,9 +10,11 @@ import {
   ReactFlowProvider,
   Handle,
   Position,
+  useReactFlow,
   type ReactFlowInstance,
   type NodeProps,
   type ReactFlowProps,
+  type Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { flatToFlowGraph, getLineageMembers } from '@/lib/treeUtils';
@@ -38,7 +40,6 @@ function MemberNode({ data, selected }: NodeProps) {
   const ownAchievements = member.achievements?.length ?? 0;
   const descendantsCount = member.descendantsCount ?? 0;
 
-  // Hiển thị ngày/năm sinh-mất
   const lifespan = (() => {
     if (member.birthYear || member.deathYear) {
       return `${member.birthYear ?? '?'} – ${member.deathYear ?? 'nay'}`;
@@ -55,16 +56,17 @@ function MemberNode({ data, selected }: NodeProps) {
         isActive
           ? 'border-amber-500 shadow-lg'
           : selected
-          ? 'border-red-600 shadow-red-200 shadow-lg'
+          ? 'border-blue-500 shadow-blue-200 shadow-lg'
           : 'border-stone-200 hover:border-red-400'
       }`}
       style={
         isActive
           ? { boxShadow: '0 0 0 3px rgba(245,158,11,0.35), 0 6px 24px rgba(245,158,11,0.25)' }
+          : selected
+          ? { boxShadow: '0 0 0 3px rgba(59,130,246,0.25), 0 6px 16px rgba(59,130,246,0.15)' }
           : undefined
       }
     >
-      {/* Active badge */}
       {isActive && (
         <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm leading-tight z-10">
           Đang xem
@@ -73,7 +75,6 @@ function MemberNode({ data, selected }: NodeProps) {
 
       <Handle type="target" position={Position.Top} className="!bg-red-400 !w-2 !h-2" />
 
-      {/* Avatar + tên */}
       <div className="flex flex-col items-center gap-1">
         <div className="relative">
           {member.avatar ? (
@@ -115,17 +116,13 @@ function MemberNode({ data, selected }: NodeProps) {
         )}
       </div>
 
-      {/* Stats row: con cháu | thành tích bản thân · thành tích con cháu */}
       <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-stone-100">
-        {/* Số con cháu */}
         <div className="flex items-center gap-0.5 text-[9px] text-stone-500" title="Số con cháu">
           <svg className="w-2.5 h-2.5 text-stone-400" fill="currentColor" viewBox="0 0 20 20">
             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 14.094A5.973 5.973 0 004 17v1H1v-1a3 3 0 013.75-2.906z" />
           </svg>
           <span className="font-semibold text-stone-700">{descendantsCount}</span>
         </div>
-
-        {/* Thành tích bản thân | thành tích con cháu */}
         <div className="flex items-center gap-1 text-[9px]" title="Thành tích cá nhân · Thành tích con cháu">
           <span className="font-semibold text-amber-700">{ownAchievements}</span>
           <svg className="w-2.5 h-2.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
@@ -143,14 +140,99 @@ function MemberNode({ data, selected }: NodeProps) {
 
 const nodeTypes = { memberNode: MemberNode };
 
+// -------- Search --------
+function LineageSearch({ nodes, onSelect }: { nodes: Node[]; onSelect: (id: string) => void }) {
+  const [query, setQuery] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const { setCenter } = useReactFlow();
+
+  const filtered = query
+    ? nodes
+        .filter((n) => {
+          const member = (n.data as MemberNodeData).member;
+          return member.fullName.toLowerCase().includes(query.toLowerCase());
+        })
+        .slice(0, 10)
+    : [];
+
+  const handleSelect = (node: Node) => {
+    setQuery('');
+    setShowResults(false);
+    onSelect(node.id);
+    setCenter(node.position.x + 100, node.position.y + 60, { zoom: 1.5, duration: 800 });
+  };
+
+  return (
+    <div className="absolute top-4 left-14 z-10">
+      <div className="relative w-60">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setShowResults(true); }}
+          onFocus={() => setShowResults(true)}
+          placeholder="Tìm trong cây trực hệ..."
+          className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 bg-white/90 backdrop-blur text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-red-400 shadow-md"
+        />
+        <svg
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+
+        {showResults && query && (
+          <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-xl border border-stone-200 max-h-52 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <div className="p-3 text-xs text-stone-500 text-center">Không tìm thấy ai</div>
+            ) : (
+              <ul className="py-1">
+                {filtered.map((n) => {
+                  const m = (n.data as MemberNodeData).member;
+                  return (
+                    <li key={n.id}>
+                      <button
+                        onClick={() => handleSelect(n)}
+                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-stone-800 flex flex-col transition-colors"
+                      >
+                        <span className="font-semibold">{m.fullName}</span>
+                        <span className="text-[10px] text-stone-500">
+                          {m.birthYear ? `SN: ${m.birthYear}` : ''}
+                          {m.generation != null ? ` · Đời ${m.generation}` : ''}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// -------- Inner Tree --------
 function LineageTreeInner({
   lineageMembers,
   focusMemberId,
+  onEditMember,
+  onDeleteMember,
 }: {
   lineageMembers: Member[];
   focusMemberId: string;
+  onEditMember?: (id: string) => void;
+  onDeleteMember?: (id: string) => Promise<void>;
 }) {
   const { nodes, edges } = useMemo(() => flatToFlowGraph(lineageMembers), [lineageMembers]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const selectedMember = useMemo(
+    () => (selectedId ? lineageMembers.find((m) => m.id === selectedId) ?? null : null),
+    [selectedId, lineageMembers],
+  );
 
   const handleInit = useCallback(
     (instance: ReactFlowInstance) => {
@@ -167,6 +249,31 @@ function LineageTreeInner({
     [focusMemberId],
   );
 
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    setSelectedId((prev) => {
+      if (prev === node.id) return null;
+      setConfirmingDelete(false);
+      return node.id;
+    });
+  }, []);
+
+  const onPaneClick = useCallback(() => {
+    setSelectedId(null);
+    setConfirmingDelete(false);
+  }, []);
+
+  const handleDelete = async () => {
+    if (!selectedId || !onDeleteMember) return;
+    setDeleting(true);
+    try {
+      await onDeleteMember(selectedId);
+      setSelectedId(null);
+      setConfirmingDelete(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <FocusMemberCtx.Provider value={focusMemberId}>
       <RF
@@ -176,6 +283,8 @@ function LineageTreeInner({
         nodesDraggable={false}
         nodesConnectable={false}
         onInit={handleInit}
+        onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
         minZoom={0.05}
         maxZoom={3}
         className="bg-stone-50"
@@ -189,6 +298,90 @@ function LineageTreeInner({
           pannable
           zoomable
         />
+
+        {/* Search */}
+        <LineageSearch nodes={nodes as Node[]} onSelect={setSelectedId} />
+
+        {/* Selected member action bar */}
+        {selectedMember && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-white rounded-2xl shadow-xl border border-stone-200 px-4 py-3 flex items-center gap-3 max-w-md w-full">
+            {confirmingDelete ? (
+              /* Confirm delete mode */
+              <>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-red-700">Xóa thành viên này?</p>
+                  <p className="text-[10px] text-stone-500 truncate">{selectedMember.fullName}</p>
+                </div>
+                <button
+                  onClick={() => setConfirmingDelete(false)}
+                  disabled={deleting}
+                  className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {deleting ? (
+                    <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  )}
+                  {deleting ? 'Đang xóa...' : 'Xác nhận xóa'}
+                </button>
+              </>
+            ) : (
+              /* Normal mode */
+              <>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-stone-900 truncate">{selectedMember.fullName}</p>
+                  <p className="text-[10px] text-stone-400">
+                    {selectedMember.birthYear ? `SN: ${selectedMember.birthYear}` : ''}
+                    {selectedMember.generation != null
+                      ? `${selectedMember.birthYear ? ' · ' : ''}Đời ${selectedMember.generation}`
+                      : ''}
+                    {!selectedMember.birthYear && selectedMember.generation == null ? 'Thành viên được chọn' : ''}
+                  </p>
+                </div>
+                {onEditMember && (
+                  <button
+                    onClick={() => onEditMember(selectedMember.id)}
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Sửa
+                  </button>
+                )}
+                {onDeleteMember && (
+                  <button
+                    onClick={() => setConfirmingDelete(true)}
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Xóa
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelectedId(null)}
+                  className="flex-shrink-0 w-6 h-6 rounded-lg bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-400 hover:text-stone-600 transition-colors"
+                  aria-label="Bỏ chọn"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </RF>
     </FocusMemberCtx.Provider>
   );
@@ -199,9 +392,11 @@ interface LineageModalProps {
   memberName: string;
   allMembers: Member[];
   onClose: () => void;
+  onEditMember?: (id: string) => void;
+  onDeleteMember?: (id: string) => Promise<void>;
 }
 
-export default function LineageModal({ memberId, memberName, allMembers, onClose }: LineageModalProps) {
+export default function LineageModal({ memberId, memberName, allMembers, onClose, onEditMember, onDeleteMember }: LineageModalProps) {
   const [isFullscreen, setIsFullscreen] = useState(true);
 
   const lineageMembers = useMemo(() => getLineageMembers(memberId, allMembers), [memberId, allMembers]);
@@ -251,7 +446,6 @@ export default function LineageModal({ memberId, memberName, allMembers, onClose
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            {/* Toggle fullscreen/windowed */}
             <button
               onClick={() => setIsFullscreen((v) => !v)}
               className="text-white/80 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10"
@@ -259,18 +453,15 @@ export default function LineageModal({ memberId, memberName, allMembers, onClose
               title={isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
             >
               {isFullscreen ? (
-                /* Thu nhỏ icon */
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25M9 15H4.5M9 15v4.5M9 15l-5.25 5.25" />
                 </svg>
               ) : (
-                /* Toàn màn hình icon */
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                 </svg>
               )}
             </button>
-            {/* Đóng */}
             <button
               onClick={onClose}
               className="text-white/80 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-xl leading-none"
@@ -282,7 +473,7 @@ export default function LineageModal({ memberId, memberName, allMembers, onClose
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 px-4 py-2 bg-stone-50 border-b border-stone-100 text-[10px] text-stone-500">
+        <div className="flex items-center gap-4 px-4 py-2 bg-stone-50 border-b border-stone-100 text-[10px] text-stone-500 flex-shrink-0">
           <div className="flex items-center gap-1">
             <svg className="w-3 h-3 text-stone-400" fill="currentColor" viewBox="0 0 20 20">
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 14.094A5.973 5.973 0 004 17v1H1v-1a3 3 0 013.75-2.906z" />
@@ -295,16 +486,29 @@ export default function LineageModal({ memberId, memberName, allMembers, onClose
             </svg>
             <span><span className="text-amber-700 font-semibold">Thành tích</span> · Con cháu</span>
           </div>
-          <div className="flex items-center gap-1 ml-auto">
+          <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-amber-400 inline-block" />
             <span>Thành viên đang xem</span>
           </div>
+          {(onEditMember || onDeleteMember) && (
+            <div className="flex items-center gap-1 ml-auto text-blue-600">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
+              </svg>
+              <span>Nhấn vào thành viên để {onEditMember && onDeleteMember ? 'sửa / xóa' : onEditMember ? 'sửa' : 'xóa'}</span>
+            </div>
+          )}
         </div>
 
         {/* Tree */}
         <div className="flex-1 relative">
           <ReactFlowProvider>
-            <LineageTreeInner lineageMembers={lineageMembers} focusMemberId={memberId} />
+            <LineageTreeInner
+              lineageMembers={lineageMembers}
+              focusMemberId={memberId}
+              onEditMember={onEditMember}
+              onDeleteMember={onDeleteMember}
+            />
           </ReactFlowProvider>
         </div>
       </div>

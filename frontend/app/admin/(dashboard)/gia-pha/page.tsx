@@ -13,6 +13,7 @@ import {
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import FamilyTree from '@/components/public/gia-pha/FamilyTree';
 import LineageModal from '@/components/public/gia-pha/LineageModal';
+import EditMemberDrawer from '@/components/admin/gia-pha/EditMemberDrawer';
 import type { Member, PaginatedResponse } from '@/types';
 
 function AvatarCell({ member }: { member: Member }) {
@@ -140,6 +141,7 @@ export default function GiaPhaAdminPage() {
   } | null>(null);
   const [recalcDone, setRecalcDone] = useState<{ updated: number; durationMs: number } | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [editMemberId, setEditMemberId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const esRef = useRef<EventSource | null>(null);
 
@@ -596,11 +598,15 @@ export default function GiaPhaAdminPage() {
           <div className="p-4 border-b border-stone-100 bg-stone-50">
             <h3 className="text-sm font-semibold text-stone-800">Sơ đồ cây gia phả</h3>
             <p className="text-xs text-stone-500">
-              Nhấn vào thành viên để xem thông tin và cây trực hệ. Chỉ xem — chỉnh sửa dùng chế độ Danh sách.
+              Nhấn vào thành viên để xem thông tin — có thể sửa thông tin trực tiếp từ đây.
             </p>
           </div>
           <div className="flex-1 relative">
-            <FamilyTree refreshKey={refreshKey} />
+            <FamilyTree
+              refreshKey={refreshKey}
+              onEditMember={(id) => setEditMemberId(id)}
+              onDeleteMember={async (id) => { await deleteMember(id); triggerRefresh(); }}
+            />
           </div>
         </div>
       )}
@@ -621,6 +627,14 @@ export default function GiaPhaAdminPage() {
         </div>
       )}
 
+      {editMemberId && (
+        <EditMemberDrawer
+          memberId={editMemberId}
+          onClose={() => setEditMemberId(null)}
+          onSaved={triggerRefresh}
+        />
+      )}
+
       <ConfirmDialog
         open={!!deleteTarget}
         title="Xóa thành viên"
@@ -638,6 +652,8 @@ export default function GiaPhaAdminPage() {
           memberName={lineageTarget.name}
           allMembers={lineageMembers}
           onClose={() => setLineageTarget(null)}
+          onEditMember={(id) => setEditMemberId(id)}
+          onDeleteMember={async (id) => { await deleteMember(id); triggerRefresh(); setLineageTarget(null); }}
         />
       )}
     </div>
