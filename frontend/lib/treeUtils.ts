@@ -2,8 +2,9 @@ import type { Node, Edge } from '@xyflow/react';
 import type { Member } from '@/types';
 import dagre from 'dagre';
 
-interface MemberNodeData extends Record<string, unknown> {
+export interface MemberNodeData extends Record<string, unknown> {
   member: Member;
+  descendantsAchievementsCount: number;
 }
 
 export interface FlowGraph {
@@ -12,7 +13,7 @@ export interface FlowGraph {
 }
 
 const nodeWidth = 200;
-const nodeHeight = 120;
+const nodeHeight = 140;
 
 /**
  * Convert a flat array of Members into ReactFlow nodes and edges
@@ -34,6 +35,34 @@ export function flatToFlowGraph(members: Member[]): FlowGraph {
   const nodes: Node<MemberNodeData>[] = [];
   const edges: Edge[] = [];
   const memberMap = new Map<string, Member>(members.map((m) => [m.id, m]));
+
+  // Build children adjacency list
+  const childrenOf = new Map<string, string[]>();
+  members.forEach((m) => {
+    if (m.parentId && memberMap.has(m.parentId)) {
+      if (!childrenOf.has(m.parentId)) childrenOf.set(m.parentId, []);
+      childrenOf.get(m.parentId)!.push(m.id);
+    }
+  });
+
+  // Compute total achievements of all descendants (BFS)
+  const getDescendantsAchievements = (id: string): number => {
+    let total = 0;
+    const queue = childrenOf.get(id) ? [...childrenOf.get(id)!] : [];
+    const seen = new Set<string>();
+    while (queue.length > 0) {
+      const cid = queue.shift()!;
+      if (seen.has(cid)) continue;
+      seen.add(cid);
+      const m = memberMap.get(cid);
+      if (m) {
+        total += m.achievements?.length ?? 0;
+        const grandChildren = childrenOf.get(cid);
+        if (grandChildren) queue.push(...grandChildren);
+      }
+    }
+    return total;
+  };
 
   // Add nodes to dagre
   members.forEach((m) => {
@@ -64,11 +93,10 @@ export function flatToFlowGraph(members: Member[]): FlowGraph {
     nodes.push({
       id: m.id,
       position: {
-        // Dagre uses center of node, React Flow uses top left by default
         x: nodeWithPosition.x - nodeWidth / 2,
         y: nodeWithPosition.y - nodeHeight / 2,
       },
-      data: { member: m },
+      data: { member: m, descendantsAchievementsCount: getDescendantsAchievements(m.id) },
       type: 'memberNode',
     });
   });

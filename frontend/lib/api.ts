@@ -152,7 +152,43 @@ export const getActivityLogs = (page = 1, limit = 20) =>
   );
 
 export const recalculateMemberStats = () =>
-  apiFetch<null>('/api/members/recalculate-stats', { method: 'POST' });
+  apiFetch<{ jobId: string }>('/api/members/recalculate-stats', { method: 'POST' });
+
+// Returns an EventSource for SSE-based progress updates.
+// Call .close() when done to clean up.
+export function subscribeRecalculateEvents(
+  jobId: string,
+  handlers: {
+    onProgress?: (data: { step: string; processed: number; total: number }) => void;
+    onDone?: (data: { updated: number; durationMs: number }) => void;
+    onError?: (data: { message: string }) => void;
+  },
+): EventSource {
+  const url = `${BROWSER_API_PROXY_BASE}/api/members/recalculate-stats/events?jobId=${encodeURIComponent(jobId)}`;
+  const es = new EventSource(url, { withCredentials: true });
+
+  if (handlers.onProgress) {
+    es.addEventListener('progress', (e) => {
+      handlers.onProgress!(JSON.parse((e as MessageEvent).data));
+    });
+  }
+  if (handlers.onDone) {
+    es.addEventListener('done', (e) => {
+      handlers.onDone!(JSON.parse((e as MessageEvent).data));
+    });
+  }
+  if (handlers.onError) {
+    es.addEventListener('error', (e) => {
+      try {
+        handlers.onError!(JSON.parse((e as MessageEvent).data ?? '{}'));
+      } catch {
+        handlers.onError!({ message: 'Kết nối thất bại' });
+      }
+    });
+  }
+
+  return es;
+}
 
 // ====== DASHBOARD ======
 export const getDashboard = () => apiFetch<DashboardStats>('/api/dashboard');

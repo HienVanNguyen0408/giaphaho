@@ -102,7 +102,7 @@ const navItems: NavItem[] = [
   { href: '/admin/section', label: 'Mục trang chủ', icon: <LayoutIcon /> },
   { href: '/admin/footer', label: 'Footer', icon: <FooterIcon /> },
   { href: '/admin/notification', label: 'Thông báo', icon: <BellIcon /> },
-  { href: '/admin/activity-log', label: 'Nhật ký hoạt động', icon: <LogIcon />, superAdminOnly: true },
+  // { href: '/admin/activity-log', label: 'Nhật ký hoạt động', icon: <LogIcon />, superAdminOnly: true },
 ];
 
 const roleMeta: Record<Role, { label: string; dot: string; badge: string; text: string }> = {

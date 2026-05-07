@@ -45,6 +45,19 @@ model Member {
   spousesCount     Int?      @default(0)
   sonsCount        Int?      @default(0)
   daughtersCount   Int?      @default(0)
+  // Extended profile fields
+  residence        String?
+  nationalId       String?
+  phone            String?
+  email            String?
+  bankAccount      String?
+  burialPlace      String?
+  fieldConfig      Json?
+  // Family relations
+  spouses          String[]
+  motherName       String?
+  // Contributions (separate from achievements)
+  contributions    String[]
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 }

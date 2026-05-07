@@ -1,0 +1,815 @@
+{
+  "_meta": {
+    "source": "dulieu.json",
+    "note": "Chuyển đổi từ cây lồng nhau sang mảng phẳng. Ngày sinh/mất là ngày âm lịch (dd/mm) không có năm → lưu vào bio để xác nhận sau. Phùng Huy VT (ID ROOT-051) là chi trưởng Nhánh 2 trong dulieu.json nhưng đặt dưới Phùng Huân Thức — có thể sai vị trí so với chi_nhanh_2/data.json; cần xác nhận.",
+    "conventions": {
+      "gender": "Nam / Nữ / null",
+      "deathDate_lunar": "Lưu trong bio dạng 'Ngày giỗ: dd/mm âm lịch'",
+      "_ref": "ID tạm để tham chiếu parentRef khi seed"
+    }
+  },
+  "members": [
+    {
+      "_ref": "ROOT-001",
+      "fullName": "Phùng Nhã Lượng",
+      "gender": "Nam",
+      "parentRef": null,
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 15/7 âm lịch. Vợ: Lê Thị Hằng Nhất (Từ Huệ), ngày giỗ 5/10",
+      "spouses": [
+        "Lê Thị Hằng Nhất"
+      ]
+    },
+    {
+      "_ref": "ROOT-002",
+      "fullName": "Phùng Mẫn Huệ",
+      "gender": "Nam",
+      "parentRef": "ROOT-001",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Tên khác: Huệ Mẫn. Ngày giỗ: 15/3 âm lịch. Vợ: Nguyễn Thị Ý Đức, ngày giỗ 5/4",
+      "spouses": [
+        "Nguyễn Thị Ý Đức"
+      ]
+    },
+    {
+      "_ref": "ROOT-003",
+      "fullName": "Phùng Phúc Điền",
+      "gender": "Nam",
+      "parentRef": "ROOT-002",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 5/5 âm lịch. Vợ: Hoàng Trinh Tuyết, ngày giỗ 19/6",
+      "spouses": [
+        "Hoàng Trinh Tuyết"
+      ]
+    },
+    {
+      "_ref": "ROOT-004",
+      "fullName": "Phùng Phúc Ninh",
+      "gender": "Nam",
+      "parentRef": "ROOT-003",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 29/4 âm lịch. Vợ: Nguyễn Từ Huy, ngày giỗ 27/11",
+      "spouses": [
+        "Nguyễn Từ Huy"
+      ]
+    },
+    {
+      "_ref": "ROOT-005",
+      "fullName": "Phùng Chân Lương",
+      "gender": "Nam",
+      "parentRef": "ROOT-004",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-006",
+      "fullName": "Phùng Phúc Thiện",
+      "gender": "Nam",
+      "parentRef": "ROOT-004",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-007",
+      "fullName": "Phùng Phúc Trung",
+      "gender": "Nam",
+      "parentRef": "ROOT-004",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 07/3 âm lịch. Vợ: Lê Thục Chất, ngày giỗ 28/8",
+      "spouses": [
+        "Lê Thục Chất"
+      ]
+    },
+    {
+      "_ref": "ROOT-008",
+      "fullName": "Phùng Thuần Trí",
+      "gender": "Nam",
+      "parentRef": "ROOT-004",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-009",
+      "fullName": "Phùng An Công",
+      "gender": "Nam",
+      "parentRef": "ROOT-004",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-010",
+      "fullName": "Phùng Đức Tuấn",
+      "gender": "Nam",
+      "parentRef": "ROOT-004",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Tên khác: Tích Phúc. Ngày giỗ: 19/6 âm lịch. Vợ 1: Nguyễn Thục Mỹ. Vợ 2: Nguyễn Uyển Khanh",
+      "spouses": [
+        "Nguyễn Thục Mỹ",
+        "Nguyễn Uyển Khanh"
+      ]
+    },
+    {
+      "_ref": "ROOT-011",
+      "fullName": "Phùng Thị Mai",
+      "gender": "Nữ",
+      "parentRef": "ROOT-004",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-012",
+      "fullName": "Phùng Thị Già",
+      "gender": "Nữ",
+      "parentRef": "ROOT-007",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-013",
+      "fullName": "Phùng Phúc Toàn",
+      "gender": "Nam",
+      "parentRef": "ROOT-007",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 11/6 âm lịch. Vợ: Vũ Từ Quang, ngày giỗ 14/3",
+      "spouses": [
+        "Vũ Từ Quang"
+      ]
+    },
+    {
+      "_ref": "ROOT-014",
+      "fullName": "Phùng Đắc Áng",
+      "gender": "Nam",
+      "parentRef": "ROOT-007",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-015",
+      "fullName": "Phùng Thị Quyền",
+      "gender": "Nữ",
+      "parentRef": "ROOT-007",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-016",
+      "fullName": "Phùng Đội Tự",
+      "gender": "Nam",
+      "parentRef": "ROOT-007",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-017",
+      "fullName": "Phùng Huân Thức",
+      "gender": "Nam",
+      "parentRef": "ROOT-010",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 12/3 âm lịch. Vợ: Nguyễn Trinh Khiết",
+      "spouses": [
+        "Nguyễn Trinh Khiết"
+      ]
+    },
+    {
+      "_ref": "ROOT-018",
+      "fullName": "Phùng Đức Khoan",
+      "gender": "Nam",
+      "parentRef": "ROOT-010",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-019",
+      "fullName": "Phùng Hy Điền",
+      "gender": "Nam",
+      "parentRef": "ROOT-010",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Vợ: Cao Từ Thịnh",
+      "spouses": [
+        "Cao Từ Thịnh"
+      ]
+    },
+    {
+      "_ref": "ROOT-020",
+      "fullName": "Phùng Phúc Diên",
+      "gender": "Nam",
+      "parentRef": "ROOT-013",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 16/4 âm lịch. Vợ: Hà Từ Ân",
+      "spouses": [
+        "Hà Từ Ân"
+      ]
+    },
+    {
+      "_ref": "ROOT-021",
+      "fullName": "Phùng Phúc Chính",
+      "gender": "Nam",
+      "parentRef": "ROOT-013",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Vợ: Lê Từ Ý",
+      "spouses": [
+        "Lê Từ Ý"
+      ]
+    },
+    {
+      "_ref": "ROOT-022",
+      "fullName": "Phùng Phúc Hưng",
+      "gender": "Nam",
+      "parentRef": "ROOT-013",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Vợ: Phạm Từ Khang",
+      "spouses": [
+        "Phạm Từ Khang"
+      ]
+    },
+    {
+      "_ref": "ROOT-023",
+      "fullName": "Phùng Phúc Ân",
+      "gender": "Nam",
+      "parentRef": "ROOT-017",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Vợ: Nguyễn Từ Đức",
+      "spouses": [
+        "Nguyễn Từ Đức"
+      ]
+    },
+    {
+      "_ref": "ROOT-024",
+      "fullName": "Phùng Huy Vĩ (Huy VT)",
+      "gender": "Nam",
+      "parentRef": "ROOT-017",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 25/2 âm lịch. Vợ: Lê Thục Huệ (ngày giỗ 24/12). Chi trưởng Nhánh 2 — _note: vị trí trong cây cần xác nhận (dulieu.json đặt dưới Phùng Huân Thức, nhưng chi_nhanh_2 cho thấy là anh em với Phùng Nhận)",
+      "spouses": [
+        "Lê Thục Huệ"
+      ]
+    },
+    {
+      "_ref": "ROOT-025",
+      "fullName": "Phùng B",
+      "gender": "Nam",
+      "parentRef": "ROOT-017",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "_note: tên viết tắt trong nguồn, cần xác nhận tên đầy đủ",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-026",
+      "fullName": "Phùng Kham",
+      "gender": "Nam",
+      "parentRef": "ROOT-017",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-027",
+      "fullName": "Phùng Phúc Thọ",
+      "gender": "Nam",
+      "parentRef": "ROOT-020",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-028",
+      "fullName": "Phùng Hà Diễn",
+      "gender": "Nam",
+      "parentRef": "ROOT-020",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-029",
+      "fullName": "Phùng Đắc Ý",
+      "gender": "Nam",
+      "parentRef": "ROOT-020",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 23/1 âm lịch. Vợ 1: P. Phương Xuân. Vợ 2: T. Khoan Cung",
+      "spouses": [
+        "P. Phương Xuân",
+        "T. Khoan Cung"
+      ]
+    },
+    {
+      "_ref": "ROOT-030",
+      "fullName": "Phùng Thị Mùi",
+      "gender": "Nữ",
+      "parentRef": "ROOT-020",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-031",
+      "fullName": "Phùng Thị Tam",
+      "gender": "Nữ",
+      "parentRef": "ROOT-020",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-032",
+      "fullName": "Phùng Đức Thuận",
+      "gender": "Nam",
+      "parentRef": "ROOT-023",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Vợ: Trần Từ Thực",
+      "spouses": [
+        "Trần Từ Thực"
+      ]
+    },
+    {
+      "_ref": "ROOT-033",
+      "fullName": "Phùng Tuấn",
+      "gender": "Nam",
+      "parentRef": "ROOT-029",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 29/4 âm lịch. Vợ: Đỗ Trinh Hậu, ngày giỗ 5/11",
+      "spouses": [
+        "Đỗ Trinh Hậu"
+      ]
+    },
+    {
+      "_ref": "ROOT-034",
+      "fullName": "Phùng Huy Lan",
+      "gender": "Nam",
+      "parentRef": "ROOT-029",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-035",
+      "fullName": "Phùng Đức Thi",
+      "gender": "Nam",
+      "parentRef": "ROOT-032",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Vợ 1: Phạm Từ Triết. Vợ 2: Phạm Từ Khiết",
+      "spouses": [
+        "Phạm Từ Triết",
+        "Phạm Từ Khiết"
+      ]
+    },
+    {
+      "_ref": "ROOT-036",
+      "fullName": "Phùng Duy Chính",
+      "gender": "Nam",
+      "parentRef": "ROOT-033",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ngày giỗ: 3/5 âm lịch. Vợ: Nguyễn Cần Mẫn",
+      "spouses": [
+        "Nguyễn Cần Mẫn"
+      ]
+    },
+    {
+      "_ref": "ROOT-037",
+      "fullName": "Phùng Sương Tiết",
+      "gender": "Nam",
+      "parentRef": "ROOT-033",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-038",
+      "fullName": "Phùng Quang Đạt",
+      "gender": "Nam",
+      "parentRef": "ROOT-035",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Vợ 1: Nguyễn Từ Thanh. Vợ 2: Trần Từ Vân",
+      "spouses": [
+        "Nguyễn Từ Thanh",
+        "Trần Từ Vân"
+      ]
+    },
+    {
+      "_ref": "ROOT-039",
+      "fullName": "Phùng Nhận",
+      "gender": "Nam",
+      "parentRef": "ROOT-036",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Chi trưởng Nhánh 1. Con trưởng của Phùng Duy Chính",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-040",
+      "fullName": "Phùng Huy Vĩ",
+      "gender": "Nam",
+      "parentRef": "ROOT-036",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Chi trưởng Nhánh 2. Con của Phùng Duy Chính — _note: trùng tên/vai trò với ROOT-024; cần xác nhận đây có phải cùng người không",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-041",
+      "fullName": "Phùng Ba",
+      "gender": "Nam",
+      "parentRef": "ROOT-036",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-042",
+      "fullName": "Phùng Khanh",
+      "gender": "Nam",
+      "parentRef": "ROOT-036",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-043",
+      "fullName": "Phùng Thanh Quý",
+      "gender": "Nam",
+      "parentRef": "ROOT-038",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Tên khác: Viễn Toan. Vợ: Phạm Huy Nhu",
+      "spouses": [
+        "Phạm Huy Nhu"
+      ]
+    },
+    {
+      "_ref": "ROOT-044",
+      "fullName": "Phùng Văn Vàng",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Con của Phùng Huy Vĩ (Huy VT)",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-045",
+      "fullName": "Phùng Văn Huần",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-046",
+      "fullName": "Phùng Thị Bình",
+      "gender": "Nữ",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-047",
+      "fullName": "Phùng Thị Quý",
+      "gender": "Nữ",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-048",
+      "fullName": "Phùng Danh Ngôn",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Tên khác: Hữu Phương. _note: trong ảnh chi nhánh 2, P. Danh Ngôn là con của Phùng Thị Bình",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-049",
+      "fullName": "Phùng Danh Ngữ",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "_note: trong ảnh chi nhánh 2, P. Danh Ngữ là con của Phùng Thị Quý",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-050",
+      "fullName": "Huỳnh",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "_note: cần xác nhận tên đầy đủ",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-051",
+      "fullName": "Ninh",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Tên khác: Thành",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-052",
+      "fullName": "Kinh",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Tên khác: Quỳnh",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-053",
+      "fullName": "Linh",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-054",
+      "fullName": "Hạnh",
+      "gender": "Nữ",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-055",
+      "fullName": "Ty",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-056",
+      "fullName": "Duy",
+      "gender": "Nam",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-057",
+      "fullName": "Võ Phổ Dung",
+      "gender": "Nữ",
+      "parentRef": "ROOT-024",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "_note: có thể là tên người con gái kết hôn vào; cần xác nhận",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-058",
+      "fullName": "Phùng Hữu Thanh",
+      "gender": "Nam",
+      "parentRef": "ROOT-045",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-059",
+      "fullName": "Kệ",
+      "gender": "Nữ",
+      "parentRef": "ROOT-057",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Con của Võ Phổ Dung",
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-060",
+      "fullName": "Dân",
+      "gender": "Nam",
+      "parentRef": "ROOT-057",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-061",
+      "fullName": "Sênh",
+      "gender": "Nam",
+      "parentRef": "ROOT-057",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-062",
+      "fullName": "Sang",
+      "gender": "Nam",
+      "parentRef": "ROOT-057",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": null,
+      "spouses": []
+    },
+    {
+      "_ref": "ROOT-063",
+      "fullName": "Hội",
+      "gender": "Nam",
+      "parentRef": "ROOT-057",
+      "birthYear": null,
+      "birthDate": null,
+      "deathYear": null,
+      "deathDate": null,
+      "bio": "Ghi chú nguồn: Hợi",
+      "spouses": []
+    }
+  ]
+}

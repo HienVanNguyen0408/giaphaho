@@ -22,6 +22,16 @@ function makeMember(overrides: Partial<Member> & { id: string; fullName: string 
     spousesCount: null,
     sonsCount: null,
     daughtersCount: null,
+    residence: null,
+    nationalId: null,
+    phone: null,
+    email: null,
+    bankAccount: null,
+    burialPlace: null,
+    fieldConfig: null,
+    spouses: [],
+    motherName: null,
+    contributions: [],
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
@@ -59,7 +69,7 @@ describe('flatToFlowGraph', () => {
     expect(edge.target).toBe('child');
   });
 
-  it('assigns correct depth levels: root at y=0, child at y=200', () => {
+  it('assigns correct depth levels: root at y=0, child below root', () => {
     const root = makeMember({ id: 'root', fullName: 'Root', parentId: null });
     const child = makeMember({ id: 'child', fullName: 'Child', parentId: 'root' });
 
@@ -69,7 +79,7 @@ describe('flatToFlowGraph', () => {
     const childNode = result.nodes.find((n) => n.id === 'child')!;
 
     expect(rootNode.position.y).toBe(0);
-    expect(childNode.position.y).toBe(200);
+    expect(childNode.position.y).toBeGreaterThan(rootNode.position.y);
   });
 
   it('generates edge id with format e-{parentId}-{childId}', () => {

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { MemberService } from '../services/member.service';
+import { MemberService, getJob } from '../services/member.service';
 import { sendSuccess, sendCreated, sendError } from '../utils/response';
 
 export const MemberController = {
@@ -44,6 +44,16 @@ export const MemberController = {
       achievements?: string[];
       parentId?: string;
       chiId?: string;
+      residence?: string;
+      nationalId?: string;
+      phone?: string;
+      email?: string;
+      bankAccount?: string;
+      burialPlace?: string;
+      fieldConfig?: Record<string, boolean>;
+      spouses?: string[];
+      motherName?: string;
+      contributions?: string[];
     };
     try {
       const member = await MemberService.create(data, req.user?.role, req.user?.chiId);
@@ -72,6 +82,16 @@ export const MemberController = {
       achievements?: string[];
       parentId?: string;
       chiId?: string;
+      residence?: string;
+      nationalId?: string;
+      phone?: string;
+      email?: string;
+      bankAccount?: string;
+      burialPlace?: string;
+      fieldConfig?: Record<string, boolean>;
+      spouses?: string[];
+      motherName?: string;
+      contributions?: string[];
     };
     const callerRole = req.user?.role ?? '';
     const callerChiId = req.user?.chiId ?? null;
@@ -97,7 +117,65 @@ export const MemberController = {
   },
 
   async recalculateStats(_req: Request, res: Response): Promise<void> {
-    await MemberService.recalculateAllStats();
-    sendSuccess(res, null, 'Đã tính lại số liệu toàn bộ gia phả');
+    const jobId = MemberService.startRecalculation();
+    sendSuccess(res, { jobId }, 'Đã bắt đầu tính lại số liệu');
+  },
+
+  async recalculateStatsEvents(req: Request, res: Response): Promise<void> {
+    const jobId = req.query['jobId'] as string | undefined;
+    if (!jobId) {
+      sendError(res, 'Thiếu jobId', 400);
+      return;
+    }
+
+    const job = getJob(jobId);
+    if (!job) {
+      sendError(res, 'Không tìm thấy job', 404);
+      return;
+    }
+
+    // SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+
+    const send = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    // Job already finished — send terminal event and close immediately
+    if (job.status === 'done') {
+      send('done', job.result);
+      res.end();
+      return;
+    }
+    if (job.status === 'error') {
+      send('error', { message: job.error });
+      res.end();
+      return;
+    }
+
+    // Subscribe to live events
+    const onProgress = (data: unknown) => send('progress', data);
+    const onDone = (data: unknown) => { send('done', data); res.end(); };
+    const onError = (data: unknown) => { send('error', data); res.end(); };
+
+    job.emitter.on('progress', onProgress);
+    job.emitter.on('done', onDone);
+    job.emitter.on('error', onError);
+
+    // Heartbeat — keeps the connection alive through proxies
+    const heartbeat = setInterval(() => {
+      if (!res.writableEnded) res.write(': heartbeat\n\n');
+    }, 15_000);
+
+    req.on('close', () => {
+      clearInterval(heartbeat);
+      job.emitter.off('progress', onProgress);
+      job.emitter.off('done', onDone);
+      job.emitter.off('error', onError);
+    });
   },
 };

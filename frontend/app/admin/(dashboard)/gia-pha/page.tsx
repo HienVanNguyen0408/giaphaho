@@ -2,8 +2,14 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { getMembersPage, deleteMember, recalculateMemberStats } from '@/lib/api';
-import { getCachedAllMembers, invalidateMembersCache } from '@/lib/memberCache';
+import { deleteMember, recalculateMemberStats, subscribeRecalculateEvents } from '@/lib/api';
+import {
+  getCachedAllMembers,
+  getPageCache,
+  isPageCacheFresh,
+  revalidatePage,
+  invalidateMembersCache,
+} from '@/lib/memberCache';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import FamilyTree from '@/components/public/gia-pha/FamilyTree';
 import LineageModal from '@/components/public/gia-pha/LineageModal';
@@ -39,6 +45,21 @@ function AvatarCell({ member }: { member: Member }) {
   );
 }
 
+function formatDayMonth(str: string | null | undefined): string {
+  if (!str) return '—';
+  const parts = str.split('/');
+  if (parts.length === 2 && parts[0] && parts[1]) {
+    return `${parts[0]}/${parts[1]}`;
+  }
+  return str;
+}
+
+function DateCell({ date, year }: { date: string | null; year: number | null }) {
+  const val = date ? formatDayMonth(date) : year ? String(year) : null;
+  if (!val) return <span className="text-stone-300">—</span>;
+  return <span className="text-stone-600 text-xs tabular-nums">{val}</span>;
+}
+
 function GenderBadge({ gender }: { gender: string | null }) {
   if (!gender) return <span className="text-stone-300">—</span>;
   return (
@@ -57,6 +78,46 @@ function GenderBadge({ gender }: { gender: string | null }) {
 
 const PAGE_SIZE = 12;
 
+const STEP_LABELS: Record<string, string> = {
+  loading: 'Đang tải danh sách thành viên...',
+  computing: 'Đang tính toán số liệu...',
+  saving: 'Đang lưu kết quả...',
+};
+
+function RecalcProgressBanner({
+  progress,
+}: {
+  progress: { step: string; processed: number; total: number };
+}) {
+  const pct = progress.total > 0 ? Math.round((progress.processed / progress.total) * 100) : 0;
+  const label = STEP_LABELS[progress.step] ?? 'Đang xử lý...';
+
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 text-sm text-amber-800">
+          <svg className="w-4 h-4 animate-spin text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <span className="font-medium">{label}</span>
+        </div>
+        <span className="text-xs font-bold text-amber-700 tabular-nums">
+          {progress.step === 'saving' && progress.total > 0
+            ? `${progress.processed} / ${progress.total}`
+            : `${pct}%`}
+        </span>
+      </div>
+      <div className="h-1.5 bg-amber-200 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-amber-500 rounded-full transition-all duration-300"
+          style={{ width: progress.step === 'loading' ? '5%' : progress.step === 'computing' ? '35%' : `${Math.max(35, pct)}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function GiaPhaAdminPage() {
   const [pagedData, setPagedData] = useState<PaginatedResponse<Member> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,9 +131,20 @@ export default function GiaPhaAdminPage() {
   const [lineageTarget, setLineageTarget] = useState<{ id: string; name: string } | null>(null);
   const [lineageMembers, setLineageMembers] = useState<Member[]>([]);
   const [lineageLoading, setLineageLoading] = useState(false);
+  const [isRevalidating, setIsRevalidating] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
+  const [recalcProgress, setRecalcProgress] = useState<{
+    step: string;
+    processed: number;
+    total: number;
+  } | null>(null);
+  const [recalcDone, setRecalcDone] = useState<{ updated: number; durationMs: number } | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const esRef = useRef<EventSource | null>(null);
+
+  // Cleanup EventSource on unmount
+  useEffect(() => () => { esRef.current?.close(); }, []);
 
   // Debounce filter input
   useEffect(() => {
@@ -84,14 +156,33 @@ export default function GiaPhaAdminPage() {
   // Reset to page 1 when filter changes
   useEffect(() => { setCurrentPage(1); }, [debouncedName]);
 
-  // Fetch paginated data (table/grid only)
+  // SWR page fetch: show stale data immediately, revalidate in background
   useEffect(() => {
     if (viewMode === 'tree') return;
-    setLoading(true);
-    getMembersPage(currentPage, PAGE_SIZE, debouncedName || undefined)
-      .then((res) => setPagedData(res.data))
+
+    const name = debouncedName || undefined;
+
+    // 1. Serve stale data instantly (no skeleton if we have anything cached)
+    const stale = getPageCache(currentPage, PAGE_SIZE, name);
+    if (stale) {
+      setPagedData(stale);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
+    // 2. Skip network hit when cache is still fresh
+    if (isPageCacheFresh(currentPage, PAGE_SIZE, name)) return;
+
+    // 3. Revalidate in background (or foreground if no stale data)
+    setIsRevalidating(true);
+    revalidatePage(currentPage, PAGE_SIZE, name)
+      .then((data) => {
+        setPagedData(data);
+        setLoading(false);
+      })
       .catch((err) => setError(err instanceof Error ? err.message : 'Lỗi tải dữ liệu'))
-      .finally(() => setLoading(false));
+      .finally(() => setIsRevalidating(false));
   }, [currentPage, debouncedName, viewMode, refreshKey]);
 
   const triggerRefresh = useCallback(() => {
@@ -126,18 +217,49 @@ export default function GiaPhaAdminPage() {
     }
   };
 
-  const handleRecalculate = async () => {
+  const handleRecalculate = useCallback(async () => {
+    if (recalculating) return;
+    // Close any previous SSE connection
+    esRef.current?.close();
+    esRef.current = null;
+
     setRecalculating(true);
+    setRecalcProgress(null);
+    setRecalcDone(null);
     setError(null);
+
+    let jobId: string;
     try {
-      await recalculateMemberStats();
-      triggerRefresh();
+      const res = await recalculateMemberStats();
+      jobId = res.data.jobId;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Tính lại thất bại');
-    } finally {
+      setError(err instanceof Error ? err.message : 'Không thể bắt đầu tính lại');
       setRecalculating(false);
+      return;
     }
-  };
+
+    const es = subscribeRecalculateEvents(jobId, {
+      onProgress: (data) => setRecalcProgress(data),
+      onDone: (data) => {
+        es.close();
+        esRef.current = null;
+        setRecalculating(false);
+        setRecalcProgress(null);
+        setRecalcDone(data);
+        triggerRefresh();
+        // Auto-clear the done toast after 5s
+        setTimeout(() => setRecalcDone(null), 5000);
+      },
+      onError: (data) => {
+        es.close();
+        esRef.current = null;
+        setRecalculating(false);
+        setRecalcProgress(null);
+        setError(data.message ?? 'Tính lại thất bại');
+      },
+    });
+    esRef.current = es;
+  }, [recalculating, triggerRefresh]);
 
   const members = pagedData?.items ?? [];
   const total = pagedData?.total ?? 0;
@@ -163,6 +285,15 @@ export default function GiaPhaAdminPage() {
             {!loading && pagedData && (
               <span className="text-sm text-stone-500">
                 <span className="font-semibold text-stone-700">{total}</span> thành viên
+              </span>
+            )}
+            {isRevalidating && !loading && (
+              <span className="flex items-center gap-1 text-xs text-stone-400">
+                <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Đang làm mới...
               </span>
             )}
           </div>
@@ -197,6 +328,29 @@ export default function GiaPhaAdminPage() {
         </div>
       </div>
 
+      {/* ── Recalculate progress banner ── */}
+      {recalculating && recalcProgress && (
+        <RecalcProgressBanner progress={recalcProgress} />
+      )}
+
+      {/* ── Recalculate done toast ── */}
+      {recalcDone && (
+        <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 text-sm">
+          <svg className="w-4 h-4 flex-shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          <span>
+            Đã tính lại xong <span className="font-semibold">{recalcDone.updated}</span> thành viên
+            {' '}trong <span className="font-semibold">{(recalcDone.durationMs / 1000).toFixed(1)}s</span>.
+          </span>
+          <button onClick={() => setRecalcDone(null)} className="ml-auto text-emerald-500 hover:text-emerald-700">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
           <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -229,6 +383,25 @@ export default function GiaPhaAdminPage() {
                 </button>
               )}
             </div>
+          )}
+          {/* Force-reload button — bypasses cache, fetches fresh from API */}
+          {viewMode !== 'tree' && (
+            <button
+              onClick={triggerRefresh}
+              disabled={loading || isRevalidating}
+              title="Tải lại từ máy chủ (bỏ qua cache)"
+              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl border border-stone-200 bg-white shadow-sm text-stone-500 hover:text-red-600 hover:border-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg
+                className={`w-4 h-4 ${isRevalidating || loading ? 'animate-spin' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
           )}
           {viewMode !== 'tree' && debouncedName && pagedData && (
             <span className="text-xs text-stone-500">{total} kết quả</span>
@@ -274,10 +447,10 @@ export default function GiaPhaAdminPage() {
               <thead>
                 <tr style={{ background: '#faf7f3', borderBottom: '1px solid #e8e0d4' }}>
                   <th className="px-5 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '35%' }}>Thành viên</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '70px' }}>Năm sinh</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '70px' }}>Năm mất</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider hidden md:table-cell">Giới tính</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider hidden lg:table-cell" style={{ width: '70px' }}>Đời thứ</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '80px' }}>Ngày sinh</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '80px' }}>Ngày mất</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider hidden sm:table-cell">Giới tính</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider hidden sm:table-cell" style={{ width: '70px' }}>Đời thứ</th>
                   <th className="px-5 py-3 text-right text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '160px' }}>Thao tác</th>
                 </tr>
               </thead>
@@ -286,10 +459,10 @@ export default function GiaPhaAdminPage() {
                   [...Array(4)].map((_, i) => (
                     <tr key={i} className="animate-pulse">
                       <td className="px-5 py-4"><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-stone-100 flex-shrink-0" /><div className="h-4 w-36 bg-stone-100 rounded" /></div></td>
-                      <td className="px-4 py-4"><div className="h-3 w-12 bg-stone-100 rounded" /></td>
-                      <td className="px-4 py-4"><div className="h-3 w-12 bg-stone-100 rounded" /></td>
-                      <td className="px-4 py-4 hidden md:table-cell"><div className="h-4 w-10 bg-stone-100 rounded-full" /></td>
-                      <td className="px-4 py-4 hidden lg:table-cell"><div className="h-3 w-8 bg-stone-100 rounded" /></td>
+                      <td className="px-4 py-4"><div className="h-3 w-14 bg-stone-100 rounded" /></td>
+                      <td className="px-4 py-4"><div className="h-3 w-14 bg-stone-100 rounded" /></td>
+                      <td className="px-4 py-4 hidden sm:table-cell"><div className="h-4 w-10 bg-stone-100 rounded-full" /></td>
+                      <td className="px-4 py-4 hidden sm:table-cell"><div className="h-3 w-8 bg-stone-100 rounded" /></td>
                       <td className="px-5 py-4"><div className="h-3 w-16 bg-stone-100 rounded ml-auto" /></td>
                     </tr>
                   ))
@@ -315,10 +488,10 @@ export default function GiaPhaAdminPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3.5 text-stone-600">{member.birthYear ?? <span className="text-stone-300">—</span>}</td>
-                      <td className="px-4 py-3.5 text-stone-600">{member.deathYear ?? <span className="text-stone-300">—</span>}</td>
-                      <td className="px-4 py-3.5 hidden md:table-cell"><GenderBadge gender={member.gender} /></td>
-                      <td className="px-4 py-3.5 hidden lg:table-cell text-xs text-stone-500 font-medium">
+                      <td className="px-4 py-3.5"><DateCell date={member.birthDate} year={member.birthYear} /></td>
+                      <td className="px-4 py-3.5"><DateCell date={member.deathDate} year={member.deathYear} /></td>
+                      <td className="px-4 py-3.5 hidden sm:table-cell"><GenderBadge gender={member.gender} /></td>
+                      <td className="px-4 py-3.5 hidden sm:table-cell text-xs text-stone-500 font-medium">
                         {member.generation ? `Đời ${member.generation}` : <span className="text-stone-300">—</span>}
                       </td>
                       <td className="px-5 py-3.5">
@@ -389,9 +562,11 @@ export default function GiaPhaAdminPage() {
                   </div>
                 </div>
                 <div className="text-xs text-stone-500 space-y-1 mb-4 flex-1">
-                  <p><span className="text-stone-400">Năm sinh:</span> {member.birthYear ?? '—'}</p>
-                  <p><span className="text-stone-400">Năm mất:</span> {member.deathYear ?? '—'}</p>
-                  {member.generation && <p><span className="text-stone-400">Đời thứ:</span> {member.generation}</p>}
+                  <p><span className="text-stone-400">Ngày sinh:</span> {member.birthDate ? formatDayMonth(member.birthDate) : member.birthYear ?? '—'}</p>
+                  <p><span className="text-stone-400">Ngày mất:</span> {member.deathDate ? formatDayMonth(member.deathDate) : member.deathYear ?? '—'}</p>
+                  {member.generation ? (
+                    <p><span className="text-stone-400">Đời thứ:</span> <span className="font-semibold text-stone-700">{member.generation}</span></p>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-1.5 pt-3 border-t border-stone-100 mt-auto">
                   <button
@@ -425,7 +600,7 @@ export default function GiaPhaAdminPage() {
             </p>
           </div>
           <div className="flex-1 relative">
-            <FamilyTree />
+            <FamilyTree refreshKey={refreshKey} />
           </div>
         </div>
       )}
