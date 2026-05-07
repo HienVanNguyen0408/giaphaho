@@ -94,3 +94,9 @@ Khi xem chi tiết của thành viên đó trong cây trực hệ cần có acti
 
 Lamf đi rồi seed dữ liệu 2 chi nhánh đó vào ddatabase cho tôi, nối tiếp tên chi Trưởng đã có sẵn trước đó rồi cho tôi
 
+
+
+Sưa rlaji layout dọc , admin dọc, bố cục của layout cũng như trang chủ
+
+
+Chỗ này tính toán được

@@ -10,81 +10,168 @@ function formatDate(dateStr: string) {
   });
 }
 
-export default function TinNoiBat({ news }: { news: NewsListItem[] }) {
-  if (news.length === 0) {
-    return (
-      <section className="py-12 px-4 max-w-6xl mx-auto" aria-label="Tin nổi bật">
-        <div className="flex items-center gap-3 mb-6">
-          <svg className="w-5 h-5 text-amber-700 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-          <path fillRule="evenodd" d="M10.293 2.293a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L13 6.414V14a1 1 0 11-2 0V6.414L9.707 7.707a1 1 0 01-1.414-1.414l2-2z" clipRule="evenodd" />
-          <path d="M5 10a1 1 0 011-1h2a1 1 0 110 2H6a1 1 0 01-1-1zm7 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" />
-        </svg>
-          <h2 className="text-2xl font-bold text-stone-800">Tin Nổi Bật</h2>
-          <span className="flex-1 h-px bg-amber-200" aria-hidden="true" />
-        </div>
-        <div className="bg-stone-100 border border-stone-200 rounded-xl p-10 text-center">
-          <p className="text-stone-500 text-sm">Chưa có tin nổi bật.</p>
-        </div>
-      </section>
-    );
-  }
-
-  const featured = news[0];
-
+function DealCard({ item }: { item: NewsListItem }) {
   return (
-    <section className="py-12 px-4 max-w-6xl mx-auto" aria-label="Tin nổi bật">
-      <div className="flex items-center gap-3 mb-6">
-        <svg className="w-5 h-5 text-amber-700 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-          <path fillRule="evenodd" d="M10.293 2.293a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L13 6.414V14a1 1 0 11-2 0V6.414L9.707 7.707a1 1 0 01-1.414-1.414l2-2z" clipRule="evenodd" />
-          <path d="M5 10a1 1 0 011-1h2a1 1 0 110 2H6a1 1 0 01-1-1zm7 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" />
-        </svg>
-        <h2 className="text-2xl font-bold text-stone-800">Tin Nổi Bật</h2>
-        <span className="flex-1 h-px bg-amber-200" aria-hidden="true" />
+    <Link
+      href={`/tin-tuc/${item.slug}`}
+      className="deal-card group flex flex-col overflow-hidden rounded-xl"
+      style={{
+        background: 'var(--t-surface)',
+        border: '1px solid var(--t-border)',
+        boxShadow: '0 1px 4px -1px rgba(0,0,0,0.08)',
+      }}
+    >
+      {/* Thumbnail */}
+      <div className="relative overflow-hidden bg-stone-100 aspect-[16/9]">
+        {item.thumbnail ? (
+          <Image
+            src={item.thumbnail}
+            alt={item.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-red-900 via-red-800 to-amber-800 flex items-center justify-center">
+            <span className="text-amber-400/30 text-7xl select-none" aria-hidden="true">
+              鳳
+            </span>
+          </div>
+        )}
+
+        {/* Pinned badge — VNA-style price badge */}
+        <div
+          className="absolute top-3 left-3 px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wider"
+          style={{
+            background: 'var(--t-nav-bg)',
+            color: 'var(--t-gold)',
+          }}
+        >
+          Tin nổi bật
+        </div>
       </div>
 
-      <Link
-        href={`/tin-tuc/${featured.slug}`}
-        className="group block overflow-hidden rounded-2xl bg-white shadow-md shadow-stone-200 border border-stone-100 hover:shadow-lg hover:shadow-amber-100/60 transition-shadow duration-300"
-      >
-        <div className="md:flex">
-          {/* Thumbnail */}
-          <div className="md:w-1/2 relative overflow-hidden bg-stone-100 min-h-[220px] md:min-h-[280px]">
-            {featured.thumbnail ? (
-              <Image
-                src={featured.thumbnail}
-                alt={featured.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                sizes="(max-width: 768px) 100vw, 50vw"
+      {/* Content */}
+      <div className="flex flex-col flex-1 p-4">
+        <p
+          className="text-[11px] font-medium uppercase tracking-wider mb-2"
+          style={{ color: 'var(--t-text-3)' }}
+        >
+          {formatDate(item.publishedAt)}
+        </p>
+        <h3
+          className="font-semibold text-sm sm:text-base leading-snug flex-1 mb-3 line-clamp-2 transition-colors duration-150 group-hover:text-red-800"
+          style={{ color: 'var(--t-text)' }}
+        >
+          {item.title}
+        </h3>
+        <div className="flex items-center justify-between">
+          <span
+            className="inline-flex items-center gap-1.5 text-xs font-semibold transition-all group-hover:gap-2.5"
+            style={{ color: 'var(--t-nav-bg)' }}
+          >
+            Đọc tiếp
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3.5 w-3.5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clipRule="evenodd"
               />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-red-900 via-red-800 to-amber-800 flex items-center justify-center">
-                <span className="text-amber-400 text-7xl select-none opacity-40" aria-hidden="true">鳳</span>
-              </div>
-            )}
-            {/* Pin badge */}
-            <span className="absolute top-3 left-3 bg-amber-500 text-red-950 text-xs font-semibold px-2.5 py-1 rounded-full shadow">
-              Tin nổi bật
-            </span>
-          </div>
-
-          {/* Content */}
-          <div className="md:w-1/2 p-6 md:p-8 flex flex-col justify-center">
-            <p className="text-amber-700 text-xs font-medium uppercase tracking-wider mb-3">
-              {formatDate(featured.publishedAt)}
-            </p>
-            <h3 className="text-stone-900 text-xl md:text-2xl font-bold leading-snug mb-4 group-hover:text-red-800 transition-colors">
-              {featured.title}
-            </h3>
-            <span className="inline-flex items-center gap-1.5 text-sm text-amber-700 font-medium group-hover:gap-2.5 transition-all">
-              Đọc tiếp
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-              </svg>
-            </span>
-          </div>
+            </svg>
+          </span>
         </div>
-      </Link>
+      </div>
+    </Link>
+  );
+}
+
+export default function TinNoiBat({ news }: { news: NewsListItem[] }) {
+  if (news.length === 0) return null;
+
+  const cardsToShow = news.slice(0, 3);
+
+  return (
+    <section
+      className="py-12 sm:py-16"
+      style={{ background: 'var(--t-bg)' }}
+      aria-label="Tin nổi bật"
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section header — VNA "Ưu đãi nổi bật" style */}
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <div
+              className="w-8 h-1 rounded-full mb-3"
+              style={{ background: 'var(--t-nav-bg)' }}
+              aria-hidden="true"
+            />
+            <h2
+              className="text-2xl sm:text-3xl font-bold"
+              style={{ color: 'var(--t-text)' }}
+            >
+              Tin Nổi Bật
+            </h2>
+          </div>
+          <Link
+            href="/tin-tuc"
+            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold transition-all duration-150 pb-1 border-b-2"
+            style={{
+              color: 'var(--t-nav-bg)',
+              borderBottomColor: 'var(--t-gold)',
+            }}
+          >
+            Xem tất cả
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Link>
+        </div>
+
+        {/* Deal cards grid — VNA horizontal deals style */}
+        <div
+          className={`grid gap-5 ${
+            cardsToShow.length === 1
+              ? 'grid-cols-1 max-w-xl'
+              : cardsToShow.length === 2
+              ? 'grid-cols-1 sm:grid-cols-2'
+              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+          }`}
+        >
+          {cardsToShow.map((item) => (
+            <DealCard key={item.id} item={item} />
+          ))}
+        </div>
+
+        {/* Mobile "Xem tất cả" */}
+        <div className="mt-7 text-center sm:hidden">
+          <Link
+            href="/tin-tuc"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-lg transition-all"
+            style={{
+              border: '1.5px solid var(--t-nav-bg)',
+              color: 'var(--t-nav-bg)',
+            }}
+          >
+            Xem tất cả tin nổi bật
+          </Link>
+        </div>
+      </div>
     </section>
   );
 }
