@@ -1,0 +1,336 @@
+{
+  "family": "Họ Phùng - Bát Tràng",
+  "version": "draft-1",
+  "note": "Một số dữ liệu được suy luận từ ảnh và có thể chưa chính xác hoàn toàn.",
+  "root": {
+    "name": "Phùng Nhã Lương",
+    "birth_day_month": "15/7",
+    "spouse": {
+      "name": "Lê Thị Hằng Nhất",
+      "alias": "Từ Huệ",
+      "birth_day_month": "5/10"
+    },
+    "children": [
+      {
+        "name": "Phùng Mẫn Huệ",
+        "alias": "Huệ Mẫn",
+        "birth_day_month": "15/3",
+        "spouse": {
+          "name": "Nguyễn Thị Ý Đức",
+          "birth_day_month": "5/4"
+        },
+        "children": [
+          {
+            "name": "Phùng Phúc Điền",
+            "birth_day_month": "5/5",
+            "spouse": {
+              "name": "Hoàng Trinh Tuyết",
+              "birth_day_month": "19/6"
+            },
+            "children": [
+              {
+                "name": "Phùng Phúc Ninh",
+                "birth_day_month": "29/4",
+                "spouse": {
+                  "name": "Nguyễn Tử Huy",
+                  "birth_day_month": "27/11"
+                },
+                "children": [
+                  {
+                    "name": "Phùng Châu Lương"
+                  },
+                  {
+                    "name": "Phùng Thúc Thịnh"
+                  },
+                  {
+                    "name": "Phùng Nhã Trung",
+                    "spouse": {
+                      "name": "Đào Minh Lễ / Lê Thục Chi",
+                      "note": "Chưa xác minh rõ từ ảnh"
+                    },
+                    "children": [
+                      {
+                        "name": "Phùng Đức Toàn",
+                        "spouse": {
+                          "name": "VQ Tử Quang",
+                          "birth_day_month": "1/3"
+                        },
+                        "children": [
+                          {
+                            "name": "Phùng Đức Đức",
+                            "spouse": {
+                              "name": "Hà Tất Cần",
+                              "birth_day_month": "4/6"
+                            },
+                            "children": [
+                              {
+                                "name": "Phùng Phú Thọ"
+                              },
+                              {
+                                "name": "Phùng Hà Đen"
+                              },
+                              {
+                                "name": "Phùng Bá Kỷ",
+                                "spouse": {
+                                  "name": "P. Phùng Xuân"
+                                },
+                                "children": [
+                                  {
+                                    "name": "T. Khoan Cung"
+                                  },
+                                  {
+                                    "name": "Phùng Thị Mùi"
+                                  },
+                                  {
+                                    "name": "Phùng Thị Tâm"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Phùng Đức Chính",
+                            "spouse": {
+                              "name": "Lê Tỷ"
+                            }
+                          },
+                          {
+                            "name": "Phùng Đức Hưng",
+                            "spouse": {
+                              "name": "PV Khung"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "name": "Phùng Đức Ang"
+                      },
+                      {
+                        "name": "Phùng Thị Quyền"
+                      },
+                      {
+                        "name": "Phùng Đột T"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Phùng Trần Trí"
+                  },
+                  {
+                    "name": "Phùng Ác Công"
+                  },
+                  {
+                    "name": "Phùng Đức Khoan"
+                  },
+                  {
+                    "name": "Phùng Thị Mỹ"
+                  },
+                  {
+                    "name": "Phùng Tấn",
+                    "children": [
+                      {
+                        "name": "Phùng Duy Chính",
+                        "birth_day_month": "3/5",
+                        "spouse": {
+                          "name": "Nguyễn Cẩn Mẫn"
+                        },
+                        "children": [
+                          {
+                            "name": "Phùng Nhân",
+                            "branch": "Chi nhánh 1",
+                            "children": [
+                              {
+                                "name": "Phùng Đức"
+                              },
+                              {
+                                "name": "Phùng Thiêm",
+                                "children": [
+                                  {
+                                    "name": "Phùng Liêm",
+                                    "children": [
+                                      {
+                                        "name": "P. Huynh",
+                                        "alias": "Hiếu"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "name": "Phùng Tiến",
+                                    "children": [
+                                      {
+                                        "name": "P. Đệ",
+                                        "alias": "Đệ"
+                                      },
+                                      {
+                                        "name": "P. Tịnh"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "name": "Phùng Nghiên",
+                                    "children": [
+                                      {
+                                        "name": "P. Khoa",
+                                        "children": [
+                                          {
+                                            "name": "Ngọc"
+                                          },
+                                          {
+                                            "name": "Ngà"
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "name": "P. Châu"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "Phùng Tư",
+                                "children": [
+                                  {
+                                    "name": "Phùng Thái",
+                                    "children": [
+                                      {
+                                        "name": "P. Yến",
+                                        "alias": "An"
+                                      },
+                                      {
+                                        "name": "P. Bầu"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "name": "Phùng Tuất",
+                                    "children": [
+                                      {
+                                        "name": "P. Tang"
+                                      },
+                                      {
+                                        "name": "P. Bông"
+                                      },
+                                      {
+                                        "name": "P. Nở"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "name": "Phùng Viễn",
+                                    "children": [
+                                      {
+                                        "name": "P. Ân"
+                                      },
+                                      {
+                                        "name": "P. Ước"
+                                      },
+                                      {
+                                        "name": "Kim Chung"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Phùng Huy VT",
+                            "birth_day_month": "25/2",
+                            "branch": "Chi nhánh 2",
+                            "spouse": {
+                              "name": "Lê Thục Huệ",
+                              "birth_day_month": "24/12"
+                            },
+                            "children": [
+                              {
+                                "name": "Phùng V Vàng"
+                              },
+                              {
+                                "name": "Phùng V Huấn",
+                                "children": [
+                                  {
+                                    "name": "P. Hữu Thanh"
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "Phùng Thị Bình"
+                              },
+                              {
+                                "name": "Phùng Thị Quy"
+                              },
+                              {
+                                "name": "P. Danh Ngôn",
+                                "alias": "Hữu Phương"
+                              },
+                              {
+                                "name": "P. Danh Ngữ"
+                              },
+                              {
+                                "name": "Huỳnh"
+                              },
+                              {
+                                "name": "Ninh",
+                                "alias": "Thành"
+                              },
+                              {
+                                "name": "Kinh",
+                                "alias": "Quỳnh"
+                              },
+                              {
+                                "name": "Linh"
+                              },
+                              {
+                                "name": "Hạnh"
+                              },
+                              {
+                                "name": "Ty"
+                              },
+                              {
+                                "name": "Duy"
+                              },
+                              {
+                                "name": "Võ Phổ Dung",
+                                "children": [
+                                  {
+                                    "name": "Kệ"
+                                  },
+                                  {
+                                    "name": "Dân"
+                                  },
+                                  {
+                                    "name": "Senh"
+                                  },
+                                  {
+                                    "name": "Sang"
+                                  },
+                                  {
+                                    "name": "Hợi"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Phùng B"
+                          },
+                          {
+                            "name": "Phùng Kham"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "Phùng Sương Tiết"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
