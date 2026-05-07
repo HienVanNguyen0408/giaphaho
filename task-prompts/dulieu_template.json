@@ -1,0 +1,36 @@
+{
+  "family": "Họ Phùng - Bát Tràng",
+  "version": "draft-1",
+  "note": "",
+  "root": {
+    "name": "",
+    "alias": "",
+    "birth_day_month": "",
+    "death_day_month": "",
+    "spouses": [
+      {
+        "name": "",
+        "alias": "",
+        "birth_day_month": "",
+        "death_day_month": ""
+      }
+    ],
+    "children": [
+      {
+        "name": "",
+        "alias": "",
+        "birth_day_month": "",
+        "death_day_month": "",
+        "spouses": [
+          {
+            "name": "",
+            "alias": "",
+            "birth_day_month": "",
+            "death_day_month": ""
+          }
+        ],
+        "children": []
+      }
+    ]
+  }
+}

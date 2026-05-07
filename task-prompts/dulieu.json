@@ -1,0 +1,538 @@
+{
+  "family": "Họ Phùng - Bát Tràng",
+  "version": "draft-2",
+  "note": "Một số dữ liệu được suy luận từ ảnh và có thể chưa chính xác hoàn toàn.",
+  "root": {
+    "name": "Phùng Nhã Lượng",
+    "birth_day_month": "",
+    "death_day_month": "15/7",
+    "spouses": [
+      {
+        "name": "Lê Thị Hằng Nhất",
+        "alias": "Từ Huệ",
+        "birth_day_month": "",
+        "death_day_month": "5/10"
+      }
+    ],
+    "children": [
+      {
+        "name": "Phùng Mẫn Huệ",
+        "alias": "Huệ Mẫn",
+        "birth_day_month": "",
+        "death_day_month": "15/3",
+        "spouses": [
+          {
+            "name": "Nguyễn Thị Ý Đức",
+            "birth_day_month": "",
+            "death_day_month": "5/4"
+          }
+        ],
+        "children": [
+          {
+            "name": "Phùng Phúc Điền",
+            "birth_day_month": "",
+            "death_day_month": "5/5",
+            "spouses": [
+              {
+                "name": "Hoàng Trinh Tuyết",
+                "birth_day_month": "",
+                "death_day_month": "19/6"
+              }
+            ],
+            "children": [
+              {
+                "name": "Phùng Phúc Ninh",
+                "birth_day_month": "",
+                "death_day_month": "29/4",
+                "spouses": [
+                  {
+                    "name": "Nguyễn Từ Huy",
+                    "birth_day_month": "",
+                    "death_day_month": "27/11"
+                  }
+                ],
+                "children": [
+                  {
+                    "name": "Phùng Chân Lương",
+                    "birth_day_month": "",
+                    "death_day_month": ""
+                  },
+                  {
+                    "name": "Phùng Phúc Thiện",
+                    "birth_day_month": "",
+                    "death_day_month": ""
+                  },
+                  {
+                    "name": "Phùng Phúc Trung",
+                    "birth_day_month": "",
+                    "death_day_month": "07/3",
+                    "spouses": [
+                      {
+                        "name": "Lê Thục Chất",
+                        "birth_day_month": "",
+                        "death_day_month": "28/08"
+                      }
+                    ],
+                    "children": [
+                      {
+                        "name": "Phùng Thị Già",
+                        "birth_day_month": "",
+                        "death_day_month": "",
+                        "gender": "female"
+                      },
+                      {
+                        "name": "Phùng Phúc Toàn",
+                        "birth_day_month": "",
+                        "death_day_month": "11/6",
+                        "spouses": [
+                          {
+                            "name": "Vũ Từ Quang",
+                            "birth_day_month": "",
+                            "death_day_month": "14/3"
+                          }
+                        ],
+                        "children": [
+                          {
+                            "name": "Phùng Phúc Diên",
+                            "birth_day_month": "",
+                            "death_day_month": "16/4",
+                            "spouses": [
+                              {
+                                "name": "Hà Từ Ân",
+                                "birth_day_month": ""
+                              }
+                            ],
+                            "children": [
+                              {
+                                "name": "Phùng Phúc Thọ",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Phùng Hà Diễn",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Phùng Đắc Ý",
+                                "birth_day_month": "",
+                                "death_day_month": "23/1",
+                                "spouses": [
+                                  {
+                                    "name": "P. Phương Xuân",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  },
+                                  {
+                                    "name": "T. Khoan Cung",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  }
+                                ],
+                                "children": [
+                                  {
+                                    "name": "Phùng Tuấn",
+                                    "birth_day_month": "",
+                                    "death_day_month": "29/4",
+                                    "spouses": [
+                                      {
+                                        "name": "Đỗ  Trinh Hậu",
+                                        "birth_day_month": "",
+                                        "death_day_month": "5/11"
+                                      }
+                                    ],
+                                    "children": [
+                                      {
+                                        "name": "Phùng Duy Chính",
+                                        "birth_day_month": "",
+                                        "death_day_month": "3/5",
+                                        "spouses": [
+                                          {
+                                            "name": "Ng. Cần Mẫn",
+                                            "birth_day_month": "",
+                                            "death_day_month": ""
+                                          }
+                                        ],
+                                        "children": [
+                                          {
+                                            "name": "Phùng Nhận",
+                                            "role": "chi trưởng",
+                                            "birth_day_month": "",
+                                            "death_day_month": ""
+                                          },
+                                          {
+                                            "name": "Phùng Huy Vĩ",
+                                            "birth_day_month": "",
+                                            "death_day_month": ""
+                                          },
+                                          {
+                                            "name": "Phùng Ba",
+                                            "birth_day_month": "",
+                                            "death_day_month": ""
+                                          },
+                                          {
+                                            "name": "Phùng Khanh",
+                                            "birth_day_month": "",
+                                            "death_day_month": ""
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "name": "Phùng Sương Tiết",
+                                        "birth_day_month": "",
+                                        "death_day_month": ""
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "name": "Phùng Huy Lan",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "Phùng Thị Mùi",
+                                "birth_day_month": "",
+                                "death_day_month": "",
+                                "gender": "female"
+                              },
+                              {
+                                "name": "Phùng Thị Tam",
+                                "birth_day_month": "",
+                                "death_day_month": "",
+                                "gender": "female"
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Phùng Phúc Chính",
+                            "birth_day_month": "",
+                            "death_day_month": "",
+                            "spouses": [
+                              {
+                                "name": "Lê Từ Ý",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Phùng Phúc Hưng",
+                            "birth_day_month": "",
+                            "death_day_month": "",
+                            "spouses": [
+                              {
+                                "name": "Phạm Từ Khang",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "Phùng Đắc Áng",
+                        "birth_day_month": "",
+                        "death_day_month": ""
+                      },
+                      {
+                        "name": "Phùng Thị Quyền",
+                        "birth_day_month": "",
+                        "death_day_month": "",
+                        "gender": "female"
+                      },
+                      {
+                        "name": "Phùng Đội Tự",
+                        "birth_day_month": "",
+                        "death_day_month": ""
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Phùng Thuần Trí",
+                    "birth_day_month": "",
+                    "death_day_month": ""
+                  },
+                  {
+                    "name": "Phùng An Công",
+                    "birth_day_month": "",
+                    "death_day_month": ""
+                  },
+                  {
+                    "name": "Phùng Đức Tuấn",
+                    "alias": "Tích Phúc",
+                    "birth_day_month": "",
+                    "death_day_month": "19/06",
+                    "spouses": [
+                      {
+                        "name": "Nguyễn Thục Mỹ",
+                        "birth_day_month": "",
+                        "death_day_month": ""
+                      },
+                      {
+                        "name": "Ng. Uyển Khanh",
+                        "birth_day_month": "",
+                        "death_day_month": ""
+                      }
+                    ],
+                    "children": [
+                      {
+                        "name": "Phùng Huân Thức",
+                        "birth_day_month": "",
+                        "death_day_month": "12/3",
+                        "spouses": [
+                          {
+                            "name": "Ng. Trinh Khiết",
+                            "birth_day_month": "",
+                            "death_day_month": ""
+                          }
+                        ],
+                        "children": [
+                          {
+                            "name": "Phùng Phúc Ân",
+                            "birth_day_month": "",
+                            "death_day_month": "",
+                            "spouses": [
+                              {
+                                "name": "Ng. Từ Đức",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              }
+                            ],
+                            "children": [
+                              {
+                                "name": "Phùng Đức Thuận",
+                                "birth_day_month": "",
+                                "death_day_month": "",
+                                "spouses": [
+                                  {
+                                    "name": "Trần Từ Thực",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  }
+                                ],
+                                "children": [
+                                  {
+                                    "name": "Phùng Đức Thi",
+                                    "birth_day_month": "",
+                                    "death_day_month": "",
+                                    "spouses": [
+                                      {
+                                        "name": "Phạm Từ Triết",
+                                        "birth_day_month": "",
+                                        "death_day_month": ""
+                                      },
+                                      {
+                                        "name": "Phạm Từ Khiết",
+                                        "birth_day_month": "",
+                                        "death_day_month": ""
+                                      }
+                                    ],
+                                    "children": [
+                                      {
+                                        "name": "Phùng Quang Đạt",
+                                        "birth_day_month": "",
+                                        "death_day_month": "",
+                                        "spouses": [
+                                          {
+                                            "name": "Ng. Từ Thanh",
+                                            "birth_day_month": "",
+                                            "death_day_month": ""
+                                          },
+                                          {
+                                            "name": "Trần Từ Vân",
+                                            "birth_day_month": "",
+                                            "death_day_month": ""
+                                          }
+                                        ],
+                                        "children": [
+                                          {
+                                            "name": "Phùng Thanh Quý",
+                                            "birth_day_month": "",
+                                            "death_day_month": "",
+                                            "alias": "Viễn Toan",
+                                            "spouses": [
+                                              {
+                                                "name": "Phạm Huy Nhu",
+                                                "birth_day_month": "",
+                                                "death_day_month": ""
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Phùng Huy VT",
+                            "birth_day_month": "",
+                            "death_day_month": "25/2",
+                            "branch": "Chi nhánh 2",
+                            "spouses": [
+                              {
+                                "name": "Lê Thục Huệ",
+                                "birth_day_month": "",
+                                "death_day_month": "24/12"
+                              }
+                            ],
+                            "children": [
+                              {
+                                "name": "Phùng V Vàng",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Phùng V Huấn",
+                                "birth_day_month": "",
+                                "death_day_month": "",
+                                "children": [
+                                  {
+                                    "name": "P. Hữu Thanh",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "Phùng Thị Bình",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Phùng Thị Quy",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "P. Danh Ngôn",
+                                "alias": "Hữu Phương",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "P. Danh Ngữ",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Huỳnh",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Ninh",
+                                "alias": "Thành",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Kinh",
+                                "alias": "Quỳnh",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Linh",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Hạnh",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Ty",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Duy",
+                                "birth_day_month": "",
+                                "death_day_month": ""
+                              },
+                              {
+                                "name": "Võ Phổ Dung",
+                                "birth_day_month": "",
+                                "death_day_month": "",
+                                "children": [
+                                  {
+                                    "name": "Kệ",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  },
+                                  {
+                                    "name": "Dân",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  },
+                                  {
+                                    "name": "Senh",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  },
+                                  {
+                                    "name": "Sang",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  },
+                                  {
+                                    "name": "Hợi",
+                                    "birth_day_month": "",
+                                    "death_day_month": ""
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Phùng B",
+                            "birth_day_month": "",
+                            "death_day_month": ""
+                          },
+                          {
+                            "name": "Phùng Kham",
+                            "birth_day_month": "",
+                            "death_day_month": ""
+                          }
+                        ]
+                      },
+                      {
+                        "name": "Phùng Đức Khoan",
+                        "birth_day_month": "",
+                        "death_day_month": ""
+                      },
+                      {
+                        "name": "Phùng Hy Điền",
+                        "birth_day_month": "",
+                        "death_day_month": "",
+                        "spouses": [
+                          {
+                            "name": "Cao Từ Thịnh",
+                            "birth_day_month": "",
+                            "death_day_month": ""
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Phùng Thị Mai",
+                    "birth_day_month": "",
+                    "death_day_month": "",
+                    "gender": "female"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

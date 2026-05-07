@@ -9,24 +9,47 @@ export interface User {
 }
 
 // ====== MEMBER ======
+export type FieldConfig = Partial<Record<'birthDate' | 'residence' | 'nationalId' | 'phone' | 'email' | 'bankAccount', boolean>>;
+
 export interface Member {
   id: string;
   fullName: string;
   avatar: string | null;
   birthYear: number | null;
+  birthDate: string | null;
   deathYear: number | null;
+  deathDate: string | null;
   gender: string | null;
   bio: string | null;
   achievements: string[];
   parentId: string | null;
   chiId: string | null;
+  descendantsCount: number | null;
+  generation: number | null;
+  siblingsCount: number | null;
+  spousesCount: number | null;
+  sonsCount: number | null;
+  daughtersCount: number | null;
+  // Extended profile
+  residence: string | null;
+  nationalId: string | null;
+  phone: string | null;
+  email: string | null;
+  bankAccount: string | null;
+  burialPlace: string | null;
+  fieldConfig: FieldConfig | null;
+  // Family relations
+  spouses: string[];
+  motherName: string | null;
+  // Contributions (separate from achievements)
+  contributions: string[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface MemberDetail extends Member {
   parent: Pick<Member, 'id' | 'fullName'> | null;
-  children: Pick<Member, 'id' | 'fullName'>[];
+  children: Pick<Member, 'id' | 'fullName' | 'gender' | 'motherName'>[];
 }
 
 // ====== NEWS ======

@@ -27,6 +27,14 @@ export const SectionService = {
     await prisma.section.delete({ where: { id } });
   },
 
+  async reorder(orderedIds: string[]): Promise<void> {
+    await prisma.$transaction(
+      orderedIds.map((id, index) =>
+        prisma.section.update({ where: { id }, data: { order: index } }),
+      ),
+    );
+  },
+
   async toggle(id: string): Promise<{ isActive: boolean }> {
     const section = await prisma.section.findUnique({ where: { id } });
     if (!section) {
