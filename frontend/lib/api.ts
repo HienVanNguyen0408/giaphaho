@@ -13,6 +13,7 @@ import type {
   FooterConfig,
   ActivityLog,
   DashboardStats,
+  AnalyticsSummary,
   SearchResults,
 } from '@/types';
 
@@ -224,6 +225,27 @@ export function subscribeRecalculateEvents(
 
 // ====== DASHBOARD ======
 export const getDashboard = () => apiFetch<DashboardStats>('/api/dashboard');
+
+// ====== ANALYTICS ======
+export const getAnalyticsSummary = (days = 7) =>
+  apiFetch<AnalyticsSummary>(`/api/analytics/summary?days=${days}`);
+
+export const trackAnalyticsEvent = (data: {
+  eventType?: string;
+  path: string;
+  title?: string;
+  targetType?: string;
+  targetId?: string;
+  visitorId?: string;
+  referrer?: string;
+}) =>
+  fetch(`${BASE_URL}/api/analytics`, {
+    method: 'POST',
+    credentials: 'include',
+    keepalive: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  }).catch(() => undefined);
 
 // ====== SEARCH ======
 export const search = (q: string) =>

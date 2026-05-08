@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getVideoList } from '@/lib/api';
+import { trackPublicEvent } from '@/components/public/AnalyticsTracker';
 import type { Video } from '@/types';
 
 const PAGE_SIZE = 9;
@@ -21,6 +22,16 @@ function extractYouTubeId(url: string): string | null {
 
 function VideoCard({ video }: { video: Video }) {
   const videoId = extractYouTubeId(video.youtubeUrl);
+
+  useEffect(() => {
+    trackPublicEvent('video_view', {
+      path: '/video',
+      title: video.title,
+      targetType: 'video',
+      targetId: video.id,
+    });
+  }, [video.id, video.title]);
+
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-stone-100 flex flex-col">
       <div className="relative w-full aspect-video bg-stone-900">

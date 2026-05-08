@@ -150,6 +150,32 @@ export interface DashboardStats {
   recentLogs: ActivityLog[];
 }
 
+// ====== ANALYTICS ======
+export interface AnalyticsEvent {
+  id: string;
+  eventType: string;
+  path: string;
+  title: string | null;
+  targetType: string | null;
+  targetId: string | null;
+  visitorId: string | null;
+  referrer: string | null;
+  userAgent: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+}
+
+export interface AnalyticsSummary {
+  totalViews: number;
+  todayViews: number;
+  newsViews: number;
+  videoViews: number;
+  uniqueVisitors: number;
+  topPages: { path: string; views: number }[];
+  dailyViews: { date: string; views: number }[];
+  recentEvents: AnalyticsEvent[];
+}
+
 export interface SearchResults {
   members: Pick<Member, 'id' | 'fullName' | 'avatar'>[];
   news: Pick<NewsListItem, 'id' | 'title' | 'slug' | 'thumbnail'>[];

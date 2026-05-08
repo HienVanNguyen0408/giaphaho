@@ -128,3 +128,23 @@ model ActivityLog {
   detail    String?
   createdAt DateTime @default(now())
 }
+
+// ====== PUBLIC ANALYTICS ======
+model AnalyticsEvent {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  eventType   String
+  path        String
+  title       String?
+  targetType  String?
+  targetId    String?
+  visitorId   String?
+  referrer    String?
+  userAgent   String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([eventType])
+  @@index([path])
+  @@index([visitorId])
+}

@@ -47,6 +47,14 @@ function PlayIcon() {
   );
 }
 
+function AnalyticsIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 19V5m0 14h16M8 16v-5m4 5V8m4 8v-7m4 7v-3" />
+    </svg>
+  );
+}
+
 function LayoutIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
@@ -99,6 +107,7 @@ const navItems: NavItem[] = [
   { href: '/admin/gia-pha', label: 'Gia phả', icon: <TreeIcon /> },
   { href: '/admin/tin-tuc', label: 'Tin tức', icon: <NewsIcon /> },
   { href: '/admin/video', label: 'Video', icon: <PlayIcon /> },
+  { href: '/admin/analytics', label: 'Giám sát truy cập', icon: <AnalyticsIcon /> },
   { href: '/admin/section', label: 'Mục trang chủ', icon: <LayoutIcon /> },
   { href: '/admin/footer', label: 'Footer', icon: <FooterIcon /> },
   // { href: '/admin/activity-log', label: 'Nhật ký hoạt động', icon: <LogIcon />, superAdminOnly: true },

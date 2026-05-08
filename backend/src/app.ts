@@ -21,6 +21,7 @@ import activityLogRouter from './routes/activity-log.route';
 import searchRouter from './routes/search.route';
 import uploadRouter from './routes/upload.route';
 import dashboardRouter from './routes/dashboard.route';
+import analyticsRouter from './routes/analytics.route';
 import { errorHandler } from './middlewares/error.middleware';
 import { activityLogger } from './middlewares/logger.middleware';
 
@@ -66,6 +67,7 @@ app.use('/api/activity-logs', activityLogRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/analytics', analyticsRouter);
 
 app.use(errorHandler);
 
