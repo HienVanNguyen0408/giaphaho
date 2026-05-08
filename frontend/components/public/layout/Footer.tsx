@@ -21,20 +21,8 @@ export default async function Footer() {
   return (
     <footer
       className="mt-auto"
-      style={{
-        background: 'var(--t-footer-bg)',
-        color: 'var(--t-footer-text)',
-        transition: 'background 0.3s ease',
-      }}
+      style={{ background: 'var(--t-footer-bg)', borderTop: '2px solid var(--t-footer-accent)' }}
     >
-      {/* Top decorative line */}
-      <div
-        style={{
-          height: '2px',
-          background: 'linear-gradient(90deg, transparent, var(--t-footer-accent), transparent)',
-        }}
-      />
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
 
@@ -47,20 +35,14 @@ export default async function Footer() {
               >
                 <span
                   className="font-bold text-base leading-none select-none"
-                  style={{
-                    color: 'var(--t-footer-bg)',
-                    fontFamily: 'var(--t-display-font)',
-                  }}
+                  style={{ color: 'var(--t-nav-active-text)', fontFamily: 'var(--t-display-font)' }}
                 >
                   鳳
                 </span>
               </div>
               <span
                 className="font-semibold text-lg"
-                style={{
-                  color: 'var(--t-footer-accent)',
-                  fontFamily: 'var(--t-display-font)',
-                }}
+                style={{ color: 'var(--t-footer-accent)', fontFamily: 'var(--t-display-font)' }}
               >
                 Họ Phùng Bát Tràng
               </span>
@@ -73,8 +55,8 @@ export default async function Footer() {
           {/* Nav */}
           <div>
             <h3
-              className="text-sm uppercase tracking-widest mb-4"
-              style={{ color: 'var(--t-footer-accent)', fontWeight: 600 }}
+              className="text-xs uppercase tracking-widest mb-4 font-semibold"
+              style={{ color: 'var(--t-footer-accent)' }}
             >
               Điều hướng
             </h3>
@@ -98,8 +80,8 @@ export default async function Footer() {
           {/* Contact */}
           <div>
             <h3
-              className="text-sm uppercase tracking-widest mb-4"
-              style={{ color: 'var(--t-footer-accent)', fontWeight: 600 }}
+              className="text-xs uppercase tracking-widest mb-4 font-semibold"
+              style={{ color: 'var(--t-footer-accent)' }}
             >
               Liên hệ
             </h3>
@@ -119,13 +101,11 @@ export default async function Footer() {
         <div
           className="mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs"
           style={{
-            borderTop: '1px solid color-mix(in oklch, var(--t-footer-text) 20%, transparent)',
-            color: 'color-mix(in oklch, var(--t-footer-text) 60%, transparent)',
+            borderTop: '1px solid var(--t-border)',
+            color: 'color-mix(in oklch, var(--t-footer-text) 70%, transparent)',
           }}
         >
-          <p>
-            {footer?.copyright ?? `© ${year} Họ Phùng Bát Tràng. Mọi quyền được bảo lưu.`}
-          </p>
+          <p>{footer?.copyright ?? `© ${year} Họ Phùng Bát Tràng. Mọi quyền được bảo lưu.`}</p>
           <p>Gia phả dòng tộc — Bát Tràng, Hà Nội</p>
         </div>
       </div>

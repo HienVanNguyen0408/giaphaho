@@ -61,16 +61,16 @@ export default function QuickServicesSection() {
   return (
     <section
       aria-label="Dịch vụ nhanh"
-      className="py-8"
+      className="py-5 sm:py-8"
       style={{ background: 'var(--t-surface)' }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
           {SERVICES.map(({ href, label, desc, icon }) => (
             <Link
               key={label}
               href={href}
-              className="quick-service-card group flex flex-col items-center gap-2.5 py-5 px-3 rounded-xl"
+              className="quick-service-card group flex flex-col items-center gap-2.5 rounded-xl px-3 py-4 sm:py-5"
               style={{
                 background: 'var(--t-bg)',
                 border: '1px solid var(--t-border)',
@@ -78,7 +78,7 @@ export default function QuickServicesSection() {
             >
               <span
                 className="transition-colors duration-200"
-                style={{ color: 'var(--t-nav-bg)' }}
+                style={{ color: 'var(--t-accent)' }}
               >
                 {icon}
               </span>

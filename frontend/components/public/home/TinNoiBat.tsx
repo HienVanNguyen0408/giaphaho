@@ -18,11 +18,10 @@ function DealCard({ item }: { item: NewsListItem }) {
       style={{
         background: 'var(--t-surface)',
         border: '1px solid var(--t-border)',
-        boxShadow: '0 1px 4px -1px rgba(0,0,0,0.08)',
       }}
     >
       {/* Thumbnail */}
-      <div className="relative overflow-hidden bg-stone-100 aspect-[16/9]">
+      <div className="relative overflow-hidden aspect-[16/9]" style={{ background: 'var(--t-surface-2)' }}>
         {item.thumbnail ? (
           <Image
             src={item.thumbnail}
@@ -32,8 +31,15 @@ function DealCard({ item }: { item: NewsListItem }) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-red-900 via-red-800 to-amber-800 flex items-center justify-center">
-            <span className="text-amber-400/30 text-7xl select-none" aria-hidden="true">
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ background: 'var(--t-accent)' }}
+          >
+            <span
+              className="text-7xl select-none"
+              style={{ color: 'color-mix(in oklch, var(--t-nav-active-text) 25%, transparent)' }}
+              aria-hidden="true"
+            >
               鳳
             </span>
           </div>
@@ -43,8 +49,8 @@ function DealCard({ item }: { item: NewsListItem }) {
         <div
           className="absolute top-3 left-3 px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wider"
           style={{
-            background: 'var(--t-nav-bg)',
-            color: 'var(--t-gold)',
+            background: 'var(--t-accent)',
+            color: 'var(--t-nav-active-text)',
           }}
         >
           Tin nổi bật
@@ -60,7 +66,7 @@ function DealCard({ item }: { item: NewsListItem }) {
           {formatDate(item.publishedAt)}
         </p>
         <h3
-          className="font-semibold text-sm sm:text-base leading-snug flex-1 mb-3 line-clamp-2 transition-colors duration-150 group-hover:text-red-800"
+          className="font-semibold text-sm sm:text-base leading-snug flex-1 mb-3 line-clamp-2 transition-colors duration-150"
           style={{ color: 'var(--t-text)' }}
         >
           {item.title}
@@ -68,7 +74,7 @@ function DealCard({ item }: { item: NewsListItem }) {
         <div className="flex items-center justify-between">
           <span
             className="inline-flex items-center gap-1.5 text-xs font-semibold transition-all group-hover:gap-2.5"
-            style={{ color: 'var(--t-nav-bg)' }}
+            style={{ color: 'var(--t-accent)' }}
           >
             Đọc tiếp
             <svg
@@ -98,21 +104,21 @@ export default function TinNoiBat({ news }: { news: NewsListItem[] }) {
 
   return (
     <section
-      className="py-12 sm:py-16"
+      className="py-10 sm:py-16"
       style={{ background: 'var(--t-bg)' }}
       aria-label="Tin nổi bật"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header — VNA "Ưu đãi nổi bật" style */}
-        <div className="flex items-end justify-between mb-8">
+        <div className="flex items-end justify-between mb-6 sm:mb-8">
           <div>
             <div
               className="w-8 h-1 rounded-full mb-3"
-              style={{ background: 'var(--t-nav-bg)' }}
+              style={{ background: 'var(--t-accent)' }}
               aria-hidden="true"
             />
             <h2
-              className="text-2xl sm:text-3xl font-bold"
+              className="text-xl sm:text-3xl font-bold"
               style={{ color: 'var(--t-text)' }}
             >
               Tin Nổi Bật
@@ -122,8 +128,8 @@ export default function TinNoiBat({ news }: { news: NewsListItem[] }) {
             href="/tin-tuc"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold transition-all duration-150 pb-1 border-b-2"
             style={{
-              color: 'var(--t-nav-bg)',
-              borderBottomColor: 'var(--t-gold)',
+              color: 'var(--t-accent)',
+              borderBottomColor: 'var(--t-accent)',
             }}
           >
             Xem tất cả
@@ -145,7 +151,7 @@ export default function TinNoiBat({ news }: { news: NewsListItem[] }) {
 
         {/* Deal cards grid — VNA horizontal deals style */}
         <div
-          className={`grid gap-5 ${
+          className={`grid gap-4 sm:gap-5 ${
             cardsToShow.length === 1
               ? 'grid-cols-1 max-w-xl'
               : cardsToShow.length === 2
@@ -159,13 +165,13 @@ export default function TinNoiBat({ news }: { news: NewsListItem[] }) {
         </div>
 
         {/* Mobile "Xem tất cả" */}
-        <div className="mt-7 text-center sm:hidden">
+        <div className="mt-6 text-center sm:hidden">
           <Link
             href="/tin-tuc"
             className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-lg transition-all"
             style={{
-              border: '1.5px solid var(--t-nav-bg)',
-              color: 'var(--t-nav-bg)',
+              border: '1.5px solid var(--t-accent)',
+              color: 'var(--t-accent)',
             }}
           >
             Xem tất cả tin nổi bật

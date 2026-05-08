@@ -108,15 +108,15 @@ const navItems: NavItem[] = [
 const roleMeta: Record<Role, { label: string; dot: string; badge: string; text: string }> = {
   SUPER_ADMIN: {
     label: 'Admin tổng',
-    dot: '#f59e0b',
-    badge: 'rgba(245,158,11,0.12)',
-    text: 'rgba(251,191,36,0.85)',
+    dot: 'var(--t-warning)',
+    badge: 'color-mix(in oklch, var(--t-warning) 12%, transparent)',
+    text: 'var(--t-warning)',
   },
   CHI_ADMIN: {
     label: 'Quản trị chi',
-    dot: '#38bdf8',
-    badge: 'rgba(56,189,248,0.10)',
-    text: 'rgba(125,211,252,0.85)',
+    dot: 'var(--t-info)',
+    badge: 'color-mix(in oklch, var(--t-info) 10%, transparent)',
+    text: 'var(--t-info)',
   },
 };
 
@@ -157,7 +157,7 @@ function SidebarContent() {
           ${mobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}
           ${desktopCollapsed ? 'lg:w-16' : 'lg:w-64'}
         `}
-        style={{ background: '#130f0a', borderRight: '1px solid rgba(80,50,20,0.35)' }}
+        style={{ background: 'var(--t-nav-bg)', borderRight: '1px solid var(--t-border)' }}
       >
         {/* Brand */}
         <div
@@ -165,21 +165,21 @@ function SidebarContent() {
             flex
             ${showLabel ? 'items-center gap-3 px-4 py-5' : 'flex-col items-center gap-2 px-2 py-4'}
           `}
-          style={{ borderBottom: '1px solid rgba(80,50,20,0.3)' }}
+          style={{ borderBottom: '1px solid var(--t-border)' }}
         >
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-amber-100 font-bold text-sm flex-shrink-0 shadow-lg"
+            className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0"
             style={{
-              background: 'linear-gradient(145deg, #8b1a1a, #b45309)',
-              boxShadow: '0 2px 12px rgba(139,26,26,0.35)',
-              fontFamily: "'Cormorant Garamond', serif",
+              background: 'var(--t-accent)',
+              color: 'var(--t-nav-active-text)',
+              fontFamily: 'var(--t-display-font)',
               fontSize: '1.1rem',
             }}
           >
             P
           </div>
           {showLabel && (
-            <span className="text-sm font-semibold truncate leading-tight" style={{ color: 'rgba(254,243,199,0.85)' }}>
+            <span className="text-sm font-semibold truncate leading-tight" style={{ color: 'var(--t-text)' }}>
               Họ Phùng Bát Tràng
             </span>
           )}
@@ -194,10 +194,9 @@ function SidebarContent() {
             aria-label={desktopCollapsed ? 'Mở sidebar' : 'Thu gọn sidebar'}
             title={desktopCollapsed ? 'Mở sidebar' : 'Thu gọn sidebar'}
             style={{
-              color: 'rgba(254,243,199,0.78)',
-              background: 'rgba(245,158,11,0.08)',
-              border: '1px solid rgba(245,158,11,0.16)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              color: 'var(--t-text-3)',
+              background: 'var(--t-surface-2)',
+              border: '1px solid var(--t-border)',
             }}
           >
             <SidebarRailIcon collapsed={desktopCollapsed} />
@@ -209,7 +208,7 @@ function SidebarContent() {
           {showLabel && (
             <p
               className="px-3 pt-1 pb-2 text-[9px] font-bold uppercase"
-              style={{ color: 'rgba(120,80,30,0.5)', letterSpacing: '0.18em' }}
+              style={{ color: 'var(--t-text-3)', letterSpacing: '0.18em' }}
             >
               Quản trị
             </p>
@@ -231,23 +230,22 @@ function SidebarContent() {
                       active
                         ? showLabel
                           ? {
-                              background: 'rgba(139,26,26,0.18)',
-                              color: 'rgba(252,165,165,0.9)',
-                              borderLeft: '2px solid rgba(220,60,60,0.7)',
+                              background: 'var(--color-red-50)',
+                              color: 'var(--t-accent)',
+                              borderLeft: '2px solid var(--t-accent)',
                               paddingLeft: '10px',
                             }
                           : {
-                              background: 'linear-gradient(180deg, rgba(139,26,26,0.26), rgba(180,83,9,0.18))',
-                              color: 'rgba(254,226,226,0.96)',
-                              border: '1px solid rgba(248,113,113,0.24)',
-                              boxShadow: '0 8px 16px rgba(0,0,0,0.18)',
+                              background: 'var(--color-red-50)',
+                              color: 'var(--t-accent)',
+                              border: '1px solid var(--t-border)',
                             }
                         : showLabel
                           ? {
-                              color: 'rgba(168,162,158,0.6)',
+                              color: 'var(--t-text-3)',
                             }
                           : {
-                              color: 'rgba(168,162,158,0.72)',
+                              color: 'var(--t-text-3)',
                             }
                     }
                   >
@@ -264,21 +262,20 @@ function SidebarContent() {
         {showLabel && user && (
           <div
             className="px-3 py-4"
-            style={{ borderTop: '1px solid rgba(80,50,20,0.3)' }}
+            style={{ borderTop: '1px solid var(--t-border)' }}
           >
             <div className="flex items-center gap-3">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0"
                 style={{
-                  background: 'linear-gradient(145deg, rgba(139,26,26,0.5), rgba(180,83,9,0.4))',
-                  border: '1px solid rgba(139,26,26,0.4)',
-                  color: '#fde68a',
+                  background: 'var(--t-accent)',
+                  color: 'var(--t-nav-active-text)',
                 }}
               >
                 {initials}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold truncate" style={{ color: 'rgba(214,211,209,0.8)' }}>
+                <p className="text-xs font-semibold truncate" style={{ color: 'var(--t-text)' }}>
                   {user.username}
                 </p>
                 <span
@@ -295,13 +292,12 @@ function SidebarContent() {
 
         {/* Collapsed user avatar */}
         {!showLabel && user && (
-          <div className="px-2 py-4" style={{ borderTop: '1px solid rgba(80,50,20,0.3)' }}>
+          <div className="px-2 py-4" style={{ borderTop: '1px solid var(--t-border)' }}>
             <div
               className="w-8 h-8 rounded-lg mx-auto flex items-center justify-center text-[11px] font-bold"
               style={{
-                background: 'linear-gradient(145deg, rgba(139,26,26,0.5), rgba(180,83,9,0.4))',
-                border: '1px solid rgba(139,26,26,0.4)',
-                color: '#fde68a',
+                background: 'var(--t-accent)',
+                color: 'var(--t-nav-active-text)',
               }}
               title={user.username}
             >
@@ -320,7 +316,7 @@ export default function Sidebar() {
       fallback={
         <aside
           className="w-64 hidden lg:block"
-          style={{ background: '#130f0a', borderRight: '1px solid rgba(80,50,20,0.35)' }}
+          style={{ background: 'var(--t-nav-bg)', borderRight: '1px solid var(--t-border)' }}
         />
       }
     >

@@ -38,8 +38,8 @@ function VideoCard({ video }: { video: Video }) {
         )}
       </div>
       {/* Title */}
-      <div className="px-4 py-3">
-        <h3 className="text-stone-800 font-medium text-sm leading-snug line-clamp-2">{video.title}</h3>
+      <div className="px-4 py-3 sm:py-4">
+        <h3 className="text-stone-800 font-medium text-sm sm:text-base leading-snug line-clamp-2">{video.title}</h3>
       </div>
     </div>
   );
@@ -49,14 +49,14 @@ export default function VideoSection({ videos }: { videos: Video[] }) {
   const displayVideos = videos.slice(0, 3);
 
   return (
-    <section className="py-14 bg-white" aria-label="Video dòng họ">
+    <section className="py-10 bg-white sm:py-14" aria-label="Video dòng họ">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-7 sm:mb-10">
           <p className="text-amber-700 text-xs font-semibold uppercase tracking-widest mb-2">
             Hình ảnh & âm thanh
           </p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-3">Video Dòng Họ</h2>
+          <h2 className="text-xl sm:text-3xl font-bold text-stone-900 mb-3">Video Dòng Họ</h2>
           <div className="flex items-center justify-center gap-3" aria-hidden="true">
             <span className="block h-px w-12 bg-amber-300" />
             <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -72,7 +72,7 @@ export default function VideoSection({ videos }: { videos: Video[] }) {
             <p className="text-stone-500 text-sm">Chưa có video nào.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {displayVideos.map((video) => (
               <VideoCard key={video.id} video={video} />
             ))}

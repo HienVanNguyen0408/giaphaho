@@ -61,7 +61,7 @@ function MemberEditContent() {
         <Link
           href="/admin/gia-pha"
           className="flex items-center gap-1.5 font-medium transition-colors"
-          style={{ color: 'rgba(139,26,26,0.8)' }}
+          style={{ color: 'color-mix(in oklch, var(--t-accent) 80%, transparent)' }}
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -79,11 +79,11 @@ function MemberEditContent() {
         {/* Card header */}
         <div
           className="px-6 py-4 flex items-center gap-3"
-          style={{ background: '#faf7f3', borderBottom: '1px solid #ede8df' }}
+          style={{ background: 'var(--t-surface-2)', borderBottom: '1px solid var(--t-border)' }}
         >
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: 'linear-gradient(145deg, #8b1a1a, #b45309)' }}
+            style={{ background: 'var(--t-accent)' }}
           >
             <svg className="w-4 h-4 text-amber-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               {isNew ? (

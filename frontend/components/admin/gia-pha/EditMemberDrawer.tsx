@@ -57,7 +57,7 @@ export default function EditMemberDrawer({ memberId, onClose, onSaved }: EditMem
         {/* Header */}
         <div
           className="flex items-center justify-between px-6 py-4 flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg, #8b1a1a, #b45309)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}
+          style={{ background: 'var(--t-accent)', borderBottom: '1px solid color-mix(in oklch, var(--t-nav-active-text) 10%, transparent)' }}
         >
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">

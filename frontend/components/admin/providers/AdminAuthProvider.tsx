@@ -17,27 +17,26 @@ function AuthLoadingScreen() {
   return (
     <div
       className="fixed inset-0 flex items-center justify-center z-50"
-      style={{ background: '#0e0a06' }}
+      style={{ background: 'var(--t-bg)' }}
       aria-label="Đang xác thực..."
     >
       <div className="flex flex-col items-center gap-4">
         <div
-          className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl"
+          className="w-12 h-12 rounded-2xl flex items-center justify-center"
           style={{
-            background: 'linear-gradient(145deg, #8b1a1a, #b45309)',
-            boxShadow: '0 8px 32px rgba(139,26,26,0.4)',
+            background: 'var(--t-accent)',
           }}
         >
           <span
-            className="text-[1.4rem] text-amber-100"
-            style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}
+            className="text-[1.4rem]"
+            style={{ color: 'var(--t-nav-active-text)', fontFamily: 'var(--t-display-font)', fontWeight: 600 }}
           >
             P
           </span>
         </div>
         <div
           className="w-6 h-6 border-2 rounded-full animate-spin"
-          style={{ borderColor: 'rgba(217,119,6,0.2)', borderTopColor: '#d97706' }}
+          style={{ borderColor: 'var(--color-red-200)', borderTopColor: 'var(--t-accent)' }}
           aria-hidden="true"
         />
       </div>

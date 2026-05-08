@@ -52,12 +52,12 @@ export default async function VideoPage() {
   const videos = res?.data ?? [];
 
   return (
-    <div className="min-h-screen bg-stone-50 py-12 px-4">
+    <div className="min-h-screen bg-stone-50 px-4 py-8 sm:py-12">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-3">Thư viện Video</h1>
-          <p className="text-stone-500 max-w-xl mx-auto">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl font-bold text-stone-900 mb-3">Thư viện Video</h1>
+          <p className="text-sm leading-6 text-stone-500 max-w-xl mx-auto sm:text-base">
             Những thước phim lưu giữ ký ức và truyền thống dòng họ Phùng Bát Tràng qua các thế hệ.
           </p>
           <div className="mt-4 w-16 h-1 bg-red-700 mx-auto rounded-full" />
@@ -66,7 +66,7 @@ export default async function VideoPage() {
         {videos.length === 0 ? (
           <div className="text-center py-20 text-stone-400">Chưa có video nào.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {videos.map((video) => {
               const videoId = extractYouTubeId(video.youtubeUrl);
               return (
@@ -74,7 +74,7 @@ export default async function VideoPage() {
                   key={video.id}
                   className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-stone-100 flex flex-col"
                 >
-                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                  <div className="relative w-full aspect-video bg-stone-900">
                     {videoId ? (
                       <iframe
                         className="absolute inset-0 w-full h-full"
@@ -90,8 +90,8 @@ export default async function VideoPage() {
                       </div>
                     )}
                   </div>
-                  <div className="p-4">
-                    <h2 className="text-sm font-semibold text-stone-800 leading-snug line-clamp-2">
+                  <div className="p-4 sm:p-5">
+                    <h2 className="text-sm sm:text-base font-semibold text-stone-800 leading-snug line-clamp-2">
                       {video.title}
                     </h2>
                   </div>

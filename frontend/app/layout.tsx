@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Be_Vietnam_Pro } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import ThemeSwitcher from '@/components/shared/ThemeSwitcher';
 import './globals.css';
 
 const beVietnam = Be_Vietnam_Pro({
@@ -26,7 +25,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi" className={`${beVietnam.variable} h-full antialiased`} data-theme="bachLien">
+    <html lang="vi" className={`${beVietnam.variable} h-full antialiased`} data-theme="chuSa">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -39,7 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col font-sans">
         <ThemeProvider>
           {children}
-          <ThemeSwitcher />
         </ThemeProvider>
       </body>
     </html>

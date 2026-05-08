@@ -17,6 +17,7 @@ const THEMES_META: {
   { id: 'sonMai',   name: 'Sơn Mài',   desc: 'Vàng & đen',   bg: '#0c0804', fg: '#f0deb8', dot1: '#d4a03c', dot2: '#d4af37' },
   { id: 'giayCo',  name: 'Giấy Cổ',   desc: 'Cổ điển nâu',  bg: '#f2e8d0', fg: '#2a1a06', dot1: '#7c2d12', dot2: '#b07820' },
   { id: 'lamNgoc', name: 'Lam Ngọc',  desc: 'Tối & ngọc bích', bg: '#080c18', fg: '#e4ecf5', dot1: '#14b8a6', dot2: '#d4af37' },
+  { id: 'chuSa',   name: 'Chu Sa',    desc: 'Đỏ thẫm & trắng', bg: '#ffffff', fg: '#0a0a0a', dot1: '#8B0000', dot2: '#0a0a0a' },
 ];
 
 export default function ThemeSwitcher() {
@@ -33,14 +34,14 @@ export default function ThemeSwitcher() {
         <div
           className="rounded-2xl overflow-hidden"
           style={{
-            background: '#1c1917',
-            border: '1px solid #3d3530',
+            background: 'var(--t-surface)',
+            border: '1px solid var(--t-border)',
             boxShadow: '0 12px 40px -8px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)',
             width: '220px',
           }}
         >
-          <div className="px-4 py-3 border-b" style={{ borderColor: '#3d3530' }}>
-            <p className="text-xs tracking-widest uppercase" style={{ color: '#78716c' }}>Giao diện</p>
+          <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--t-border)' }}>
+            <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--t-text-3)' }}>Giao diện</p>
           </div>
 
           <div className="p-2 space-y-1">
@@ -52,7 +53,7 @@ export default function ThemeSwitcher() {
                   onClick={() => { setTheme(t.id); setOpen(false); }}
                   className="w-full text-left rounded-xl flex items-center gap-3 px-3 py-2.5 transition-all duration-150"
                   style={{
-                    background: active ? '#292524' : 'transparent',
+                    background: active ? 'var(--t-surface-2)' : 'transparent',
                     outline: active ? `2px solid ${t.dot1}` : '2px solid transparent',
                     outlineOffset: '-2px',
                   }}
@@ -64,10 +65,10 @@ export default function ThemeSwitcher() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium leading-tight" style={{ color: '#e7e5e4' }}>
+                    <p className="text-sm font-medium leading-tight" style={{ color: 'var(--t-text)' }}>
                       {t.name}
                     </p>
-                    <p className="text-[10px] leading-tight mt-0.5" style={{ color: '#78716c' }}>
+                    <p className="text-[10px] leading-tight mt-0.5" style={{ color: 'var(--t-text-3)' }}>
                       {t.desc}
                     </p>
                   </div>
@@ -83,8 +84,8 @@ export default function ThemeSwitcher() {
             })}
           </div>
 
-          <div className="px-4 py-2.5 border-t text-center" style={{ borderColor: '#3d3530' }}>
-            <p className="text-[10px]" style={{ color: '#57534e' }}>Tự động lưu vào trình duyệt</p>
+          <div className="px-4 py-2.5 border-t text-center" style={{ borderColor: 'var(--t-border)' }}>
+            <p className="text-[10px]" style={{ color: 'var(--t-text-3)' }}>Tự động lưu vào trình duyệt</p>
           </div>
         </div>
       )}
@@ -98,7 +99,7 @@ export default function ThemeSwitcher() {
         style={{
           background: open ? current.dot1 : '#1c1917',
           border: `1px solid ${open ? current.dot1 : '#44403c'}`,
-          color: open ? '#fff' : '#d6d3d1',
+          color: open ? 'var(--t-nav-active-text)' : '#d6d3d1',
           padding: '8px 14px',
           boxShadow: '0 4px 16px -4px rgba(0,0,0,0.5)',
         }}
