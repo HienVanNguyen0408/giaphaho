@@ -50,30 +50,41 @@ function MemberNode({ data, selected }: NodeProps) {
     return parts.join('  ') || null;
   })();
 
+  const nodeStyle: React.CSSProperties = isActive
+    ? {
+        background: 'var(--t-surface)',
+        borderColor: 'var(--t-accent)',
+        boxShadow: '0 0 0 3px color-mix(in oklch, var(--t-accent) 25%, transparent)',
+        outline: 'none',
+      }
+    : selected
+    ? {
+        background: 'var(--t-surface)',
+        borderColor: 'var(--t-accent)',
+        boxShadow: '0 0 0 2px color-mix(in oklch, var(--t-accent) 15%, transparent)',
+        outline: 'none',
+      }
+    : {
+        background: 'var(--t-surface)',
+        borderColor: 'var(--t-border)',
+        outline: 'none',
+      };
+
   return (
     <div
-      className={`relative bg-white border-2 rounded-xl shadow-md px-3 py-2 w-48 cursor-pointer transition-all ${
-        isActive
-          ? 'border-amber-500 shadow-lg'
-          : selected
-          ? 'border-blue-500 shadow-blue-200 shadow-lg'
-          : 'border-stone-200 hover:border-red-400'
-      }`}
-      style={
-        isActive
-          ? { boxShadow: '0 0 0 3px rgba(245,158,11,0.35), 0 6px 24px rgba(245,158,11,0.25)' }
-          : selected
-          ? { boxShadow: '0 0 0 3px rgba(59,130,246,0.25), 0 6px 16px rgba(59,130,246,0.15)' }
-          : undefined
-      }
+      className="relative border-2 rounded-xl px-3 py-2 w-48 cursor-pointer transition-all"
+      style={nodeStyle}
     >
       {isActive && (
-        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm leading-tight z-10">
+        <span
+          className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap leading-tight z-10"
+          style={{ background: 'var(--t-accent)', color: 'var(--t-nav-active-text)' }}
+        >
           Đang xem
         </span>
       )}
 
-      <Handle type="target" position={Position.Top} className="!bg-red-400 !w-2 !h-2" />
+      <Handle type="target" position={Position.Top} className="!w-2 !h-2" style={{ background: 'var(--t-accent)' }} />
 
       <div className="flex flex-col items-center gap-1">
         <div className="relative">
@@ -82,58 +93,68 @@ function MemberNode({ data, selected }: NodeProps) {
             <img
               src={member.avatar}
               alt={member.fullName}
-              className={`w-11 h-11 rounded-full object-cover border-2 ${isActive ? 'border-amber-400' : 'border-stone-200'}`}
+              className="w-11 h-11 rounded-full object-cover border-2"
+              style={{ borderColor: isActive ? 'var(--t-accent)' : 'var(--t-border)' }}
             />
           ) : (
             <div
-              className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm"
-              style={{
-                background: isActive
-                  ? 'linear-gradient(135deg, #d97706, #f59e0b)'
-                  : 'linear-gradient(135deg, #991b1b, #d97706)',
-              }}
+              className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm"
+              style={{ background: 'var(--t-accent)', color: 'var(--t-nav-active-text)' }}
             >
               {initials}
             </div>
           )}
           {isDeceased && (
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-stone-400 border border-white flex items-center justify-center">
-              <span className="text-white text-[6px] leading-none font-bold">✝</span>
+            <div
+              className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border flex items-center justify-center"
+              style={{ background: 'var(--t-text-3)', borderColor: 'var(--t-surface)' }}
+            >
+              <span className="text-[6px] leading-none font-bold" style={{ color: 'var(--t-nav-active-text)' }}>✝</span>
             </div>
           )}
         </div>
 
-        <p className={`text-xs font-semibold leading-tight line-clamp-2 text-center ${isActive ? 'text-amber-800' : 'text-stone-800'}`}>
+        <p
+          className="text-xs font-semibold leading-tight line-clamp-2 text-center"
+          style={{ color: 'var(--t-text)' }}
+        >
           {member.fullName}
         </p>
 
         {lifespan && (
-          <p className="text-[10px] text-stone-400 leading-none text-center">{lifespan}</p>
+          <p className="text-[10px] leading-none text-center" style={{ color: 'var(--t-text-3)' }}>
+            {lifespan}
+          </p>
         )}
 
         {member.generation != null && (
-          <span className="text-[9px] text-stone-400 leading-none">Đời {member.generation}</span>
+          <span className="text-[9px] leading-none" style={{ color: 'var(--t-text-3)' }}>
+            Đời {member.generation}
+          </span>
         )}
       </div>
 
-      <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-stone-100">
-        <div className="flex items-center gap-0.5 text-[9px] text-stone-500" title="Số con cháu">
-          <svg className="w-2.5 h-2.5 text-stone-400" fill="currentColor" viewBox="0 0 20 20">
+      <div
+        className="flex items-center justify-between mt-1.5 pt-1.5 border-t"
+        style={{ borderColor: 'var(--t-border)' }}
+      >
+        <div className="flex items-center gap-0.5 text-[9px]" title="Số con cháu">
+          <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'var(--t-text-3)' }}>
             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 14.094A5.973 5.973 0 004 17v1H1v-1a3 3 0 013.75-2.906z" />
           </svg>
-          <span className="font-semibold text-stone-700">{descendantsCount}</span>
+          <span className="font-semibold" style={{ color: 'var(--t-text-2)' }}>{descendantsCount}</span>
         </div>
         <div className="flex items-center gap-1 text-[9px]" title="Thành tích cá nhân · Thành tích con cháu">
-          <span className="font-semibold text-amber-700">{ownAchievements}</span>
-          <svg className="w-2.5 h-2.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+          <span className="font-semibold" style={{ color: 'var(--t-accent)' }}>{ownAchievements}</span>
+          <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'var(--t-accent)' }}>
             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
           </svg>
-          <span className="text-stone-300">·</span>
-          <span className="font-semibold text-stone-500">{descendantsAchievementsCount}</span>
+          <span style={{ color: 'var(--t-border)' }}>·</span>
+          <span className="font-semibold" style={{ color: 'var(--t-text-3)' }}>{descendantsAchievementsCount}</span>
         </div>
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!bg-red-400 !w-2 !h-2" />
+      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2" style={{ background: 'var(--t-accent)' }} />
     </div>
   );
 }
@@ -171,19 +192,32 @@ function LineageSearch({ nodes, onSelect }: { nodes: Node[]; onSelect: (id: stri
           onChange={(e) => { setQuery(e.target.value); setShowResults(true); }}
           onFocus={() => setShowResults(true)}
           placeholder="Tìm trong cây trực hệ..."
-          className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 bg-white/90 backdrop-blur text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-red-400 shadow-md"
+          className="w-full pl-9 pr-4 py-2 rounded-xl border text-sm focus:outline-none"
+          style={{
+            background: 'var(--t-surface)',
+            borderColor: 'var(--t-border)',
+            color: 'var(--t-text)',
+          }}
+          onFocusCapture={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = 'var(--t-accent)'; }}
+          onBlurCapture={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = 'var(--t-border)'; }}
         />
         <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none"
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+          style={{ color: 'var(--t-text-3)' }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
 
         {showResults && query && (
-          <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-xl border border-stone-200 max-h-52 overflow-y-auto">
+          <div
+            className="absolute top-full mt-2 w-full rounded-xl border max-h-52 overflow-y-auto"
+            style={{ background: 'var(--t-surface)', borderColor: 'var(--t-border)' }}
+          >
             {filtered.length === 0 ? (
-              <div className="p-3 text-xs text-stone-500 text-center">Không tìm thấy ai</div>
+              <div className="p-3 text-xs text-center" style={{ color: 'var(--t-text-3)' }}>
+                Không tìm thấy ai
+              </div>
             ) : (
               <ul className="py-1">
                 {filtered.map((n) => {
@@ -192,10 +226,13 @@ function LineageSearch({ nodes, onSelect }: { nodes: Node[]; onSelect: (id: stri
                     <li key={n.id}>
                       <button
                         onClick={() => handleSelect(n)}
-                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-stone-800 flex flex-col transition-colors"
+                        className="w-full text-left px-4 py-2 text-sm flex flex-col transition-colors"
+                        style={{ color: 'var(--t-text)' }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--t-surface-2)'; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                       >
                         <span className="font-semibold">{m.fullName}</span>
-                        <span className="text-[10px] text-stone-500">
+                        <span className="text-[10px]" style={{ color: 'var(--t-text-3)' }}>
                           {m.birthYear ? `SN: ${m.birthYear}` : ''}
                           {m.generation != null ? ` · Đời ${m.generation}` : ''}
                         </span>
@@ -287,14 +324,14 @@ function LineageTreeInner({
         onPaneClick={onPaneClick}
         minZoom={0.05}
         maxZoom={3}
-        className="bg-stone-50"
+        style={{ background: 'var(--t-surface-2)' }}
       >
-        <Background color="#d6d3d1" gap={24} size={1} />
+        <Background color="var(--t-border)" gap={24} size={1} />
         <Controls />
         <MiniMap
-          maskColor="rgba(250, 250, 249, 0.8)"
-          nodeColor={(n) => (n.id === focusMemberId ? '#f59e0b' : '#e5e5e5')}
-          nodeStrokeColor={(n) => (n.id === focusMemberId ? '#d97706' : '#8b1a1a')}
+          maskColor="color-mix(in oklch, var(--t-surface-2) 80%, transparent)"
+          nodeColor={(n) => (n.id === focusMemberId ? 'var(--t-accent)' : 'var(--t-border)')}
+          nodeStrokeColor={(n) => (n.id === focusMemberId ? 'var(--t-accent-2)' : 'var(--t-border)')}
           pannable
           zoomable
         />
@@ -304,25 +341,38 @@ function LineageTreeInner({
 
         {/* Selected member action bar */}
         {selectedMember && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-white rounded-2xl shadow-xl border border-stone-200 px-4 py-3 flex items-center gap-3 max-w-md w-full">
+          <div
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 rounded-2xl border px-4 py-3 flex items-center gap-3 max-w-md w-full"
+            style={{
+              background: 'var(--t-surface)',
+              borderColor: 'var(--t-border)',
+            }}
+          >
             {confirmingDelete ? (
-              /* Confirm delete mode */
               <>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-red-700">Xóa thành viên này?</p>
-                  <p className="text-[10px] text-stone-500 truncate">{selectedMember.fullName}</p>
+                  <p className="text-xs font-bold" style={{ color: 'var(--t-accent)' }}>
+                    Xóa thành viên này?
+                  </p>
+                  <p className="text-[10px] truncate" style={{ color: 'var(--t-text-3)' }}>
+                    {selectedMember.fullName}
+                  </p>
                 </div>
                 <button
                   onClick={() => setConfirmingDelete(false)}
                   disabled={deleting}
-                  className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                  style={{ background: 'var(--t-surface-2)', color: 'var(--t-text-2)' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--t-border)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--t-surface-2)'; }}
                 >
                   Hủy
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                  style={{ background: 'var(--t-accent)', color: 'var(--t-nav-active-text)' }}
                 >
                   {deleting ? (
                     <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -335,11 +385,12 @@ function LineageTreeInner({
                 </button>
               </>
             ) : (
-              /* Normal mode */
               <>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-stone-900 truncate">{selectedMember.fullName}</p>
-                  <p className="text-[10px] text-stone-400">
+                  <p className="text-xs font-bold truncate" style={{ color: 'var(--t-text)' }}>
+                    {selectedMember.fullName}
+                  </p>
+                  <p className="text-[10px]" style={{ color: 'var(--t-text-3)' }}>
                     {selectedMember.birthYear ? `SN: ${selectedMember.birthYear}` : ''}
                     {selectedMember.generation != null
                       ? `${selectedMember.birthYear ? ' · ' : ''}Đời ${selectedMember.generation}`
@@ -350,7 +401,8 @@ function LineageTreeInner({
                 {onEditMember && (
                   <button
                     onClick={() => onEditMember(selectedMember.id)}
-                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+                    style={{ background: 'var(--t-accent)', color: 'var(--t-nav-active-text)' }}
                   >
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -361,7 +413,8 @@ function LineageTreeInner({
                 {onDeleteMember && (
                   <button
                     onClick={() => setConfirmingDelete(true)}
-                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+                    style={{ background: 'var(--t-accent)', color: 'var(--t-nav-active-text)' }}
                   >
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -371,7 +424,16 @@ function LineageTreeInner({
                 )}
                 <button
                   onClick={() => setSelectedId(null)}
-                  className="flex-shrink-0 w-6 h-6 rounded-lg bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-400 hover:text-stone-600 transition-colors"
+                  className="flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-colors"
+                  style={{ background: 'var(--t-surface-2)', color: 'var(--t-text-3)' }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--t-border)';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--t-text-2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--t-surface-2)';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--t-text-3)';
+                  }}
                   aria-label="Bỏ chọn"
                 >
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -419,28 +481,40 @@ export default function LineageModal({ memberId, memberName, allMembers, onClose
       }`}
     >
       <div
-        className={`bg-white shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+        className={`flex flex-col overflow-hidden transition-all duration-300 ${
           isFullscreen
             ? 'w-full h-full rounded-none'
             : 'w-full max-w-5xl h-[85vh] rounded-2xl'
         }`}
+        style={{ background: 'var(--t-surface)' }}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-red-700 to-amber-600 px-5 py-4 flex items-center justify-between flex-shrink-0">
+        <div
+          className="px-5 py-4 flex items-center justify-between flex-shrink-0"
+          style={{ background: 'var(--t-accent)' }}
+        >
           <div>
-            <h3 className="text-white font-semibold text-base">Cây trực hệ — {memberName}</h3>
+            <h3 className="font-semibold text-base" style={{ color: 'var(--t-nav-active-text)' }}>
+              Cây trực hệ — {memberName}
+            </h3>
             <div className="flex items-center gap-3 mt-1 flex-wrap">
-              <span className="text-white/80 text-xs">{lineageMembers.length} thành viên</span>
+              <span className="text-xs" style={{ color: 'color-mix(in oklch, var(--t-nav-active-text) 80%, transparent)' }}>
+                {lineageMembers.length} thành viên
+              </span>
               {generations != null && (
                 <>
-                  <span className="text-white/40 text-xs">·</span>
-                  <span className="text-white/80 text-xs">{generations} đời</span>
+                  <span className="text-xs" style={{ color: 'color-mix(in oklch, var(--t-nav-active-text) 40%, transparent)' }}>·</span>
+                  <span className="text-xs" style={{ color: 'color-mix(in oklch, var(--t-nav-active-text) 80%, transparent)' }}>
+                    {generations} đời
+                  </span>
                 </>
               )}
               {totalAchievements > 0 && (
                 <>
-                  <span className="text-white/40 text-xs">·</span>
-                  <span className="text-white/80 text-xs">{totalAchievements} thành tích</span>
+                  <span className="text-xs" style={{ color: 'color-mix(in oklch, var(--t-nav-active-text) 40%, transparent)' }}>·</span>
+                  <span className="text-xs" style={{ color: 'color-mix(in oklch, var(--t-nav-active-text) 80%, transparent)' }}>
+                    {totalAchievements} thành tích
+                  </span>
                 </>
               )}
             </div>
@@ -448,7 +522,16 @@ export default function LineageModal({ memberId, memberName, allMembers, onClose
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setIsFullscreen((v) => !v)}
-              className="text-white/80 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10"
+              className="transition-colors w-8 h-8 flex items-center justify-center rounded-lg"
+              style={{ color: 'color-mix(in oklch, var(--t-nav-active-text) 80%, transparent)' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = 'var(--t-nav-active-text)';
+                (e.currentTarget as HTMLElement).style.background = 'color-mix(in oklch, var(--t-nav-active-text) 10%, transparent)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = 'color-mix(in oklch, var(--t-nav-active-text) 80%, transparent)';
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
               aria-label={isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
               title={isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
             >
@@ -464,7 +547,16 @@ export default function LineageModal({ memberId, memberName, allMembers, onClose
             </button>
             <button
               onClick={onClose}
-              className="text-white/80 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-xl leading-none"
+              className="transition-colors w-8 h-8 flex items-center justify-center rounded-lg text-xl leading-none"
+              style={{ color: 'color-mix(in oklch, var(--t-nav-active-text) 80%, transparent)' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = 'var(--t-nav-active-text)';
+                (e.currentTarget as HTMLElement).style.background = 'color-mix(in oklch, var(--t-nav-active-text) 10%, transparent)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = 'color-mix(in oklch, var(--t-nav-active-text) 80%, transparent)';
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
               aria-label="Đóng"
             >
               ×
@@ -473,25 +565,38 @@ export default function LineageModal({ memberId, memberName, allMembers, onClose
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 px-4 py-2 bg-stone-50 border-b border-stone-100 text-[10px] text-stone-500 flex-shrink-0">
+        <div
+          className="flex items-center gap-4 px-4 py-2 border-b text-[10px] flex-shrink-0"
+          style={{
+            background: 'var(--t-surface-2)',
+            borderColor: 'var(--t-border)',
+            color: 'var(--t-text-3)',
+          }}
+        >
           <div className="flex items-center gap-1">
-            <svg className="w-3 h-3 text-stone-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'var(--t-text-3)' }}>
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 14.094A5.973 5.973 0 004 17v1H1v-1a3 3 0 013.75-2.906z" />
             </svg>
             <span>Số con cháu</span>
           </div>
           <div className="flex items-center gap-1">
-            <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'var(--t-accent)' }}>
               <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
             </svg>
-            <span><span className="text-amber-700 font-semibold">Thành tích</span> · Con cháu</span>
+            <span>
+              <span className="font-semibold" style={{ color: 'var(--t-accent)' }}>Thành tích</span>
+              {' · Con cháu'}
+            </span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-amber-400 inline-block" />
+            <span
+              className="w-3 h-3 rounded-full inline-block"
+              style={{ background: 'var(--t-accent)' }}
+            />
             <span>Thành viên đang xem</span>
           </div>
           {(onEditMember || onDeleteMember) && (
-            <div className="flex items-center gap-1 ml-auto text-blue-600">
+            <div className="flex items-center gap-1 ml-auto" style={{ color: 'var(--t-accent)' }}>
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
               </svg>

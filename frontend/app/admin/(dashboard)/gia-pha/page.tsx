@@ -24,7 +24,7 @@ function AvatarCell({ member }: { member: Member }) {
         src={member.avatar}
         alt={member.fullName}
         className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
-        style={{ border: '1px solid rgba(0,0,0,0.08)' }}
+        style={{ border: '1px solid var(--t-border)' }}
       />
     );
   }
@@ -34,7 +34,7 @@ function AvatarCell({ member }: { member: Member }) {
     .map((w) => w[0])
     .join('')
     .toUpperCase();
-  const colors = ['#8b1a1a', '#b45309', '#1d4ed8', '#065f46', '#6d28d9'];
+  const colors = ['var(--t-accent)', 'var(--t-warning)', 'var(--t-info)', '#065f46', '#6d28d9'];
   const color = colors[member.fullName.charCodeAt(0) % colors.length];
   return (
     <div
@@ -68,7 +68,7 @@ function GenderBadge({ gender }: { gender: string | null }) {
       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
       style={
         gender === 'Nam'
-          ? { background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }
+          ? { background: 'color-mix(in oklch, var(--t-info) 10%, transparent)', color: 'var(--t-info)' }
           : { background: 'rgba(236,72,153,0.1)', color: '#ec4899' }
       }
     >
@@ -270,12 +270,12 @@ export default function GiaPhaAdminPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-5">
       {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-3 mb-1">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'linear-gradient(145deg, #8b1a1a, #b45309)' }}
+              style={{ background: 'var(--t-accent)' }}
             >
               <svg className="w-5 h-5 text-amber-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -301,11 +301,11 @@ export default function GiaPhaAdminPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:flex-shrink-0">
           <button
             onClick={handleRecalculate}
             disabled={recalculating || loading}
-            className="flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-stone-700 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-colors disabled:opacity-50 shadow-sm"
+            className="flex min-w-0 items-center justify-center gap-2 px-3 py-2.5 text-xs font-semibold text-stone-700 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-colors disabled:opacity-50 shadow-sm"
             title="Tính lại số liệu thống kê (đời, con cháu, anh chị em...)"
           >
             <svg className={`w-3.5 h-3.5 ${recalculating ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -316,10 +316,10 @@ export default function GiaPhaAdminPage() {
 
           <Link
             href="/admin/gia-pha/new"
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-amber-50 rounded-xl transition-all shadow-sm"
+            className="flex min-w-0 items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-amber-50 rounded-xl transition-all shadow-sm"
             style={{
-              background: 'linear-gradient(135deg, #8b1a1a, #b45309)',
-              boxShadow: '0 2px 12px rgba(139,26,26,0.2)',
+              background: 'var(--t-accent)',
+              boxShadow: '0 2px 12px color-mix(in oklch, var(--t-accent) 20%, transparent)',
             }}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -363,10 +363,10 @@ export default function GiaPhaAdminPage() {
       )}
 
       {/* ── Filter & View Mode ── */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           {viewMode !== 'tree' && (
-            <div className="relative max-w-xs w-full">
+            <div className="relative w-full sm:max-w-xs">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -406,14 +406,14 @@ export default function GiaPhaAdminPage() {
             </button>
           )}
           {viewMode !== 'tree' && debouncedName && pagedData && (
-            <span className="text-xs text-stone-500">{total} kết quả</span>
+            <span className="hidden text-xs text-stone-500 sm:inline">{total} kết quả</span>
           )}
         </div>
 
-        <div className="flex items-center bg-white border border-stone-200 rounded-xl p-1 shadow-sm">
+        <div className="grid w-full grid-cols-3 bg-white border border-stone-200 rounded-xl p-1 shadow-sm sm:flex sm:w-auto sm:items-center">
           <button
             onClick={() => setViewMode('table')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${viewMode === 'table' ? 'bg-stone-100 text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'}`}
+            className={`justify-center px-2 py-2 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 sm:px-3 sm:py-1.5 ${viewMode === 'table' ? 'bg-stone-100 text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'}`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -422,7 +422,7 @@ export default function GiaPhaAdminPage() {
           </button>
           <button
             onClick={() => setViewMode('grid')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${viewMode === 'grid' ? 'bg-stone-100 text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'}`}
+            className={`justify-center px-2 py-2 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 sm:px-3 sm:py-1.5 ${viewMode === 'grid' ? 'bg-stone-100 text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'}`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -431,7 +431,7 @@ export default function GiaPhaAdminPage() {
           </button>
           <button
             onClick={() => setViewMode('tree')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${viewMode === 'tree' ? 'bg-stone-100 text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'}`}
+            className={`justify-center px-2 py-2 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 sm:px-3 sm:py-1.5 ${viewMode === 'tree' ? 'bg-stone-100 text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'}`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -443,11 +443,12 @@ export default function GiaPhaAdminPage() {
 
       {/* ── Table View ── */}
       {viewMode === 'table' && (
-        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+        <>
+        <div className="hidden bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden sm:block">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ background: '#faf7f3', borderBottom: '1px solid #e8e0d4' }}>
+                <tr style={{ background: 'var(--t-surface-2)', borderBottom: '1px solid var(--t-border)' }}>
                   <th className="px-5 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '35%' }}>Thành viên</th>
                   <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '80px' }}>Ngày sinh</th>
                   <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '80px' }}>Ngày mất</th>
@@ -502,9 +503,9 @@ export default function GiaPhaAdminPage() {
                             onClick={() => handleOpenLineage(member.id, member.fullName)}
                             disabled={lineageLoading}
                             className="px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
-                            style={{ color: '#92400e', background: 'rgba(180,83,9,0.06)' }}
-                            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(180,83,9,0.12)')}
-                            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(180,83,9,0.06)')}
+                            style={{ color: 'var(--t-warning)', background: 'color-mix(in oklch, var(--t-warning) 6%, transparent)' }}
+                            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in oklch, var(--t-warning) 12%, transparent)')}
+                            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in oklch, var(--t-warning) 6%, transparent)')}
                             title="Xem cây trực hệ"
                           >
                             {lineageLoading ? '...' : 'Cây trực hệ'}
@@ -512,18 +513,18 @@ export default function GiaPhaAdminPage() {
                           <Link
                             href={`/admin/gia-pha/${member.id}`}
                             className="px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors"
-                            style={{ color: '#2563eb', background: 'rgba(37,99,235,0.06)' }}
-                            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = 'rgba(37,99,235,0.12)')}
-                            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = 'rgba(37,99,235,0.06)')}
+                            style={{ color: 'var(--t-info)', background: 'color-mix(in oklch, var(--t-info) 6%, transparent)' }}
+                            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = 'color-mix(in oklch, var(--t-info) 12%, transparent)')}
+                            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = 'color-mix(in oklch, var(--t-info) 6%, transparent)')}
                           >
                             Sửa
                           </Link>
                           <button
                             onClick={() => setDeleteTarget(member)}
                             className="px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors"
-                            style={{ color: '#dc2626', background: 'rgba(220,38,38,0.06)' }}
-                            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(220,38,38,0.12)')}
-                            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(220,38,38,0.06)')}
+                            style={{ color: 'var(--t-error)', background: 'color-mix(in oklch, var(--t-error) 6%, transparent)' }}
+                            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in oklch, var(--t-error) 12%, transparent)')}
+                            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in oklch, var(--t-error) 6%, transparent)')}
                           >
                             Xóa
                           </button>
@@ -536,6 +537,90 @@ export default function GiaPhaAdminPage() {
             </table>
           </div>
         </div>
+        <div className="space-y-3 sm:hidden">
+          {loading ? (
+            [...Array(4)].map((_, i) => (
+              <div key={i} className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-stone-100" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="h-4 w-2/3 rounded bg-stone-100" />
+                    <div className="h-3 w-24 rounded bg-stone-100" />
+                  </div>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="h-10 rounded-xl bg-stone-100" />
+                  <div className="h-10 rounded-xl bg-stone-100" />
+                </div>
+              </div>
+            ))
+          ) : members.length === 0 ? (
+            <div className="rounded-2xl border border-stone-200 bg-white px-5 py-12 text-center shadow-sm">
+              <svg className="mx-auto h-10 w-10 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <p className="mt-3 text-sm text-stone-400">{debouncedName ? `Không tìm thấy "${debouncedName}"` : 'Chưa có thành viên nào'}</p>
+            </div>
+          ) : (
+            members.map((member) => (
+              <article key={member.id} className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <AvatarCell member={member} />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-semibold text-stone-900">{member.fullName}</h3>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <GenderBadge gender={member.gender} />
+                      {member.generation ? (
+                        <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600">
+                          Đời {member.generation}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded-xl bg-stone-50 px-3 py-2">
+                    <span className="block text-stone-400">Ngày sinh</span>
+                    <span className="mt-0.5 block font-medium text-stone-700">
+                      {member.birthDate ? formatDayMonth(member.birthDate) : member.birthYear ?? '—'}
+                    </span>
+                  </div>
+                  <div className="rounded-xl bg-stone-50 px-3 py-2">
+                    <span className="block text-stone-400">Ngày mất</span>
+                    <span className="mt-0.5 block font-medium text-stone-700">
+                      {member.deathDate ? formatDayMonth(member.deathDate) : member.deathYear ?? '—'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-3 gap-2 border-t border-stone-100 pt-3">
+                  <button
+                    onClick={() => handleOpenLineage(member.id, member.fullName)}
+                    disabled={lineageLoading}
+                    className="min-h-9 rounded-lg bg-amber-50 px-2 text-center text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50"
+                    title="Xem cây trực hệ"
+                  >
+                    {lineageLoading ? '...' : 'Trực hệ'}
+                  </button>
+                  <Link
+                    href={`/admin/gia-pha/${member.id}`}
+                    className="flex min-h-9 items-center justify-center rounded-lg bg-blue-50 px-2 text-center text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100"
+                  >
+                    Sửa
+                  </Link>
+                  <button
+                    onClick={() => setDeleteTarget(member)}
+                    className="min-h-9 rounded-lg bg-red-50 px-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+        </>
       )}
 
       {/* ── Grid View ── */}
@@ -594,7 +679,7 @@ export default function GiaPhaAdminPage() {
 
       {/* ── Tree View ── */}
       {viewMode === 'tree' && (
-        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden h-[calc(100vh-200px)] min-h-[600px] flex flex-col">
+        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden h-[calc(100vh-240px)] min-h-[460px] flex flex-col sm:h-[calc(100vh-200px)] sm:min-h-[600px]">
           <div className="p-4 border-b border-stone-100 bg-stone-50">
             <h3 className="text-sm font-semibold text-stone-800">Sơ đồ cây gia phả</h3>
             <p className="text-xs text-stone-500">
@@ -613,16 +698,16 @@ export default function GiaPhaAdminPage() {
 
       {/* ── Pagination ── */}
       {(viewMode === 'table' || viewMode === 'grid') && totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-stone-200 pt-4 mt-4">
-          <p className="text-sm text-stone-500">
+        <div className="flex flex-col gap-3 border-t border-stone-200 pt-4 mt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-center text-sm text-stone-500 sm:text-left">
             Hiển thị <span className="font-medium">{(currentPage - 1) * PAGE_SIZE + 1}</span> đến{' '}
             <span className="font-medium">{Math.min(currentPage * PAGE_SIZE, total)}</span> trong số{' '}
             <span className="font-medium">{total}</span> kết quả
           </p>
-          <div className="flex items-center gap-1">
-            <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1.5 text-sm font-medium text-stone-600 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Trước</button>
-            <div className="px-4 py-1.5 text-sm font-medium text-stone-800 bg-stone-100 rounded-lg">{currentPage} / {totalPages}</div>
-            <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 text-sm font-medium text-stone-600 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Sau</button>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1 sm:flex">
+            <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-2 text-sm font-medium text-stone-600 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Trước</button>
+            <div className="px-4 py-2 text-sm font-medium text-stone-800 bg-stone-100 rounded-lg">{currentPage} / {totalPages}</div>
+            <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-2 text-sm font-medium text-stone-600 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Sau</button>
           </div>
         </div>
       )}

@@ -15,12 +15,12 @@ function GeometricBackground() {
       >
         <defs>
           <pattern id="dp" x="0" y="0" width="52" height="52" patternUnits="userSpaceOnUse">
-            <polygon points="26,2 50,26 26,50 2,26" fill="none" stroke="#d97706" strokeWidth="0.8" />
-            <polygon points="26,14 38,26 26,38 14,26" fill="none" stroke="#d97706" strokeWidth="0.4" />
-            <circle cx="26" cy="2" r="1.5" fill="#d97706" />
-            <circle cx="50" cy="26" r="1.5" fill="#d97706" />
-            <circle cx="26" cy="50" r="1.5" fill="#d97706" />
-            <circle cx="2" cy="26" r="1.5" fill="#d97706" />
+            <polygon points="26,2 50,26 26,50 2,26" fill="none" stroke="var(--t-warning)" strokeWidth="0.8" />
+            <polygon points="26,14 38,26 26,38 14,26" fill="none" stroke="var(--t-warning)" strokeWidth="0.4" />
+            <circle cx="26" cy="2" r="1.5" fill="var(--t-warning)" />
+            <circle cx="50" cy="26" r="1.5" fill="var(--t-warning)" />
+            <circle cx="26" cy="50" r="1.5" fill="var(--t-warning)" />
+            <circle cx="2" cy="26" r="1.5" fill="var(--t-warning)" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill="url(#dp)" />
@@ -34,14 +34,14 @@ function GeometricBackground() {
         xmlns="http://www.w3.org/2000/svg"
         style={{ opacity: 0.18 }}
       >
-        <path d="M0 200 L0 0 L200 0" stroke="#d97706" strokeWidth="1.5" />
-        <path d="M18 182 L18 18 L182 18" stroke="#d97706" strokeWidth="0.6" />
-        <path d="M36 164 L36 36 L164 36" stroke="#d97706" strokeWidth="0.25" />
-        <circle cx="0" cy="0" r="75" stroke="#d97706" strokeWidth="0.5" fill="none" />
-        <circle cx="0" cy="0" r="100" stroke="#d97706" strokeWidth="0.25" fill="none" />
-        <line x1="0" y1="40" x2="40" y2="0" stroke="#d97706" strokeWidth="0.5" />
-        <line x1="0" y1="80" x2="80" y2="0" stroke="#d97706" strokeWidth="0.3" />
-        <line x1="0" y1="120" x2="120" y2="0" stroke="#d97706" strokeWidth="0.15" />
+        <path d="M0 200 L0 0 L200 0" stroke="var(--t-warning)" strokeWidth="1.5" />
+        <path d="M18 182 L18 18 L182 18" stroke="var(--t-warning)" strokeWidth="0.6" />
+        <path d="M36 164 L36 36 L164 36" stroke="var(--t-warning)" strokeWidth="0.25" />
+        <circle cx="0" cy="0" r="75" stroke="var(--t-warning)" strokeWidth="0.5" fill="none" />
+        <circle cx="0" cy="0" r="100" stroke="var(--t-warning)" strokeWidth="0.25" fill="none" />
+        <line x1="0" y1="40" x2="40" y2="0" stroke="var(--t-warning)" strokeWidth="0.5" />
+        <line x1="0" y1="80" x2="80" y2="0" stroke="var(--t-warning)" strokeWidth="0.3" />
+        <line x1="0" y1="120" x2="120" y2="0" stroke="var(--t-warning)" strokeWidth="0.15" />
       </svg>
 
       {/* Bottom-right corner flourish */}
@@ -52,13 +52,13 @@ function GeometricBackground() {
         xmlns="http://www.w3.org/2000/svg"
         style={{ opacity: 0.18, transform: 'rotate(180deg)' }}
       >
-        <path d="M0 200 L0 0 L200 0" stroke="#d97706" strokeWidth="1.5" />
-        <path d="M18 182 L18 18 L182 18" stroke="#d97706" strokeWidth="0.6" />
-        <path d="M36 164 L36 36 L164 36" stroke="#d97706" strokeWidth="0.25" />
-        <circle cx="0" cy="0" r="75" stroke="#d97706" strokeWidth="0.5" fill="none" />
-        <circle cx="0" cy="0" r="100" stroke="#d97706" strokeWidth="0.25" fill="none" />
-        <line x1="0" y1="40" x2="40" y2="0" stroke="#d97706" strokeWidth="0.5" />
-        <line x1="0" y1="80" x2="80" y2="0" stroke="#d97706" strokeWidth="0.3" />
+        <path d="M0 200 L0 0 L200 0" stroke="var(--t-warning)" strokeWidth="1.5" />
+        <path d="M18 182 L18 18 L182 18" stroke="var(--t-warning)" strokeWidth="0.6" />
+        <path d="M36 164 L36 36 L164 36" stroke="var(--t-warning)" strokeWidth="0.25" />
+        <circle cx="0" cy="0" r="75" stroke="var(--t-warning)" strokeWidth="0.5" fill="none" />
+        <circle cx="0" cy="0" r="100" stroke="var(--t-warning)" strokeWidth="0.25" fill="none" />
+        <line x1="0" y1="40" x2="40" y2="0" stroke="var(--t-warning)" strokeWidth="0.5" />
+        <line x1="0" y1="80" x2="80" y2="0" stroke="var(--t-warning)" strokeWidth="0.3" />
       </svg>
 
       {/* Warm center glow */}
@@ -66,7 +66,7 @@ function GeometricBackground() {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full pointer-events-none"
         style={{
           background:
-            'radial-gradient(circle, rgba(139,26,26,0.10) 0%, rgba(180,83,9,0.06) 35%, transparent 65%)',
+            'radial-gradient(circle, color-mix(in oklch, var(--t-accent) 10%, transparent) 0%, color-mix(in oklch, var(--t-warning) 6%, transparent) 35%, transparent 65%)',
         }}
       />
     </>
@@ -131,16 +131,16 @@ function LoginContent() {
   }
 
   const inputStyle = {
-    background: 'rgba(20,14,8,0.85)',
-    border: '1px solid rgba(120,80,30,0.3)',
-    color: 'rgba(245,240,230,0.95)',
-    caretColor: '#d97706',
+    background: 'var(--t-surface-2)',
+    border: '1px solid var(--t-border)',
+    color: 'var(--t-text)',
+    caretColor: 'var(--t-accent)',
   } as React.CSSProperties;
 
   return (
     <div
       className="relative min-h-screen flex items-center justify-center px-4 py-16 overflow-hidden"
-      style={{ background: 'linear-gradient(150deg, #100c08 0%, #1a1208 45%, #200d07 75%, #100c08 100%)' }}
+      style={{ background: 'var(--t-bg)' }}
     >
       <GeometricBackground />
 
@@ -162,14 +162,14 @@ function LoginContent() {
               xmlns="http://www.w3.org/2000/svg"
               style={{ opacity: 0.22 }}
             >
-              <polygon points="44,3 81,23 81,65 44,85 7,65 7,23" stroke="#d97706" strokeWidth="1" />
-              <polygon points="44,13 71,29 71,59 44,75 17,59 17,29" stroke="#d97706" strokeWidth="0.5" strokeDasharray="3 4" />
+              <polygon points="44,3 81,23 81,65 44,85 7,65 7,23" stroke="var(--t-warning)" strokeWidth="1" />
+              <polygon points="44,13 71,29 71,59 44,75 17,59 17,29" stroke="var(--t-warning)" strokeWidth="0.5" strokeDasharray="3 4" />
             </svg>
             <div
               className="relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl"
               style={{
-                background: 'linear-gradient(145deg, #8b1a1a, #c26010)',
-                boxShadow: '0 8px 40px rgba(139,26,26,0.45), 0 0 0 1px rgba(212,175,55,0.2)',
+                background: 'linear-gradient(145deg, var(--t-accent), var(--t-warning))',
+                boxShadow: '0 8px 40px color-mix(in oklch, var(--t-accent) 45%, transparent)',
               }}
             >
               <span
@@ -184,9 +184,9 @@ function LoginContent() {
           <h1
             className="text-[1.65rem] mb-2 tracking-wide"
             style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontWeight: 600,
-              color: 'rgba(254,243,199,0.92)',
+              fontFamily: 'var(--t-display-font)',
+              fontWeight: 'var(--t-heading-weight)',
+              color: 'var(--t-text)',
               letterSpacing: '0.03em',
             }}
           >
@@ -196,17 +196,17 @@ function LoginContent() {
           <div className="flex items-center justify-center gap-3">
             <div
               className="h-px flex-1 max-w-[60px]"
-              style={{ background: 'linear-gradient(to right, transparent, rgba(217,119,6,0.45))' }}
+              style={{ background: 'linear-gradient(to right, transparent, color-mix(in oklch, var(--t-warning) 45%, transparent))' }}
             />
             <span
               className="text-[10px] font-semibold uppercase"
-              style={{ color: 'rgba(217,119,6,0.65)', letterSpacing: '0.22em' }}
+              style={{ color: 'color-mix(in oklch, var(--t-warning) 65%, transparent)', letterSpacing: '0.22em' }}
             >
               Cổng quản trị
             </span>
             <div
               className="h-px flex-1 max-w-[60px]"
-              style={{ background: 'linear-gradient(to left, transparent, rgba(217,119,6,0.45))' }}
+              style={{ background: 'linear-gradient(to left, transparent, color-mix(in oklch, var(--t-warning) 45%, transparent))' }}
             />
           </div>
         </div>
@@ -217,15 +217,15 @@ function LoginContent() {
           style={{
             background: 'rgba(18,12,7,0.88)',
             backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(110,70,25,0.35)',
-            boxShadow: '0 0 0 1px rgba(212,175,55,0.07), 0 28px 70px rgba(0,0,0,0.65)',
+            border: '1px solid color-mix(in oklch, var(--t-warning) 35%, transparent)',
+            boxShadow: '0 0 0 1px color-mix(in oklch, var(--t-gold) 7%, transparent), 0 28px 70px rgba(0,0,0,0.65)',
           }}
         >
           {/* top accent line */}
           <div
             style={{
               height: '2px',
-              background: 'linear-gradient(90deg, transparent, rgba(217,119,6,0.65) 30%, rgba(180,83,9,0.4) 70%, transparent)',
+              background: 'linear-gradient(90deg, transparent, color-mix(in oklch, var(--t-warning) 65%, transparent) 30%, color-mix(in oklch, var(--t-accent) 40%, transparent) 70%, transparent)',
             }}
           />
 
@@ -258,11 +258,11 @@ function LoginContent() {
                   className="w-full text-sm rounded-xl py-3 px-4 outline-none transition-all placeholder-stone-700"
                   style={inputStyle}
                   onFocus={(e) => {
-                    e.target.style.borderColor = 'rgba(217,119,6,0.55)';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(217,119,6,0.08)';
+                    e.target.style.borderColor = 'color-mix(in oklch, var(--t-warning) 55%, transparent)';
+                    e.target.style.boxShadow = '0 0 0 3px color-mix(in oklch, var(--t-warning) 8%, transparent)';
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(120,80,30,0.3)';
+                    e.target.style.borderColor = 'color-mix(in oklch, var(--t-warning) 30%, transparent)';
                     e.target.style.boxShadow = 'none';
                   }}
                 />
@@ -289,11 +289,11 @@ function LoginContent() {
                     className="w-full text-sm rounded-xl py-3 pl-4 pr-11 outline-none transition-all placeholder-stone-700"
                     style={inputStyle}
                     onFocus={(e) => {
-                      e.target.style.borderColor = 'rgba(217,119,6,0.55)';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(217,119,6,0.08)';
+                      e.target.style.borderColor = 'color-mix(in oklch, var(--t-warning) 55%, transparent)';
+                      e.target.style.boxShadow = '0 0 0 3px color-mix(in oklch, var(--t-warning) 8%, transparent)';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = 'rgba(120,80,30,0.3)';
+                      e.target.style.borderColor = 'color-mix(in oklch, var(--t-warning) 30%, transparent)';
                       e.target.style.boxShadow = 'none';
                     }}
                   />
@@ -301,7 +301,7 @@ function LoginContent() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                    style={{ color: 'rgba(120,80,30,0.65)' }}
+                    style={{ color: 'color-mix(in oklch, var(--t-warning) 65%, transparent)' }}
                     aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   >
                     {showPassword ? <EyeOffIcon /> : <EyeOnIcon />}
@@ -313,9 +313,9 @@ function LoginContent() {
                 <div
                   className="rounded-xl px-4 py-3 text-xs flex items-start gap-2.5"
                   style={{
-                    background: 'rgba(110,15,15,0.35)',
-                    border: '1px solid rgba(185,28,28,0.3)',
-                    color: '#fca5a5',
+                    background: 'color-mix(in oklch, var(--t-error) 15%, transparent)',
+                    border: '1px solid color-mix(in oklch, var(--t-error) 30%, transparent)',
+                    color: 'var(--t-error)',
                   }}
                 >
                   <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -334,9 +334,9 @@ function LoginContent() {
                 disabled={loading}
                 className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
                 style={{
-                  background: loading ? 'rgba(120,40,10,0.8)' : 'linear-gradient(135deg, #8b1a1a 0%, #b45309 100%)',
-                  color: '#fef3c7',
-                  boxShadow: '0 4px 24px rgba(139,26,26,0.28)',
+                  background: loading ? 'color-mix(in oklch, var(--t-accent) 80%, transparent)' : 'linear-gradient(135deg, var(--t-accent) 0%, var(--t-warning) 100%)',
+                  color: 'var(--t-nav-active-text)',
+                  boxShadow: '0 4px 24px color-mix(in oklch, var(--t-accent) 28%, transparent)',
                   letterSpacing: '0.05em',
                 }}
               >
@@ -345,7 +345,7 @@ function LoginContent() {
                     <>
                       <span
                         className="w-3.5 h-3.5 border-2 rounded-full animate-spin"
-                        style={{ borderColor: 'rgba(254,243,199,0.3)', borderTopColor: '#fef3c7' }}
+                        style={{ borderColor: 'color-mix(in oklch, var(--t-nav-active-text) 30%, transparent)', borderTopColor: 'var(--t-nav-active-text)' }}
                       />
                       Đang đăng nhập...
                     </>
@@ -356,7 +356,7 @@ function LoginContent() {
                 {!loading && (
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: 'linear-gradient(135deg, #b91c1c 0%, #ca6010 100%)' }}
+                    style={{ background: 'linear-gradient(135deg, var(--t-accent-soft) 0%, var(--t-warning) 100%)' }}
                   />
                 )}
               </button>
@@ -367,14 +367,14 @@ function LoginContent() {
           <div className="px-7 pb-7">
             <div
               className="h-px mb-4"
-              style={{ background: 'linear-gradient(90deg, transparent, rgba(110,70,25,0.3), transparent)' }}
+              style={{ background: 'linear-gradient(90deg, transparent, color-mix(in oklch, var(--t-warning) 30%, transparent), transparent)' }}
             />
             <div className="grid grid-cols-2 gap-2.5">
               <div
                 className="rounded-xl p-3"
                 style={{
                   background: 'rgba(18,12,7,0.7)',
-                  border: '1px solid rgba(110,70,25,0.2)',
+                  border: '1px solid color-mix(in oklch, var(--t-warning) 20%, transparent)',
                 }}
               >
                 <div className="flex items-center gap-2 mb-1.5">
@@ -383,7 +383,7 @@ function LoginContent() {
                     Admin tổng
                   </span>
                 </div>
-                <p className="text-[10px] leading-relaxed" style={{ color: 'rgba(120,80,30,0.75)' }}>
+                <p className="text-[10px] leading-relaxed" style={{ color: 'color-mix(in oklch, var(--t-warning) 75%, transparent)' }}>
                   Toàn quyền quản trị hệ thống
                 </p>
               </div>
@@ -391,7 +391,7 @@ function LoginContent() {
                 className="rounded-xl p-3"
                 style={{
                   background: 'rgba(18,12,7,0.7)',
-                  border: '1px solid rgba(110,70,25,0.2)',
+                  border: '1px solid color-mix(in oklch, var(--t-warning) 20%, transparent)',
                 }}
               >
                 <div className="flex items-center gap-2 mb-1.5">
@@ -400,7 +400,7 @@ function LoginContent() {
                     Quản trị chi
                   </span>
                 </div>
-                <p className="text-[10px] leading-relaxed" style={{ color: 'rgba(120,80,30,0.75)' }}>
+                <p className="text-[10px] leading-relaxed" style={{ color: 'color-mix(in oklch, var(--t-warning) 75%, transparent)' }}>
                   Quản lý trong phạm vi chi họ
                 </p>
               </div>
@@ -408,7 +408,7 @@ function LoginContent() {
           </div>
         </div>
 
-        <p className="text-center mt-5 text-[11px]" style={{ color: 'rgba(110,70,25,0.5)' }}>
+        <p className="text-center mt-5 text-[11px]" style={{ color: 'color-mix(in oklch, var(--t-warning) 50%, transparent)' }}>
           Gia Phả Họ Phùng Bát Tràng © {year}
         </p>
       </div>
@@ -418,7 +418,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" style={{ background: '#100c08' }} />}>
+    <Suspense fallback={<div className="min-h-screen" style={{ background: 'var(--t-bg)' }} />}>
       <LoginContent />
     </Suspense>
   );

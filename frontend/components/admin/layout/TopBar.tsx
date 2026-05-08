@@ -11,15 +11,15 @@ import type { SearchResults } from '@/types';
 const roleMeta: Record<Role, { label: string; bg: string; text: string; border: string }> = {
   SUPER_ADMIN: {
     label: 'Admin tổng',
-    bg: 'rgba(245,158,11,0.1)',
-    text: 'rgba(217,119,6,0.9)',
-    border: 'rgba(245,158,11,0.25)',
+    bg: 'color-mix(in oklch, var(--t-warning) 10%, transparent)',
+    text: 'var(--t-warning)',
+    border: 'color-mix(in oklch, var(--t-warning) 25%, transparent)',
   },
   CHI_ADMIN: {
     label: 'Quản trị chi',
-    bg: 'rgba(56,189,248,0.08)',
-    text: 'rgba(14,165,233,0.85)',
-    border: 'rgba(56,189,248,0.2)',
+    bg: 'color-mix(in oklch, var(--t-info) 8%, transparent)',
+    text: 'var(--t-info)',
+    border: 'color-mix(in oklch, var(--t-info) 20%, transparent)',
   },
 };
 
@@ -74,7 +74,7 @@ function GlobalSearch() {
       <div className="relative">
         <svg
           className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-          style={{ color: 'rgba(168,162,158,0.5)' }}
+          style={{ color: 'var(--t-text-3)' }}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -95,9 +95,9 @@ function GlobalSearch() {
           placeholder="Tìm kiếm hệ thống..."
           className="w-64 lg:w-80 pl-9 pr-4 py-1.5 rounded-lg text-sm transition-colors"
           style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: 'rgba(214,211,209,0.9)',
+            background: 'var(--t-surface-2)',
+            border: '1px solid var(--t-border)',
+            color: 'var(--t-text)',
           }}
         />
         {loading && (
@@ -193,8 +193,8 @@ export default function TopBar() {
     <header
       className="h-14 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 relative z-20"
       style={{
-        background: 'rgba(15,10,6,0.95)',
-        borderBottom: '1px solid rgba(80,50,20,0.3)',
+        background: 'var(--t-nav-bg)',
+        borderBottom: '1px solid var(--t-border)',
         backdropFilter: 'blur(8px)',
       }}
     >
@@ -203,7 +203,7 @@ export default function TopBar() {
         <button
           onClick={toggleMobile}
           className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-          style={{ color: 'rgba(168,162,158,0.6)' }}
+          style={{ color: 'var(--t-text-3)' }}
           aria-label="Mở menu"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -216,9 +216,9 @@ export default function TopBar() {
 
       <div className="flex items-center gap-4">
         <div className="hidden sm:flex items-center gap-2.5">
-          <span className="text-sm" style={{ color: 'rgba(168,162,158,0.6)' }}>
+          <span className="text-sm" style={{ color: 'var(--t-text-3)' }}>
             Xin chào,{' '}
-            <span className="font-semibold" style={{ color: 'rgba(214,211,209,0.9)' }}>
+            <span className="font-semibold" style={{ color: 'var(--t-text)' }}>
               {user?.username ?? '...'}
             </span>
           </span>
@@ -245,13 +245,13 @@ export default function TopBar() {
         <button
           onClick={logout}
           className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-all group"
-          style={{ color: 'rgba(168,162,158,0.55)' }}
+          style={{ color: 'var(--t-text-3)' }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color = '#fca5a5';
-            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(139,26,26,0.15)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--t-accent)';
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-red-50)';
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color = 'rgba(168,162,158,0.55)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--t-text-3)';
             (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
           }}
         >

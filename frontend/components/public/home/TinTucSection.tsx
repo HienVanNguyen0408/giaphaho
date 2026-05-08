@@ -14,10 +14,14 @@ function NewsCard({ item }: { item: NewsListItem }) {
   return (
     <Link
       href={`/tin-tuc/${item.slug}`}
-      className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-sm shadow-stone-200 border border-stone-100 hover:shadow-md hover:shadow-amber-100/50 hover:border-amber-200 transition-all duration-300"
+      className="group flex flex-col rounded-xl overflow-hidden transition-all duration-300 deal-card"
+      style={{
+        background: 'var(--t-surface)',
+        border: '1px solid var(--t-border)',
+      }}
     >
       {/* Thumbnail */}
-      <div className="relative overflow-hidden bg-stone-100 h-44">
+      <div className="relative overflow-hidden aspect-[16/9]" style={{ background: 'var(--t-surface-2)' }}>
         {item.thumbnail ? (
           <Image
             src={item.thumbnail}
@@ -27,21 +31,36 @@ function NewsCard({ item }: { item: NewsListItem }) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-red-900 to-amber-800 flex items-center justify-center">
-            <span className="text-amber-400/30 text-6xl select-none" aria-hidden="true">鳳</span>
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ background: 'var(--t-accent)' }}
+          >
+            <span
+              className="text-6xl select-none"
+              style={{ color: 'color-mix(in oklch, var(--t-nav-active-text) 25%, transparent)' }}
+              aria-hidden="true"
+            >
+              鳳
+            </span>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-5 flex flex-col flex-1">
-        <p className="text-amber-700 text-xs font-medium mb-2">
+      <div className="p-4 sm:p-5 flex flex-col flex-1">
+        <p className="text-xs font-medium mb-2" style={{ color: 'var(--t-accent)' }}>
           {formatDate(item.publishedAt)}
         </p>
-        <h3 className="text-stone-800 font-semibold text-base leading-snug mb-3 flex-1 group-hover:text-red-800 transition-colors line-clamp-2">
+        <h3
+          className="font-semibold text-sm sm:text-base leading-snug mb-3 flex-1 line-clamp-2 transition-colors"
+          style={{ color: 'var(--t-text)' }}
+        >
           {item.title}
         </h3>
-        <span className="text-amber-700 text-sm font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+        <span
+          className="text-sm font-medium flex items-center gap-1 group-hover:gap-2 transition-all"
+          style={{ color: 'var(--t-accent)' }}
+        >
           Đọc tiếp
           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -56,19 +75,36 @@ export default function TinTucSection({ news }: { news: NewsListItem[] }) {
   const displayNews = news.slice(0, 3);
 
   return (
-    <section className="py-14 bg-stone-50" aria-label="Tin tức">
+    <section
+      className="py-10 sm:py-14"
+      aria-label="Tin tức"
+      style={{ background: 'var(--t-surface-2)' }}
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
           <div>
-            <p className="text-amber-700 text-xs font-semibold uppercase tracking-widest mb-1">
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-1"
+              style={{ color: 'var(--t-accent)' }}
+            >
               Cập nhật
             </p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-stone-900">Tin Tức Dòng Họ</h2>
+            <h2
+              className="text-xl sm:text-3xl font-bold"
+              style={{ color: 'var(--t-text)' }}
+            >
+              Tin Tức Dòng Họ
+            </h2>
           </div>
           <Link
             href="/tin-tuc"
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm text-amber-700 font-medium border border-amber-300 hover:bg-amber-50 px-4 py-2 rounded-lg transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            style={{
+              color: 'var(--t-accent)',
+              border: '1px solid var(--t-border)',
+              background: 'var(--t-surface)',
+            }}
           >
             Xem thêm
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -79,11 +115,14 @@ export default function TinTucSection({ news }: { news: NewsListItem[] }) {
 
         {/* Cards */}
         {displayNews.length === 0 ? (
-          <div className="bg-white border border-stone-200 rounded-xl p-10 text-center">
-            <p className="text-stone-500 text-sm">Chưa có tin tức nào.</p>
+          <div
+            className="rounded-xl p-10 text-center"
+            style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)' }}
+          >
+            <p className="text-sm" style={{ color: 'var(--t-text-3)' }}>Chưa có tin tức nào.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {displayNews.map((item) => (
               <NewsCard key={item.id} item={item} />
             ))}
@@ -91,10 +130,15 @@ export default function TinTucSection({ news }: { news: NewsListItem[] }) {
         )}
 
         {/* Mobile "Xem thêm" */}
-        <div className="mt-8 text-center sm:hidden">
+        <div className="mt-6 text-center sm:hidden">
           <Link
             href="/tin-tuc"
-            className="inline-flex items-center gap-1.5 text-sm text-amber-700 font-medium border border-amber-300 hover:bg-amber-50 px-5 py-2.5 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            style={{
+              color: 'var(--t-accent)',
+              border: '1px solid var(--t-border)',
+              background: 'var(--t-surface)',
+            }}
           >
             Xem thêm tin tức
           </Link>

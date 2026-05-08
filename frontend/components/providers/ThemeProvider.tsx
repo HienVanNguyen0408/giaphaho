@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext } from 'react';
 
-export type ThemeId = 'bachLien' | 'sonMai' | 'giayCo' | 'lamNgoc';
+export type ThemeId = 'chuSa';
 
 export interface ThemeDefinition {
   id: ThemeId;
@@ -14,78 +14,27 @@ export interface ThemeDefinition {
 
 export const THEMES: ThemeDefinition[] = [
   {
-    id: 'bachLien',
-    name: 'Bạch Liên',
-    nameEn: 'White Lotus',
-    swatches: ['#faf7f0', '#8b1a1a', '#ca8a04', '#1c1208'],
+    id: 'chuSa',
+    name: 'Chu Sa',
+    nameEn: 'Cinnabar',
+    swatches: ['#ffffff', '#f8f8f8', '#8B0000', '#0a0a0a'],
     dark: false,
-  },
-  {
-    id: 'sonMai',
-    name: 'Sơn Mài',
-    nameEn: 'Lacquerware',
-    swatches: ['#0c0804', '#1a0f08', '#d4a03c', '#d4af37'],
-    dark: true,
-  },
-  {
-    id: 'giayCo',
-    name: 'Giấy Cổ',
-    nameEn: 'Ancient Paper',
-    swatches: ['#f2e8d0', '#fef9ec', '#7c2d12', '#b07820'],
-    dark: false,
-  },
-  {
-    id: 'lamNgoc',
-    name: 'Lam Ngọc',
-    nameEn: 'Jade Night',
-    swatches: ['#080c18', '#0f1626', '#14b8a6', '#d4af37'],
-    dark: true,
   },
 ];
 
-const STORAGE_KEY = 'giaphaho-theme';
-
 interface ThemeContextValue {
   theme: ThemeId;
-  setTheme: (id: ThemeId) => void;
   themes: ThemeDefinition[];
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'bachLien',
-  setTheme: () => {},
+  theme: 'chuSa',
   themes: THEMES,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeId>('bachLien');
-
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as ThemeId | null;
-    if (stored && THEMES.find((t) => t.id === stored)) {
-      applyTheme(stored);
-      setThemeState(stored);
-    }
-  }, []);
-
-  function applyTheme(id: ThemeId) {
-    document.documentElement.setAttribute('data-theme', id);
-    const def = THEMES.find((t) => t.id === id);
-    if (def?.dark) {
-      document.documentElement.style.colorScheme = 'dark';
-    } else {
-      document.documentElement.style.colorScheme = 'light';
-    }
-  }
-
-  function setTheme(id: ThemeId) {
-    setThemeState(id);
-    applyTheme(id);
-    localStorage.setItem(STORAGE_KEY, id);
-  }
-
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, themes: THEMES }}>
+    <ThemeContext.Provider value={{ theme: 'chuSa', themes: THEMES }}>
       {children}
     </ThemeContext.Provider>
   );

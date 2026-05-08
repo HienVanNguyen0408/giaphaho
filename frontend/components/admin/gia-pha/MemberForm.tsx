@@ -27,6 +27,9 @@ function SectionLabel({ children, action }: { children: React.ReactNode; action?
 const inputCls =
   'w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition-colors text-stone-800 placeholder-stone-400';
 
+const panelCls = 'rounded-2xl border border-stone-200 bg-white p-4 shadow-sm';
+const mutedPanelCls = 'rounded-2xl border border-stone-200 bg-stone-50/80 p-4';
+
 function EyeToggle({ visible, onToggle, label }: { visible: boolean; onToggle: () => void; label: string }) {
   return (
     <button
@@ -70,7 +73,7 @@ export default function MemberForm({
   const [fullName, setFullName] = useState(initialData?.fullName ?? '');
   const [gender, setGender] = useState(initialData?.gender ?? '');
   const [isDeceased, setIsDeceased] = useState(
-    !!(initialData?.deathYear || initialData?.deathDate),
+    !!(initialData?.deathYear || initialData?.deathDate || initialData?.burialPlace),
   );
   const [birthYear, setBirthYear] = useState<string>(
     initialData?.birthYear != null ? String(initialData.birthYear) : '',
@@ -206,7 +209,7 @@ export default function MemberForm({
     initialData?.descendantsCount != null;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-7">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {formError && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
           <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -217,7 +220,7 @@ export default function MemberForm({
       )}
 
       {/* ── Thông tin cơ bản ── */}
-      <div>
+      <div className={panelCls}>
         <SectionLabel>Thông tin cơ bản</SectionLabel>
         <div className="space-y-4">
           {/* Avatar + Full Name */}
@@ -225,7 +228,7 @@ export default function MemberForm({
             <div className="flex-shrink-0">
               <div
                 className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center relative"
-                style={{ background: '#f5f0e8', border: '2px dashed #d1c4b0' }}
+                style={{ background: 'var(--t-surface-2)', border: '2px dashed var(--t-border)' }}
               >
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -255,7 +258,7 @@ export default function MemberForm({
               </label>
             </div>
 
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="block text-xs font-semibold text-stone-600 mb-1.5">
                 Họ và tên <span className="text-red-500">*</span>
               </label>
@@ -267,100 +270,100 @@ export default function MemberForm({
                 placeholder="Nhập họ và tên đầy đủ"
                 className={inputCls}
               />
+            </div>
+          </div>
 
-              {/* Birth year (compact, always visible) */}
-              <div className="mt-3">
-                <label className="block text-xs font-semibold text-stone-600 mb-1.5">Năm sinh</label>
-                <input
-                  type="number"
-                  value={birthYear}
-                  onChange={(e) => setBirthYear(e.target.value)}
-                  placeholder="VD: 1950"
-                  min={1000}
-                  max={2100}
-                  className={inputCls}
-                />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Gender */}
+            <div>
+              <label className="block text-xs font-semibold text-stone-600 mb-1.5">Giới tính</label>
+              <div className="flex gap-2">
+                {[
+                  { value: 'Nam', icon: '♂', color: 'color-mix(in oklch, var(--t-info) 8%, transparent)', active: 'color-mix(in oklch, var(--t-info) 12%, transparent)', text: 'var(--t-info)' },
+                  { value: 'Nữ', icon: '♀', color: 'rgba(236,72,153,0.08)', active: 'rgba(236,72,153,0.12)', text: '#db2777' },
+                ].map((g) => (
+                  <button
+                    key={g.value}
+                    type="button"
+                    onClick={() => setGender(gender === g.value ? '' : g.value)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all border"
+                    style={
+                      gender === g.value
+                        ? { background: g.active, color: g.text, border: `1px solid ${g.text}40` }
+                        : { background: 'var(--t-surface)', color: 'var(--t-text-2)', border: '1px solid var(--t-border)' }
+                    }
+                  >
+                    <span className="text-base leading-none">{g.icon}</span>
+                    {g.value}
+                  </button>
+                ))}
+                {gender && (
+                  <button
+                    type="button"
+                    onClick={() => setGender('')}
+                    className="px-3 py-2 rounded-xl text-xs font-medium text-stone-400 hover:text-stone-600 transition-colors border border-stone-200 hover:border-stone-300"
+                  >
+                    Xóa
+                  </button>
+                )}
               </div>
             </div>
-          </div>
 
-          {/* Gender */}
-          <div>
-            <label className="block text-xs font-semibold text-stone-600 mb-1.5">Giới tính</label>
-            <div className="flex gap-2">
-              {[
-                { value: 'Nam', icon: '♂', color: 'rgba(59,130,246,0.08)', active: 'rgba(59,130,246,0.12)', text: '#2563eb' },
-                { value: 'Nữ', icon: '♀', color: 'rgba(236,72,153,0.08)', active: 'rgba(236,72,153,0.12)', text: '#db2777' },
-              ].map((g) => (
+            {/* Status: Còn sống / Đã mất */}
+            <div>
+              <label className="block text-xs font-semibold text-stone-600 mb-1.5">Tình trạng</label>
+              <div className="flex rounded-xl border border-stone-200 overflow-hidden bg-white">
                 <button
-                  key={g.value}
                   type="button"
-                  onClick={() => setGender(gender === g.value ? '' : g.value)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all border"
+                  onClick={() => setIsDeceased(false)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-all"
                   style={
-                    gender === g.value
-                      ? { background: g.active, color: g.text, border: `1px solid ${g.text}40` }
-                      : { background: 'white', color: '#78716c', border: '1px solid #e7e5e4' }
+                    !isDeceased
+                      ? { background: 'color-mix(in oklch, var(--t-success) 10%, transparent)', color: 'var(--t-success)' }
+                      : { color: 'var(--t-text-3)' }
                   }
                 >
-                  <span className="text-base leading-none">{g.icon}</span>
-                  {g.value}
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: !isDeceased ? 'var(--t-success)' : 'var(--t-border)' }} />
+                  Còn sống
                 </button>
-              ))}
-              {gender && (
+                <div className="w-px bg-stone-200" />
                 <button
                   type="button"
-                  onClick={() => setGender('')}
-                  className="px-3 py-2 rounded-xl text-xs font-medium text-stone-400 hover:text-stone-600 transition-colors border border-stone-200 hover:border-stone-300"
+                  onClick={() => setIsDeceased(true)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-all"
+                  style={
+                    isDeceased
+                      ? { background: 'color-mix(in oklch, var(--t-text-3) 8%, transparent)', color: 'var(--t-text-2)' }
+                      : { color: 'var(--t-text-3)' }
+                  }
                 >
-                  Xóa
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: isDeceased ? 'var(--t-text-3)' : 'var(--t-border)' }} />
+                  Đã mất
                 </button>
-              )}
-            </div>
-          </div>
-
-          {/* Status: Còn sống / Đã mất */}
-          <div>
-            <label className="block text-xs font-semibold text-stone-600 mb-1.5">Tình trạng</label>
-            <div className="flex rounded-xl border border-stone-200 overflow-hidden bg-white">
-              <button
-                type="button"
-                onClick={() => setIsDeceased(false)}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-all"
-                style={
-                  !isDeceased
-                    ? { background: 'rgba(16,185,129,0.1)', color: '#059669' }
-                    : { color: '#a8a29e' }
-                }
-              >
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: !isDeceased ? '#10b981' : '#d6d3d1' }} />
-                Còn sống
-              </button>
-              <div className="w-px bg-stone-200" />
-              <button
-                type="button"
-                onClick={() => setIsDeceased(true)}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-all"
-                style={
-                  isDeceased
-                    ? { background: 'rgba(120,113,108,0.08)', color: '#57534e' }
-                    : { color: '#a8a29e' }
-                }
-              >
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: isDeceased ? '#78716c' : '#d6d3d1' }} />
-                Đã mất
-              </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Nếu đã mất ── */}
-      {isDeceased && (
-        <div>
-          <SectionLabel>Thông tin khi mất</SectionLabel>
-          <div className="space-y-4 bg-stone-50 rounded-xl p-4 border border-stone-200">
-            <div className="grid grid-cols-2 gap-4">
+      {/* ── Sinh, mất & an táng ── */}
+      <div className={mutedPanelCls}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-xs font-semibold text-stone-600 mb-1.5">Năm sinh</label>
+            <input
+              type="number"
+              value={birthYear}
+              onChange={(e) => setBirthYear(e.target.value)}
+              placeholder="VD: 1950"
+              min={1000}
+              max={2100}
+              className={inputCls}
+            />
+          </div>
+
+          {isDeceased ? (
+            <>
               <div>
                 <label className="block text-xs font-semibold text-stone-600 mb-1.5">Năm mất</label>
                 <input
@@ -373,7 +376,7 @@ export default function MemberForm({
                   className={inputCls}
                 />
               </div>
-              <div>
+              <div className="sm:col-span-1">
                 <label className="block text-xs font-semibold text-stone-600 mb-1.5">Ngày mất</label>
                 <input
                   type="date"
@@ -382,23 +385,27 @@ export default function MemberForm({
                   className={inputCls}
                 />
               </div>
+              <div className="sm:col-span-1">
+                <label className="block text-xs font-semibold text-stone-600 mb-1.5">Nơi an táng</label>
+                <input
+                  type="text"
+                  value={burialPlace}
+                  onChange={(e) => setBurialPlace(e.target.value)}
+                  placeholder="Tên nghĩa trang hoặc địa điểm an táng"
+                  className={inputCls}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="rounded-xl border border-dashed border-stone-200 bg-white/70 px-4 py-3 text-xs leading-5 text-stone-400">
+              Khi chọn “Đã mất”, form sẽ hiện thêm ngày mất, năm mất và nơi an táng.
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-stone-600 mb-1.5">Nơi an táng</label>
-              <input
-                type="text"
-                value={burialPlace}
-                onChange={(e) => setBurialPlace(e.target.value)}
-                placeholder="Tên nghĩa trang hoặc địa điểm an táng"
-                className={inputCls}
-              />
-            </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* ── Thông tin bổ sung (expandable with hidden button) ── */}
-      <div>
+      <div className={panelCls}>
         <SectionLabel
           action={
             <button
@@ -433,29 +440,31 @@ export default function MemberForm({
             <p className="text-[11px] text-stone-400 -mt-2 mb-1">
               Nhấn biểu tượng mắt để bật/tắt hiển thị trong hồ sơ công khai.
             </p>
-            {OPTIONAL_FIELDS.map((field) => (
-              <div key={field.key} className="flex items-center gap-2">
-                <div className="flex-1">
-                  <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                    {field.label}
-                  </label>
-                  <input
-                    type={field.type}
-                    value={optionalValues[field.key]}
-                    onChange={(e) => setOptionalValue(field.key, e.target.value)}
-                    placeholder={field.placeholder}
-                    className={inputCls}
-                  />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {OPTIONAL_FIELDS.map((field) => (
+                <div key={field.key} className="flex items-start gap-2 rounded-xl border border-stone-100 bg-stone-50/60 p-3">
+                  <div className="flex-1">
+                    <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+                      {field.label}
+                    </label>
+                    <input
+                      type={field.type}
+                      value={optionalValues[field.key]}
+                      onChange={(e) => setOptionalValue(field.key, e.target.value)}
+                      placeholder={field.placeholder}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div className="pt-6 -mr-1">
+                    <EyeToggle
+                      visible={!!fieldConfig[field.key]}
+                      onToggle={() => toggleFieldVisibility(field.key)}
+                      label={field.label}
+                    />
+                  </div>
                 </div>
-                <div className="pt-6">
-                  <EyeToggle
-                    visible={!!fieldConfig[field.key]}
-                    onToggle={() => toggleFieldVisibility(field.key)}
-                    label={field.label}
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
 
@@ -469,7 +478,7 @@ export default function MemberForm({
       </div>
 
       {/* ── Quan hệ ── */}
-      <div>
+      <div className={panelCls}>
         <SectionLabel>Quan hệ trong gia phả</SectionLabel>
         <div className="space-y-4">
           {/* Parent selector */}
@@ -625,7 +634,7 @@ export default function MemberForm({
 
       {/* ── Số liệu thống kê (chỉ xem) ── */}
       {hasStats && (
-        <div>
+        <div className={panelCls}>
           <SectionLabel>Số liệu thống kê</SectionLabel>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
@@ -650,7 +659,7 @@ export default function MemberForm({
       )}
 
       {/* ── Tiểu sử & Thành tựu ── */}
-      <div>
+      <div className={panelCls}>
         <SectionLabel>Tiểu sử & Thành tựu</SectionLabel>
         <div className="space-y-4">
           <div>
@@ -773,14 +782,14 @@ export default function MemberForm({
           disabled={loading || avatarUploading}
           className="w-full py-3 rounded-xl font-semibold text-sm tracking-wide transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{
-            background: 'linear-gradient(135deg, #8b1a1a, #b45309)',
-            color: '#fef3c7',
-            boxShadow: '0 2px 16px rgba(139,26,26,0.2)',
+            background: 'var(--t-accent)',
+            color: 'var(--t-nav-active-text)',
+            boxShadow: '0 2px 16px color-mix(in oklch, var(--t-accent) 20%, transparent)',
           }}
         >
           {loading ? (
             <>
-              <span className="w-3.5 h-3.5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(254,243,199,0.3)', borderTopColor: '#fef3c7' }} />
+              <span className="w-3.5 h-3.5 border-2 rounded-full animate-spin" style={{ borderColor: 'color-mix(in oklch, var(--t-nav-active-text) 30%, transparent)', borderTopColor: 'var(--t-nav-active-text)' }} />
               Đang lưu...
             </>
           ) : (
