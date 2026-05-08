@@ -156,8 +156,14 @@ async function runRecalculation(jobId: string): Promise<void> {
           const s = statsMap.get(m.id)!;
           return prisma.member.update({
             where: { id: m.id },
-            data: s,
-            select: { id: true }, // minimal response
+            data: {
+              generation: s.generation,
+              siblingsCount: s.siblingsCount,
+              sonsCount: s.sonsCount,
+              daughtersCount: s.daughtersCount,
+              descendantsCount: s.descendantsCount,
+            },
+            select: { id: true },
           });
         }),
       );

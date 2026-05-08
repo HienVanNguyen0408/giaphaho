@@ -137,10 +137,12 @@ function DetailPanel({
   memberId,
   onClose,
   onViewLineage,
+  onEditMember,
 }: {
   memberId: string;
   onClose: () => void;
   onViewLineage: (id: string, name: string) => void;
+  onEditMember?: (id: string) => void;
 }) {
   const [detail, setDetail] = useState<MemberDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -268,6 +270,14 @@ function DetailPanel({
             <p className="text-xs text-stone-600 leading-relaxed">{detail.bio}</p>
           )}
           <div className="space-y-2 pt-1">
+            {onEditMember && (
+              <button
+                onClick={() => onEditMember(detail.id)}
+                className="block w-full text-center text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg py-1.5 transition-colors"
+              >
+                Sửa thông tin
+              </button>
+            )}
             <button
               onClick={() => onViewLineage(detail.id, detail.fullName)}
               className="block w-full text-center text-xs font-medium text-white bg-amber-700 hover:bg-amber-800 rounded-lg py-1.5 transition-colors"
@@ -375,7 +385,7 @@ function TreeSearch({ nodes, onSelect }: { nodes: Node[], onSelect: (id: string)
 }
 
 // -------- Inner Flow --------
-function FamilyTreeInner({ refreshKey }: { refreshKey?: number }) {
+function FamilyTreeInner({ refreshKey, onEditMember, onDeleteMember }: { refreshKey?: number; onEditMember?: (id: string) => void; onDeleteMember?: (id: string) => Promise<void> }) {
   const searchParams = useSearchParams();
   const activeMemberId = searchParams.get('active');
 
@@ -491,6 +501,7 @@ function FamilyTreeInner({ refreshKey }: { refreshKey?: number }) {
           memberId={selectedId}
           onClose={() => setSelectedId(null)}
           onViewLineage={(id, name) => setLineageTarget({ id, name })}
+          onEditMember={onEditMember}
         />
       )}
       {lineageTarget && (
@@ -499,6 +510,8 @@ function FamilyTreeInner({ refreshKey }: { refreshKey?: number }) {
           memberName={lineageTarget.name}
           allMembers={allMembers}
           onClose={() => setLineageTarget(null)}
+          onEditMember={onEditMember}
+          onDeleteMember={onDeleteMember}
         />
       )}
     </div>
@@ -507,11 +520,11 @@ function FamilyTreeInner({ refreshKey }: { refreshKey?: number }) {
 }
 
 // -------- Export --------
-export default function FamilyTree({ refreshKey }: { refreshKey?: number }) {
+export default function FamilyTree({ refreshKey, onEditMember, onDeleteMember }: { refreshKey?: number; onEditMember?: (id: string) => void; onDeleteMember?: (id: string) => Promise<void> }) {
   return (
     <ReactFlowProvider>
       <Suspense fallback={<TreeSkeleton />}>
-        <FamilyTreeInner refreshKey={refreshKey} />
+        <FamilyTreeInner refreshKey={refreshKey} onEditMember={onEditMember} onDeleteMember={onDeleteMember} />
       </Suspense>
     </ReactFlowProvider>
   );

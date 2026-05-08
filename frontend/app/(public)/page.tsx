@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description: 'Website lưu giữ và phát huy truyền thống dòng họ Phùng Bát Tràng — gia phả, tin tức, và tư liệu lịch sử.',
 };
 import HeroSection from '@/components/public/home/HeroSection';
+import QuickServicesSection from '@/components/public/home/QuickServicesSection';
 import TinNoiBat from '@/components/public/home/TinNoiBat';
 import ThanhTichSection from '@/components/public/home/ThanhTichSection';
 import TinTucSection from '@/components/public/home/TinTucSection';
@@ -29,7 +30,7 @@ async function getHomeData(): Promise<{
     getNewsList(1, 3),
     getVideos(),
     getSections(),
-    getDashboard(), // This returns member counts, etc.
+    getDashboard(),
   ]);
 
   const pinnedNews =
@@ -42,7 +43,7 @@ async function getHomeData(): Promise<{
       : [];
   const sections =
     sectionsRes.status === 'fulfilled' ? sectionsRes.value.data : [];
-  const stats = 
+  const stats =
     statsRes.status === 'fulfilled' ? statsRes.value.data : null;
 
   return { pinnedNews, recentNews, videos, sections, stats };
@@ -53,11 +54,25 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* 1. Hero + Search widget (VNA booking form style) */}
       <HeroSection stats={stats} />
+
+      {/* 2. Quick services row (VNA quick services bar) */}
+      <QuickServicesSection />
+
+      {/* 3. Tin nổi bật (VNA "Ưu đãi nổi bật" deal cards) */}
       <TinNoiBat news={pinnedNews} />
+
+      {/* 4. Giá trị dòng họ */}
       <ThanhTichSection />
+
+      {/* 5. Tin tức dòng họ */}
       <TinTucSection news={recentNews} />
+
+      {/* 6. Video */}
       <VideoSection videos={videos} />
+
+      {/* 7. Chuyên mục động */}
       <DynamicSection sections={sections} />
     </>
   );
