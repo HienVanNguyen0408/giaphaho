@@ -376,8 +376,8 @@ export const MemberService = {
   async exportAll() {
     return prisma.member.findMany({
       orderBy: [
-        { generation: { sort: 'asc', nulls: 'last' } },
-        { siblingOrder: { sort: 'asc', nulls: 'last' } },
+        { generation: 'asc' },
+        { siblingOrder: 'asc' },
         { fullName: 'asc' },
       ],
     });
