@@ -96,7 +96,15 @@ Lamf đi rồi seed dữ liệu 2 chi nhánh đó vào ddatabase cho tôi, nối
 
 
 
-Sưa rlaji layout dọc , admin dọc, bố cục của layout cũng như trang chủ
+Giờ tôi muốn thêm tính năng sửa thành viên cần có gì đó nhận biets được là anh em thứ tự như nao ra sao chứ, để lúc view trong cây gia phả hay cây trực hiện thì sẽ thực hiện view từ trái qua phải cho đúng, từ trái qua phải tức là lớn nhất là bên trái của cây, sau đó bé dần bé dần về vai vế làm sao sửa được lại thứ tự của anh em với nhau được
 
 
-Chỗ này tính toán được
+Bổ sung đầy đủ các option cho tôi để người viết bài dễ dàng viết bài và thao tác tạo bài viết hơn, hoặc có thêm tính năng copy nội dung file md từ chatGPT hay file docx, hay copy nội dung cũng sẽ convert vào ô editor dễ dàng
+
+
+Danh sách bài viết tin tức và danh sách video cần có thêm phân trang, bổ sung phân trang cho tôi ở cả admin và danh sách ở client
+
+cách nào nhanh, dễ sử dụng thì làm cho tôi
+
+
+Sao chọn tính năng Chèn link đường dẫn trong editor lại hỏi lên alert và điền thế bình thường editor đâu có thế

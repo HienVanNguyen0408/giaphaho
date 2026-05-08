@@ -2,6 +2,8 @@
 
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { uploadFile } from '@/lib/api';
+import { normalizeImageUrl } from '@/lib/imageUrl';
+import ImageUrlInput from '@/components/shared/ImageUrlInput';
 import type { Member, FieldConfig } from '@/types';
 
 interface MemberFormProps {
@@ -15,20 +17,20 @@ interface MemberFormProps {
 function SectionLabel({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 mb-4">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--t-text-3)' }}>
         {children}
       </span>
-      <div className="flex-1 h-px bg-stone-100" />
+      <div className="flex-1 h-px" style={{ background: 'var(--t-border)' }} />
       {action}
     </div>
   );
 }
 
 const inputCls =
-  'w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm bg-white focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-300 transition-colors text-stone-800 placeholder-stone-400';
+  'w-full px-4 py-2.5 rounded-xl border border-[var(--t-border)] text-sm bg-[var(--t-surface)] focus:outline-none focus:border-[var(--t-accent)] focus:ring-1 focus:ring-[var(--t-accent)] transition-colors text-[var(--t-text)] placeholder:text-[var(--t-text-3)]';
 
-const panelCls = 'rounded-2xl border border-stone-200 bg-white p-4 shadow-sm';
-const mutedPanelCls = 'rounded-2xl border border-stone-200 bg-stone-50/80 p-4';
+const panelCls = 'rounded-2xl border border-[var(--t-border)] bg-[var(--t-surface)] p-4 shadow-sm';
+const mutedPanelCls = 'rounded-2xl border border-[var(--t-border)] bg-[var(--t-surface-2)] p-4';
 
 function EyeToggle({ visible, onToggle, label }: { visible: boolean; onToggle: () => void; label: string }) {
   return (
@@ -36,15 +38,16 @@ function EyeToggle({ visible, onToggle, label }: { visible: boolean; onToggle: (
       type="button"
       onClick={onToggle}
       title={visible ? `Ẩn ${label} khỏi hồ sơ công khai` : `Hiện ${label} trong hồ sơ công khai`}
-      className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-stone-100"
+      className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+      style={{ color: visible ? 'var(--t-accent)' : 'var(--t-text-3)', background: visible ? 'color-mix(in oklch, var(--t-accent) 8%, var(--t-surface))' : 'transparent' }}
     >
       {visible ? (
-        <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
         </svg>
       ) : (
-        <svg className="w-4 h-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
         </svg>
       )}
@@ -87,6 +90,9 @@ export default function MemberForm({
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData?.avatar ?? null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [parentId, setParentId] = useState(initialData?.parentId ?? '');
+  const [siblingOrder, setSiblingOrder] = useState<string>(
+    initialData?.siblingOrder != null ? String(initialData.siblingOrder) : '',
+  );
   const [parentSearch, setParentSearch] = useState('');
   const [showParentDropdown, setShowParentDropdown] = useState(false);
   const [spouses, setSpouses] = useState<string[]>(initialData?.spouses ?? []);
@@ -143,6 +149,8 @@ export default function MemberForm({
   const removeContribution = (idx: number) =>
     setContributions((prev) => prev.filter((_, i) => i !== idx));
 
+  const [showUrlInput, setShowUrlInput] = useState(false);
+
   const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -184,6 +192,7 @@ export default function MemberForm({
       contributions: contributions.filter((c) => c.trim()),
       avatar: avatarUrl,
       parentId: parentId.trim() || null,
+      siblingOrder: siblingOrder ? Number(siblingOrder) : null,
       spouses: spouses.filter((s) => s.trim()),
       motherName: motherName.trim() || null,
       residence: optionalValues.residence || null,
@@ -224,53 +233,87 @@ export default function MemberForm({
         <SectionLabel>Thông tin cơ bản</SectionLabel>
         <div className="space-y-4">
           {/* Avatar + Full Name */}
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div
-                className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center relative"
-                style={{ background: 'var(--t-surface-2)', border: '2px dashed var(--t-border)' }}
-              >
-                {avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <svg className="w-7 h-7 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                )}
-                {avatarUploading && (
-                  <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                    <span className="w-4 h-4 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
-                  </div>
-                )}
+          <div className="space-y-3">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div
+                  className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center relative"
+                  style={{ background: 'var(--t-surface-2)', border: '2px dashed var(--t-border)' }}
+                >
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <svg className="w-7 h-7" style={{ color: 'var(--t-text-3)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  )}
+                  {avatarUploading && (
+                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                      <span className="w-4 h-4 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+                <div className="mt-1.5 flex flex-col items-center gap-1">
+                  <label className="flex justify-center cursor-pointer">
+                    <span className="text-[10px] font-medium transition-colors" style={{ color: 'var(--t-accent)' }}>
+                      {avatarUrl ? 'Đổi file' : 'Tải file'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      disabled={avatarUploading}
+                      className="sr-only"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlInput((v) => !v)}
+                    className="text-[10px] font-medium transition-colors"
+                    style={{ color: showUrlInput ? 'var(--t-accent)' : 'var(--t-text-3)' }}
+                  >
+                    Dán URL
+                  </button>
+                  {avatarUrl && (
+                    <button
+                      type="button"
+                      onClick={() => { setAvatarUrl(null); setShowUrlInput(false); }}
+                      className="text-[10px] font-medium transition-colors"
+                      style={{ color: 'var(--t-error)' }}
+                    >
+                      Xóa ảnh
+                    </button>
+                  )}
+                </div>
               </div>
-              <label className="mt-1.5 flex justify-center cursor-pointer">
-                <span className="text-[10px] text-red-600 font-medium hover:text-red-700 transition-colors">
-                  {avatarUrl ? 'Đổi ảnh' : 'Tải ảnh'}
-                </span>
+
+              <div className="flex-1 min-w-0">
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--t-text-2)' }}>
+                  Họ và tên <span style={{ color: 'var(--t-error)' }}>*</span>
+                </label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  disabled={avatarUploading}
-                  className="sr-only"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  placeholder="Nhập họ và tên đầy đủ"
+                  className={inputCls}
                 />
-              </label>
+              </div>
             </div>
 
-            <div className="flex-1 min-w-0">
-              <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                Họ và tên <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                placeholder="Nhập họ và tên đầy đủ"
-                className={inputCls}
+            {showUrlInput && (
+              <ImageUrlInput
+                value={avatarUrl}
+                onChange={(url) => {
+                  setAvatarUrl(url);
+                  if (url) setShowUrlInput(false);
+                }}
+                showPreview={false}
+                label="URL ảnh đại diện"
               />
-            </div>
+            )}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -561,6 +604,23 @@ export default function MemberForm({
                 className={`${inputCls} font-mono text-xs`}
               />
             )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+              Thứ tự anh/chị/em <span className="text-stone-400 font-normal">(1 là lớn nhất, nằm trái nhất)</span>
+            </label>
+            <input
+              type="number"
+              value={siblingOrder}
+              onChange={(e) => setSiblingOrder(e.target.value)}
+              placeholder="VD: 1"
+              min={1}
+              className={inputCls}
+            />
+            <p className="mt-1 text-[11px] text-stone-400">
+              Những người cùng Cha / Mẹ sẽ hiển thị từ trái sang phải theo số này; bỏ trống sẽ xếp sau theo năm sinh và tên.
+            </p>
           </div>
 
           {/* Spouses list */}

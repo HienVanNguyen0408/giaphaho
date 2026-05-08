@@ -1,0 +1,771 @@
+ ▐▛███▜▌   Claude Code v2.1.132
+▝▜█████▛▘  Sonnet 4.6 · Claude Team
+  ▘▘ ▝▝    ~/nvhien-2026/giaphaho
+
+❯ /clear                                                                        
+  ⎿  (no content)
+
+❯ Bổ sung thêm tính năng tải dữ liệu gia phả về cho tôi(có thể định dạng là     
+  file json, docs, md, html) view được dữ liệu, xme được dữ liệu , hoặc nó cũng 
+   là 1 bản backupo khji cần import lại, với tài khoản admin thì mới có quyền   
+  này  tải hjoawjc impoirt lại dư xliejeu                                       
+
+● Để hiểu codebase hiện tại trước khi implement, tôi sẽ khám phá cấu trúc
+  project.
+
+● Explore(Explore family tree codebase structure)
+  ⎿  Done (25 tool uses · 65.1k tokens · 1m 45s)
+  (ctrl+o to expand)
+
+● Bây giờ tôi đã hiểu kiến trúc. Hãy để tôi lập kế hoạch implementation trước
+  khi code.
+
+  Read 2 files, listed 5 directories (ctrl+o to expand)
+  ⎿  Loaded frontend/CLAUDE.md
+  ⎿  Loaded frontend/AGENTS.md
+
+● Bash(rtk ls /home/nvhien/nvhien-2026/giaphaho/backend/src/)
+  ⎿  (empty)
+
+  Listed 3 directories (ctrl+o to expand)
+
+● Bash(echo "test" && pwd && ls 2>&1)
+  ⎿  test
+     /home/nvhien/nvhien-2026/giaphaho
+     (empty)
+
+  Searched for 2 patterns (ctrl+o to expand)
+
+● Tốt, tôi đã thấy cấu trúc đầy đủ. Hãy đọc các file quan trọng trước khi
+  implement.
+
+  Read 6 files (ctrl+o to expand)
+
+● Tôi đã hiểu rõ codebase. Giờ implement tính năng export/import cho gia phả.
+
+  Kế hoạch:
+  1. Backend: thêm 2 endpoint GET /export?format=json|md|html và POST /import
+  (chỉ SUPER_ADMIN)
+  2. Frontend: thêm nút Export (dropdown chọn format) và Import (modal upload +
+  preview) trên trang admin gia phả
+
+  Bắt đầu với backend service trước.
+
+  Read 4 files (ctrl+o to expand)
+
+● Tôi đã có đủ thông tin. Bắt đầu implement.
+
+● Update(backend/src/services/member.service.ts)
+  ⎿  Added 102 lines
+      372      setImmediate(() => runRecalculation(jobId));
+      373      return jobId;
+      374    },
+      375 +                                                              
+      376 +  async exportAll() {                                         
+      377 +    return prisma.member.findMany({                           
+      378 +      orderBy: [                                              
+      379 +        { generation: { sort: 'asc', nulls: 'last' } },       
+      380 +        { siblingOrder: { sort: 'asc', nulls: 'last' } },     
+      381 +        { fullName: 'asc' },                                  
+      382 +      ],                                                      
+      383 +    });                                                       
+      384 +  },                                                          
+      385 +                                                              
+      386 +  async importMembers(                                        
+      387 +    members: unknown[],                                       
+      388 +    mode: 'merge' | 'replace',                                
+      389 +  ): Promise<{ created: number; updated: number; total: number
+          + }> {                                                         
+      390 +    type Raw = Record<string, unknown>;                       
+      391 +                                                              
+      392 +    const valid = members.filter(                             
+      393 +      (m): m is Raw =>                                        
+      394 +        typeof m === 'object' && m !== null && typeof (m as Ra
+          +w)['fullName'] === 'string',                                  
+      395 +    );                                                        
+      396 +                                                              
+      397 +    const str = (v: unknown): string | null => (v != null && v
+          + !== '' ? String(v) : null);                                  
+      398 +    const num = (v: unknown): number | null => {              
+      399 +      const n = Number(v);                                    
+      400 +      return v != null && v !== '' && !isNaN(n) ? n : null;   
+      401 +    };                                                        
+      402 +    const arr = (v: unknown): string[] => (Array.isArray(v) ? 
+          +v.map(String) : []);                                          
+      403 +                                                              
+      404 +    const extract = (m: Raw) => ({                            
+      405 +      fullName: String(m['fullName']),                        
+      406 +      avatar: str(m['avatar']),                               
+      407 +      birthYear: num(m['birthYear']),                         
+      408 +      birthDate: str(m['birthDate']),                         
+      409 +      deathYear: num(m['deathYear']),                         
+      410 +      deathDate: str(m['deathDate']),                         
+      411 +      gender: str(m['gender']),                               
+      412 +      bio: str(m['bio']),                                     
+      413 +      achievements: arr(m['achievements']),                   
+      414 +      parentId: str(m['parentId']),                           
+      415 +      siblingOrder: num(m['siblingOrder']),                   
+      416 +      chiId: str(m['chiId']),                                 
+      417 +      residence: str(m['residence']),                         
+      418 +      nationalId: str(m['nationalId']),                       
+      419 +      phone: str(m['phone']),                                 
+      420 +      email: str(m['email']),                                 
+      421 +      bankAccount: str(m['bankAccount']),                     
+      422 +      burialPlace: str(m['burialPlace']),                     
+      423 +      fieldConfig: m['fieldConfig'] != null ? (m['fieldConfig'
+          +] as Record<string, boolean>) : undefined,                    
+      424 +      spouses: arr(m['spouses']),                             
+      425 +      motherName: str(m['motherName']),                       
+      426 +      contributions: arr(m['contributions']),                 
+      427 +    });                                                       
+      428 +                                                              
+      429 +    if (mode === 'replace') {                                 
+      430 +      await prisma.member.updateMany({ data: { parentId: null 
+          +} });                                                         
+      431 +      await prisma.member.deleteMany({});                     
+      432 +      let created = 0;                                        
+      433 +      for (let i = 0; i < valid.length; i += BATCH_SIZE) {    
+      434 +        const batch = valid.slice(i, i + BATCH_SIZE);         
+      435 +        await Promise.all(                                    
+      436 +          batch.map((m) => {                                  
+      437 +            const id = str(m['id']);                          
+      438 +            const data = extract(m);                          
+      439 +            return id                                         
+      440 +              ? prisma.member.create({ data: { id, ...data }, 
+          +select: { id: true } })                                       
+      441 +              : prisma.member.create({ data, select: { id: tru
+          +e } });                                                       
+      442 +          }),                                                 
+      443 +        );                                                    
+      444 +        created += batch.length;                              
+      445 +      }                                                       
+      446 +      return { created, updated: 0, total: valid.length };    
+      447 +    }                                                         
+      448 +                                                              
+      449 +    // Merge: check which IDs already exist                   
+      450 +    const existingIds = new Set(                              
+      451 +      (await prisma.member.findMany({ select: { id: true } }))
+          +.map((m) => m.id),                                            
+      452 +    );                                                        
+      453 +                                                              
+      454 +    let created = 0;                                          
+      455 +    let updated = 0;                                          
+      456 +                                                              
+      457 +    for (let i = 0; i < valid.length; i += BATCH_SIZE) {      
+      458 +      const batch = valid.slice(i, i + BATCH_SIZE);           
+      459 +      await Promise.all(                                      
+      460 +        batch.map((m) => {                                    
+      461 +          const id = str(m['id']);                            
+      462 +          const data = extract(m);                            
+      463 +          if (id && existingIds.has(id)) {                    
+      464 +            updated++;                                        
+      465 +            return prisma.member.update({ where: { id }, data,
+          + select: { id: true } });                                     
+      466 +          }                                                   
+      467 +          created++;                                          
+      468 +          return id                                           
+      469 +            ? prisma.member.create({ data: { id, ...data }, se
+          +lect: { id: true } })                                         
+      470 +            : prisma.member.create({ data, select: { id: true 
+          +} });                                                         
+      471 +        }),                                                   
+      472 +      );                                                      
+      473 +    }                                                         
+      474 +                                                              
+      475 +    return { created, updated, total: valid.length };         
+      476 +  },                                                          
+      477  };
+
+● Giờ thêm các helper functions và methods vào controller:
+
+● Update(backend/src/controllers/member.controller.ts)
+  ⎿  Added 113 lines
+        2  import { MemberService, getJob } from '../services/member.serv
+           ice';
+        3  import { sendSuccess, sendCreated, sendError } from '../utils/
+           response';
+        4  
+        5 +// ── Export helpers ─────────────────────────────────────────
+          +───────────────────                                           
+        6 +                                                              
+        7 +type ExMember = {                                             
+        8 +  id: string;                                                 
+        9 +  fullName: string;                                           
+       10 +  gender: string | null;                                      
+       11 +  birthYear: number | null;                                   
+       12 +  deathYear: number | null;                                   
+       13 +  generation: number | null;                                  
+       14 +  parentId: string | null;                                    
+       15 +  siblingOrder: number | null;                                
+       16 +  bio: string | null;                                         
+       17 +};                                                            
+       18 +                                                              
+       19 +function cmpSiblings(a: ExMember, b: ExMember): number {      
+       20 +  const ao = a.siblingOrder ?? Infinity;                      
+       21 +  const bo = b.siblingOrder ?? Infinity;                      
+       22 +  if (ao !== bo) return ao - bo;                              
+       23 +  const ab = a.birthYear ?? Infinity;                         
+       24 +  const bb = b.birthYear ?? Infinity;                         
+       25 +  if (ab !== bb) return ab - bb;                              
+       26 +  return a.fullName.localeCompare(b.fullName, 'vi');          
+       27 +}                                                             
+       28 +                                                              
+       29 +function esc(s: string): string {                             
+       30 +  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
+          +e(/>/g, '&gt;');                                              
+       31 +}                                                             
+       32 +                                                              
+       33 +function toMd(members: ExMember[]): string {                  
+       34 +  const childrenOf = new Map<string | null, ExMember[]>();    
+       35 +  for (const m of members) {                                  
+       36 +    const pid = m.parentId ?? null;                           
+       37 +    if (!childrenOf.has(pid)) childrenOf.set(pid, []);        
+       38 +    childrenOf.get(pid)!.push(m);                             
+       39 +  }                                                           
+       40 +                                                              
+       41 +  const lines: string[] = [                                   
+       42 +    '# Gia Phả',                                              
+       43 +    '',                                                       
+       44 +    `> Xuất ngày: ${new Date().toLocaleDateString('vi-VN')} · 
+          +Tổng: ${members.length} thành viên`,                          
+       45 +    '',                                                       
+       46 +  ];                                                          
+       47 +                                                              
+       48 +  const render = (m: ExMember, depth: number) => {            
+       49 +    const indent = '  '.repeat(depth);                        
+       50 +    const life =                                              
+       51 +      m.birthYear || m.deathYear                              
+       52 +        ? ` (${m.birthYear ?? '?'} – ${m.deathYear ? String(m.
+          +deathYear) : 'nay'})`                                         
+       53 +        : '';                                                 
+       54 +    const gen = m.generation ? ` · Đời ${m.generation}` : ''; 
+       55 +    lines.push(`${indent}- **${m.fullName}**${m.gender ? ` · $
+          +{m.gender}` : ''}${life}${gen}`);                             
+       56 +    if (m.bio) lines.push(`${indent}  > ${m.bio.split('\n')[0]
+          +}`);                                                          
+       57 +    const children = (childrenOf.get(m.id) ?? []).sort(cmpSibl
+          +ings);                                                        
+       58 +    for (const child of children) render(child, depth + 1);   
+       59 +  };                                                          
+       60 +                                                              
+       61 +  for (const root of (childrenOf.get(null) ?? []).sort(cmpSibl
+          +ings)) render(root, 0);                                       
+       62 +  return lines.join('\n');                                    
+       63 +}                                                             
+       64 +                                                              
+       65 +function toHtml(members: ExMember[]): string {                
+       66 +  const childrenOf = new Map<string | null, ExMember[]>();    
+       67 +  for (const m of members) {                                  
+       68 +    const pid = m.parentId ?? null;                           
+       69 +    if (!childrenOf.has(pid)) childrenOf.set(pid, []);        
+       70 +    childrenOf.get(pid)!.push(m);                             
+       71 +  }                                                           
+       72 +                                                              
+       73 +  const renderItem = (m: ExMember): string => {               
+       74 +    const life =                                              
+       75 +      m.birthYear || m.deathYear                              
+       76 +        ? ` <span class="life">(${m.birthYear ?? '?'} – ${m.de
+          +athYear ? String(m.deathYear) : 'nay'})</span>`               
+       77 +        : '';                                                 
+       78 +    const gen = m.generation ? ` <span class="gen">Đời ${m.gen
+          +eration}</span>` : '';                                        
+       79 +    const gender = m.gender                                   
+       80 +      ? ` <span class="g ${m.gender === 'Nam' ? 'male' : 'fem'
+          +}">${m.gender}</span>`                                        
+       81 +      : '';                                                   
+       82 +    const children = (childrenOf.get(m.id) ?? []).sort(cmpSibl
+          +ings);                                                        
+       83 +    const childHtml = children.length > 0 ? `<ul>${children.ma
+          +p(renderItem).join('')}</ul>` : '';                           
+       84 +    return `<li><span class="n">${esc(m.fullName)}</span>${gen
+          +der}${life}${gen}${childHtml}</li>`;                          
+       85 +  };                                                          
+       86 +                                                              
+       87 +  const date = new Date().toLocaleDateString('vi-VN');        
+       88 +  const roots = (childrenOf.get(null) ?? []).sort(cmpSiblings)
+          +;                                                             
+       89 +  return `<!DOCTYPE html>                                     
+       90 +<html lang="vi">                                              
+       91 +<head>                                                        
+       92 +<meta charset="UTF-8"><meta name="viewport" content="width=dev
+          +ice-width,initial-scale=1">                                   
+       93 +<title>Gia Phả</title>                                        
+       94 +<style>                                                       
+       95 +*{box-sizing:border-box;margin:0;padding:0}                   
+       96 +body{font-family:"Times New Roman",serif;max-width:900px;margi
+          +n:0 auto;padding:32px 24px;color:#1c1917;background:#fafaf9}  
+       97 +h1{font-size:2rem;text-align:center;margin-bottom:4px;color:#4
+          +4403c}                                                        
+       98 +.meta{text-align:center;color:#78716c;font-size:.9rem;margin-b
+          +ottom:32px}                                                   
+       99 +ul{list-style:none;padding-left:20px;border-left:2px solid #e7
+          +e5e4;margin:4px 0 4px 8px}                                    
+      100 +li{padding:3px 0 3px 8px;position:relative}                   
+      101 +li::before{content:'';position:absolute;left:-10px;top:13px;wi
+          +dth:8px;height:2px;background:#e7e5e4}                        
+      102 +.n{font-weight:700;font-size:.95rem}                          
+      103 +.life{font-size:.8rem;color:#78716c;margin-left:6px}          
+      104 +.gen{font-size:.75rem;color:#a78bfa;background:#f5f3ff;padding
+          +:1px 5px;border-radius:999px;margin-left:4px}                 
+      105 +.g{font-size:.75rem;padding:1px 5px;border-radius:999px;margin
+          +-left:4px}                                                    
+      106 +.male{background:#eff6ff;color:#1d4ed8}.fem{background:#fdf2f8
+          +;color:#be185d}                                               
+      107 +@media print{body{background:#fff;padding:16px}}              
+      108 +</style>                                                      
+      109 +</head>                                                       
+      110 +<body>                                                        
+      111 +<h1>Gia Phả</h1>                                              
+      112 +<p class="meta">Xuất ngày: ${date} · Tổng: ${members.length} t
+          +hành viên</p>                                                 
+      113 +<ul>${roots.map(renderItem).join('')}</ul>                    
+      114 +</body>                                                       
+      115 +</html>`;                                                     
+      116 +}                                                             
+      117 +                                                              
+      118  export const MemberController = {
+      119    async getAll(req: Request, res: Response): Promise<void> {
+      120      if (req.query['page'] !== undefined) {
+
+● Giờ thêm 2 methods vào controller object:
+
+● Update(backend/src/controllers/member.controller.ts)  ⎿  Added 39 lines
+      231      res.status(204).send();
+      232    },
+      233  
+      234 +  async exportData(req: Request, res: Response): Promise<void>
+          + {                                                            
+      235 +    const format = String(req.query['format'] ?? 'json');     
+      236 +    const members = await MemberService.exportAll();          
+      237 +    const date = new Date().toISOString().slice(0, 10);       
+      238 +                                                              
+      239 +    if (format === 'json') {                                  
+      240 +      res.setHeader('Content-Type', 'application/json; charset
+          +=utf-8');                                                     
+      241 +      res.setHeader('Content-Disposition', `attachment; filena
+          +me="giaphaho-${date}.json"`);                                 
+      242 +      res.json({ exportedAt: new Date().toISOString(), total: 
+          +members.length, members });                                   
+      243 +    } else if (format === 'md') {                             
+      244 +      const md = toMd(members);                               
+      245 +      res.setHeader('Content-Type', 'text/markdown; charset=ut
+          +f-8');                                                        
+      246 +      res.setHeader('Content-Disposition', `attachment; filena
+          +me="giaphaho-${date}.md"`);                                   
+      247 +      res.send(md);                                           
+      248 +    } else if (format === 'html') {                           
+      249 +      const html = toHtml(members);                           
+      250 +      res.setHeader('Content-Type', 'text/html; charset=utf-8'
+          +);                                                            
+      251 +      res.setHeader('Content-Disposition', `attachment; filena
+          +me="giaphaho-${date}.html"`);                                 
+      252 +      res.send(html);                                         
+      253 +    } else {                                                  
+      254 +      sendError(res, 'Định dạng không hỗ trợ. Dùng: json, md, 
+          +html', 400);                                                  
+      255 +    }                                                         
+      256 +  },                                                          
+      257 +                                                              
+      258 +  async importData(req: Request, res: Response): Promise<void>
+          + {                                                            
+      259 +    const body = req.body as { members?: unknown[]; mode?: str
+          +ing };                                                        
+      260 +    if (!Array.isArray(body.members)) {                       
+      261 +      sendError(res, 'Dữ liệu không hợp lệ: thiếu trường "memb
+          +ers"', 400);                                                  
+      262 +      return;                                                 
+      263 +    }                                                         
+      264 +    const mode = body.mode === 'replace' ? 'replace' : 'merge'
+          +;                                                             
+      265 +    const result = await MemberService.importMembers(body.memb
+          +ers, mode);                                                   
+      266 +    sendSuccess(                                              
+      267 +      res,                                                    
+      268 +      result,                                                 
+      269 +      `Đã nhập ${result.created + result.updated} thành viên (
+          +${result.created} mới, ${result.updated} cập nhật)`,          
+      270 +    );                                                        
+      271 +  },                                                          
+      272 +                                                              
+      273    async recalculateStats(_req: Request, res: Response): Promis
+           e<void> {
+      274      const jobId = MemberService.startRecalculation();
+      275      sendSuccess(res, { jobId }, 'Đã bắt đầu tính lại số liệu')
+           ;
+
+● Thêm routes - phải đặt trước /:id:
+
+● Update(backend/src/routes/member.route.ts)
+  ⎿  Added 2 lines
+       8  
+       9  router.get('/', MemberController.getAll);
+      10  // Static sub-routes must come before /:id to avoid the wildcar
+          d catching them
+      11 +router.get('/export', authenticate, requireRole(Role.SUPER_ADMI
+         +N), MemberController.exportData);                              
+      12 +router.post('/import', authenticate, requireRole(Role.SUPER_ADM
+         +IN), MemberController.importData);                             
+      13  router.post('/recalculate-stats', authenticate, requireRole(Rol
+          e.SUPER_ADMIN), MemberController.recalculateStats);
+      14  router.get('/recalculate-stats/events', authenticate, requireRo
+          le(Role.SUPER_ADMIN), MemberController.recalculateStatsEvents);
+      15  router.get('/:id', MemberController.getById);
+
+● Giờ thêm functions vào frontend API:
+
+● Update(frontend/lib/api.ts)
+  ⎿  Added 28 lines
+      155      `/api/activity-logs?page=${page}&limit=${limit}`,
+      156    );
+      157  
+      158 +export const exportMembers = async (format: 'json' | 'md' | 'h
+          +tml'): Promise<void> => {                                     
+      159 +  const res = await fetch(`${BASE_URL}/api/members/export?form
+          +at=${format}`, {                                              
+      160 +    credentials: 'include',                                   
+      161 +  });                                                         
+      162 +  if (!res.ok) {                                              
+      163 +    const text = await res.text();                            
+      164 +    let message = 'Export thất bại';                          
+      165 +    try { message = (JSON.parse(text) as ApiResponse).message 
+          +?? message; } catch { /* noop */ }                            
+      166 +    throw new Error(message);                                 
+      167 +  }                                                           
+      168 +  const blob = await res.blob();                              
+      169 +  const url = URL.createObjectURL(blob);                      
+      170 +  const a = document.createElement('a');                      
+      171 +  const date = new Date().toISOString().slice(0, 10);         
+      172 +  a.href = url;                                               
+      173 +  a.download = `giaphaho-${date}.${format}`;                  
+      174 +  document.body.appendChild(a);                               
+      175 +  a.click();                                                  
+      176 +  document.body.removeChild(a);                               
+      177 +  URL.revokeObjectURL(url);                                   
+      178 +};                                                            
+      179 +                                                              
+      180 +export const importMembers = (data: { members: unknown[]; mode
+          +?: 'merge' | 'replace' }) =>                                  
+      181 +  apiFetch<{ created: number; updated: number; total: number }
+          +>('/api/members/import', {                                    
+      182 +    method: 'POST',                                           
+      183 +    body: JSON.stringify(data),                               
+      184 +  });                                                         
+      185 +                                                              
+      186  export const recalculateMemberStats = () =>
+      187    apiFetch<{ jobId: string }>('/api/members/recalculate-stats'
+           , { method: 'POST' });
+      188  
+
+● Giờ thêm UI vào trang admin gia phả. Trước tiên đọc phần imports và state để
+  biết chính xác nơi cần sửa:
+
+● Update(frontend/app/admin/(dashboard)/gia-pha/page.tsx)
+  ⎿  Added 1 line, removed 1 line
+      2  
+      3  import { useEffect, useState, useCallback, useRef } from 'react'
+         ;
+      4  import Link from 'next/link';
+      5 -import { deleteMember, recalculateMemberStats, subscribeRecalcul
+        -ateEvents } from '@/lib/api';                                   
+      5 +import { deleteMember, exportMembers, importMembers, recalculate
+        +MemberStats, subscribeRecalculateEvents } from '@/lib/api';     
+      6  import { AdminActionButton, AdminActionLink } from '@/components
+         /admin/ui/AdminActionButton';
+      7  import AdminPageHeader, { AdminMetaChip } from '@/components/adm
+         in/ui/AdminPageHeader';
+      8  import {
+
+● Thêm ImportModal component vào sau RecalcProgressBanner:
+
+● Update(frontend/app/admin/(dashboard)/gia-pha/page.tsx)
+  ⎿  Added 203 lines
+      234    );
+      235  }
+      236  
+      237 +function ImportModal({                                        
+      238 +  onClose,                                                    
+      239 +  onImported,                                                 
+      240 +}: {                                                          
+      241 +  onClose: () => void;                                        
+      242 +  onImported: () => void;                                     
+      243 +}) {                                                          
+      244 +  const [file, setFile] = useState<File | null>(null);        
+      245 +  const [parsed, setParsed] = useState<{ members: unknown[]; e
+          +xportedAt?: string } | null>(null);                           
+      246 +  const [parseError, setParseError] = useState<string | null>(
+          +null);                                                        
+      247 +  const [mode, setMode] = useState<'merge' | 'replace'>('merge
+          +');                                                           
+      248 +  const [importing, setImporting] = useState(false);          
+      249 +  const [result, setResult] = useState<{ created: number; upda
+          +ted: number; total: number } | null>(null);                   
+      250 +  const [importError, setImportError] = useState<string | null
+          +>(null);                                                      
+      251 +                                                              
+      252 +  const handleFile = (f: File) => {                           
+      253 +    setFile(f);                                               
+      254 +    setParseError(null);                                      
+      255 +    setParsed(null);                                          
+      256 +    setResult(null);                                          
+      257 +    setImportError(null);                                     
+      258 +    const reader = new FileReader();                          
+      259 +    reader.onload = (e) => {                                  
+      260 +      try {                                                   
+      261 +        const json = JSON.parse(e.target?.result as string);  
+      262 +        if (Array.isArray(json)) {                            
+      263 +          setParsed({ members: json });                       
+      264 +        } else if (Array.isArray(json.members)) {             
+      265 +          setParsed({ members: json.members, exportedAt: json.
+          +exportedAt as string | undefined });                          
+      266 +        } else {                                              
+      267 +          setParseError('File không đúng định dạng. Cần file J
+          +SON xuất từ hệ thống.');                                      
+      268 +        }                                                     
+      269 +      } catch {                                               
+      270 +        setParseError('File JSON không hợp lệ');              
+      271 +      }                                                       
+      272 +    };                                                        
+      273 +    reader.onerror = () => setParseError('Không thể đọc file')
+          +;                                                             
+      274 +    reader.readAsText(f);                                     
+      275 +  };                                                          
+      276 +                                                              
+      277 +  const handleImport = async () => {                          
+      278 +    if (!parsed) return;                                      
+      279 +    setImporting(true);                                       
+      280 +    setImportError(null);                                     
+      281 +    try {                                                     
+      282 +      const res = await importMembers({ members: parsed.member
+          +s, mode });                                                   
+      283 +      setResult(res.data);                                    
+      284 +      onImported();                                           
+      285 +    } catch (err) {                                           
+      286 +      setImportError(err instanceof Error ? err.message : 'Nhậ
+          +p thất bại');                                                 
+      287 +    } finally {                                               
+      288 +      setImporting(false);                                    
+      289 +    }                                                         
+      290 +  };                                                          
+      291 +                                                              
+      292 +  return (                                                    
+      293 +    <div                                                      
+      294 +      className="fixed inset-0 z-50 flex items-center justify-
+          +center p-4"                                                   
+      295 +      style={{ background: 'rgba(0,0,0,0.45)' }}              
+      296 +      onClick={(e) => { if (e.target === e.currentTarget) onCl
+          +ose(); }}                                                     
+      297 +    >                                                         
+      298 +      <div className="bg-white rounded-2xl shadow-2xl w-full m
+          +ax-w-md p-6 space-y-5">                                       
+      299 +        <div className="flex items-start justify-between">    
+      300 +          <div>                                               
+      301 +            <h2 className="text-lg font-bold" style={{ color: 
+          +'var(--t-text)' }}>Nhập dữ liệu gia phả</h2>                  
+      302 +            <p className="text-sm mt-1" style={{ color: 'var(-
+          +-t-text-3)' }}>Chọn file JSON đã xuất từ hệ thống</p>         
+      303 +          </div>                                              
+      304 +          <button onClick={onClose} className="p-1 rounded-lg 
+          +hover:bg-stone-100 transition-colors" style={{ color: 'var(--t
+          +-text-2)' }}>                                                 
+      305 +            <svg className="w-5 h-5" fill="none" viewBox="0 0 
+          +24 24" stroke="currentColor" strokeWidth={2}>                 
+      306 +              <path strokeLinecap="round" strokeLinejoin="roun
+          +d" d="M6 18L18 6M6 6l12 12" />                                
+      307 +            </svg>                                            
+      308 +          </button>                                           
+      309 +        </div>                                                
+      310 +                                                              
+      311 +        {!result && (                                         
+      312 +          <label                                              
+      313 +            className="flex flex-col items-center gap-2 border
+          +-2 border-dashed rounded-xl p-6 cursor-pointer transition-colo
+          +rs"                                                           
+      314 +            style={{ borderColor: file ? 'var(--t-accent)' : '
+          +var(--t-border)', background: file ? 'color-mix(in oklch, var(
+          +--t-accent) 5%, transparent)' : 'transparent' }}              
+      315 +            onDragOver={(e) => e.preventDefault()}            
+      316 +            onDrop={(e) => { e.preventDefault(); const f = e.d
+          +ataTransfer.files[0]; if (f) handleFile(f); }}                
+      317 +          >                                                   
+      318 +            <input                                            
+      319 +              type="file"                                     
+      320 +              accept=".json,application/json"                 
+      321 +              className="sr-only"                             
+      322 +              onChange={(e) => { const f = e.target.files?.[0]
+          +; if (f) handleFile(f); }}                                    
+      323 +            />                                                
+      324 +            <svg className="w-8 h-8" style={{ color: file ? 'v
+          +ar(--t-accent)' : 'var(--t-text-3)' }} fill="none" viewBox="0 
+          +0 24 24" stroke="currentColor" strokeWidth={1.5}>             
+      325 +              <path strokeLinecap="round" strokeLinejoin="roun
+          +d" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021
+          + 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />            
+      326 +            </svg>                                            
+      327 +            {file ? (                                         
+      328 +              <span className="text-sm font-medium" style={{ c
+          +olor: 'var(--t-accent)' }}>{file.name}</span>                 
+      329 +            ) : (                                             
+      330 +              <span className="text-sm" style={{ color: 'var(-
+          +-t-text-3)' }}>Kéo thả hoặc click để chọn file .json</span>   
+      331 +            )}                                                
+      332 +          </label>                                            
+      333 +        )}                                                    
+      334 +                                                              
+      335 +        {parseError && (                                      
+      336 +          <div className="text-sm rounded-xl px-3 py-2" style=
+          +{{ color: 'var(--t-error)', background: 'color-mix(in oklch, v
+          +ar(--t-error) 8%, white)' }}>                                 
+      337 +            {parseError}                                      
+      338 +          </div>                                              
+      339 +        )}                                                    
+      340 +                                                              
+      341 +        {parsed && !result && (                               
+      342 +          <div className="space-y-4">                         
+      343 +            <div className="rounded-xl px-4 py-3 text-sm" styl
+          +e={{ background: 'color-mix(in oklch, var(--t-info) 8%, white)
+          +', border: '1px solid color-mix(in oklch, var(--t-info) 25%, t
+          +ransparent)' }}>                                              
+      344 +              <div className="font-semibold" style={{ color: '
+          +var(--t-info)' }}>                                            
+      345 +                {parsed.members.length} thành viên trong file 
+      346 +              </div>                                          
+      347 +              {parsed.exportedAt && (                         
+      348 +                <div className="text-xs mt-0.5" style={{ color
+          +: 'var(--t-text-2)' }}>                                       
+      349 +                  Xuất ngày: {new Date(parsed.exportedAt).toLo
+          +caleDateString('vi-VN')}                                      
+      350 +                </div>                                        
+      351 +              )}                                              
+      352 +            </div>                                            
+      353 +                                                              
+      354 +            <div className="space-y-2">                       
+      355 +              <p className="text-xs font-semibold uppercase tr
+          +acking-wide" style={{ color: 'var(--t-text-3)' }}>Chế độ nhập<
+          +/p>                                                           
+      356 +              {([                                             
+      357 +                { id: 'merge', label: 'Gộp (Merge)', desc: 'Cậ
+          +p nhật thành viên có sẵn, thêm mới nếu chưa có. Khuyên dùng.' 
+          +},                                                            
+      358 +                { id: 'replace', label: 'Thay thế (Replace)', 
+          +desc: 'Xóa toàn bộ dữ liệu hiện tại rồi nhập lại từ file. Khôn
+          +g thể hoàn tác!' },                                           
+      359 +              ] as const).map((m) => (                        
+      360 +                <button                                       
+      361 +                  key={m.id}                                  
+      362 +                  onClick={() => setMode(m.id)}               
+      363 +                  className="w-full text-left px-4 py-3 rounde
+          +d-xl border-2 transition-colors"                              
+      364 +                  style={{                                    
+      365 +                    borderColor: mode === m.id ? (m.id === 're
+          +place' ? 'var(--t-error)' : 'var(--t-info)') : 'var(--t-border
+          +)',                                                           
+      366 +                    background: mode === m.id ? (m.id === 'rep
+          +lace' ? 'color-mix(in oklch, var(--t-error) 6%, white)' : 'col
+          +or-mix(in oklch, var(--t-info) 6%, white)') : 'white',        
+      367 +                  }}                                          
+      368 +                >                                             
+      369 +                  <div className="text-sm font-semibold" style
+          +={{ color: mode === m.id && m.id === 'replace' ? 'var(--t-erro
+          +r)' : 'var(--t-text)' }}>{m.label}</div>                      
+      370 +                  <div className="text-xs mt-0.5" style={{ col
+          +or: 'var(--t-text-3)' }}>{m.desc}</div>                       
+      371 +                </button>                                     
+      372 +              ))}                                             
+      373 +            </div>                                            
+      374 +                                                              
+      375 +            {mode === 'replace' && (                          
+      376 +              <div className="text-sm rounded-xl px-4 py-3" st
+          +yle={{ color: 'var(--t-error)', background: 'color-mix(in oklc
+          +h, var(--t-error) 8%, white)', border: '1px solid color-mix(in
+          + oklch, var(--t-error) 25%, transparent)' }}>                 
+      377 +                Cảnh báo: Toàn bộ dữ liệu gia phả hiện tại sẽ 
+          +bị xóa và không thể khôi phục!                                
+      378 +              </div>                                          
+      379 +            )}                                                
+      380 +          </div>                                              
+      381 +        )}                                                    
+      382 +                                                              
+      383 +        {result && (                                          
+      384 +          <div className="rounded-xl px-4 py-4 space-y-1" styl
+          +e={{ background: 'color-mix(in oklch, var(--t-success) 8%, whi
+          +te)', border: '1px solid color-mix(in oklch, var(--t-success) 
+          +25%, transparent)' }}>                                        
+      385 +            <div className="flex items-center gap-2 font-semib
+          +old" style={{ color: 'var(--t-success)' }}>                   
+      386 +              <svg className="w-4 h-4 flex-shrink-0" fill="cur
+          +rentColor" viewBox="0 0 20 20">                               
+      387 +                <path fillRule="evenodd" d="M10 18a8 8 0 100-1
+          +6 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.70
+          +7 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRul
+          +e="evenodd" />                                                
+      388 +              </svg>                                          
+      389 +              Nhập thành công                                 
+      390 +            </div>                                            
+      391 +            <div className="text-sm" style={{ color: 'var(--t-
+          +text-2)' }}>                                                  
+      392 +              {result.created} thêm mới · {result.updated} cập
+          + nhật · Tổng {result.total} thành viên                        
+      393 +            </div>                                            
+      394 +            <div className="text-xs mt-1" style={{ color: 'var
+          +(--t-text-3)' }}>                                             
+      395 +              Chạy &ldquo;Tính lại số liệu&rdquo; để cập nhật 
+          +thống kê (đời, con cháu...).                                  
+      396 +            </div>                                            
+      397 +          </div>                                              
+      398 +        )}                                                    
+      399 +                                                              
+      400 +        {importError && (                                     
+      401 +          <div className="text-sm rounded-xl px-3 py-2" style=
+          +{{ color: 'var(--t-error)', background: 'color-mix(in oklch, v
+          +ar(--t-error) 8%, white)' }}>                                 
+      402 +            {importError}                                     
+      403 +          </div>                                              
+      404 +        )}                                                    
+      405 +                                                              
+      406 +        <div className="flex gap-3 pt-1">                     
+      407 +          {result ? (                                         
+      408 +            <button                                           
+      409 +              onClick={onClose}                               
+      410 +              className="flex-1 py-2.5 text-sm font-semibold t
+          +ext-white rounded-xl transition-opacity"                      
+      411 +              style={{ background: 'var(--t-accent)' }}       
+      412 +            >                                                 
+      413 +              Đóng                                            
+      414 +            </button>                                         
+      415 +          ) : (                                               
+      416 +            <>                                                
+      417 +              <button                                         
+      418 +                onClick={onClose}                             
+      419 +                className="flex-1 py-2.5 text-sm font-semibold
+          + rounded-xl transition-colors"                                
+      420 +                style={{ background: 'var(--t-surface-2)', col
+          +or: 'var(--t-text)' }}                                        
+      421 +              >                                               
+      422 +                Hủy                                           
+      423 +              </button>                                       
+      424 +              <button                                         
+      425 +                onClick={handleImport}                        
+      426 +                disabled={!parsed || importing}               
+      427 +                className="flex-1 py-2.5 text-sm font-semibold
+          + text-white rounded-xl transition-opacity disabled:opacity-50"
+      428 +                style={{ background: mode === 'replace' ? 'var
+          +(--t-error)' : 'var(--t-accent)' }}                           
+      429 +              >                                               
+      430 +                {importing ? 'Đang nhập...' : 'Nhập dữ liệu'} 
+      431 +              </button>                                       
+      432 +            </>                                               
+      433 +          )}                                                  
+      434 +        </div>                                                
+      435 +      </div>                                                  
+      436 +    </div>                                                    
+      437 +  );                                                          
+      438 +}                                                             
+      439 +                                                              
+      440  export default function GiaPhaAdminPage() {
+      441    const [pagedData, setPagedData] = useState<PaginatedResponse
+           <Member> | null>(null);
+      442    const [loading, setLoading] = useState(true);
+  ⎿  You've hit your limit · resets 7:40pm (Asia/Saigon)
+     /extra-usage to request more usage from your admin.
+
+✻ Crunched for 9m 4s

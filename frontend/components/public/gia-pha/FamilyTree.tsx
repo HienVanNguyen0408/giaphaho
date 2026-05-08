@@ -26,6 +26,7 @@ import { getCachedAllMembers } from '@/lib/memberCache';
 import type { Member, MemberDetail } from '@/types';
 import { getMember } from '@/lib/api';
 import LineageModal from './LineageModal';
+import GenderIcon from './GenderIcon';
 
 const ActiveMemberCtx = createContext<string | null>(null);
 
@@ -83,6 +84,7 @@ function MemberNode({ data, selected }: NodeProps) {
               {initials}
             </div>
           )}
+          <GenderIcon gender={member.gender} className="absolute -bottom-0.5 -left-0.5" />
           {isDeceased && (
             <div
               className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
@@ -138,11 +140,13 @@ function DetailPanel({
   onClose,
   onViewLineage,
   onEditMember,
+  onReorderSiblings,
 }: {
   memberId: string;
   onClose: () => void;
   onViewLineage: (id: string, name: string) => void;
   onEditMember?: (id: string) => void;
+  onReorderSiblings?: (member: Member) => void;
 }) {
   const [detail, setDetail] = useState<MemberDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -202,6 +206,10 @@ function DetailPanel({
               </div>
             )}
             <h4 className="font-bold text-center" style={{ color: 'var(--t-text)' }}>{detail.fullName}</h4>
+            <div className="flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--t-text-3)' }}>
+              <GenderIcon gender={detail.gender} />
+              {detail.gender ? <span>{detail.gender}</span> : null}
+            </div>
           </div>
 
           {(detail.generation != null || detail.descendantsCount != null) && (
@@ -282,6 +290,15 @@ function DetailPanel({
                 style={{ background: 'var(--t-info)', color: 'var(--t-nav-active-text)' }}
               >
                 Sửa thông tin
+              </button>
+            )}
+            {onReorderSiblings && detail.parentId && (detail.siblingsCount ?? 0) > 0 && (
+              <button
+                onClick={() => onReorderSiblings(detail)}
+                className="block w-full text-center text-xs font-medium rounded-lg py-1.5 transition-opacity hover:opacity-80"
+                style={{ background: 'var(--t-success)', color: 'var(--t-nav-active-text)' }}
+              >
+                Sắp xếp thứ tự anh chị em
               </button>
             )}
             <button
@@ -401,7 +418,7 @@ function TreeSearch({ nodes, onSelect }: { nodes: Node[], onSelect: (id: string)
 }
 
 // -------- Inner Flow --------
-function FamilyTreeInner({ refreshKey, onEditMember, onDeleteMember }: { refreshKey?: number; onEditMember?: (id: string) => void; onDeleteMember?: (id: string) => Promise<void> }) {
+function FamilyTreeInner({ refreshKey, onEditMember, onDeleteMember, onReorderSiblings }: { refreshKey?: number; onEditMember?: (id: string) => void; onDeleteMember?: (id: string) => Promise<void>; onReorderSiblings?: (member: Member) => void }) {
   const searchParams = useSearchParams();
   const activeMemberId = searchParams.get('active');
 
@@ -506,6 +523,7 @@ function FamilyTreeInner({ refreshKey, onEditMember, onDeleteMember }: { refresh
             onClose={() => setSelectedId(null)}
             onViewLineage={(id, name) => setLineageTarget({ id, name })}
             onEditMember={onEditMember}
+            onReorderSiblings={onReorderSiblings}
           />
         )}
         {lineageTarget && (
@@ -516,6 +534,7 @@ function FamilyTreeInner({ refreshKey, onEditMember, onDeleteMember }: { refresh
             onClose={() => setLineageTarget(null)}
             onEditMember={onEditMember}
             onDeleteMember={onDeleteMember}
+            onReorderSiblings={onReorderSiblings}
           />
         )}
       </div>
@@ -523,11 +542,11 @@ function FamilyTreeInner({ refreshKey, onEditMember, onDeleteMember }: { refresh
   );
 }
 
-export default function FamilyTree({ refreshKey, onEditMember, onDeleteMember }: { refreshKey?: number; onEditMember?: (id: string) => void; onDeleteMember?: (id: string) => Promise<void> }) {
+export default function FamilyTree({ refreshKey, onEditMember, onDeleteMember, onReorderSiblings }: { refreshKey?: number; onEditMember?: (id: string) => void; onDeleteMember?: (id: string) => Promise<void>; onReorderSiblings?: (member: Member) => void }) {
   return (
     <ReactFlowProvider>
       <Suspense fallback={<TreeSkeleton />}>
-        <FamilyTreeInner refreshKey={refreshKey} onEditMember={onEditMember} onDeleteMember={onDeleteMember} />
+        <FamilyTreeInner refreshKey={refreshKey} onEditMember={onEditMember} onDeleteMember={onDeleteMember} onReorderSiblings={onReorderSiblings} />
       </Suspense>
     </ReactFlowProvider>
   );

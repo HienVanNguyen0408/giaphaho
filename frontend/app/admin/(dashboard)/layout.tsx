@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             <TopBar />
             <main
-              className="flex-1 overflow-y-auto p-6"
+              className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5"
               style={{ background: 'var(--t-surface-2)' }}
             >
               {children}

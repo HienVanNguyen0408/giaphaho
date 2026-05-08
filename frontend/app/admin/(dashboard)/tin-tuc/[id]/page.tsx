@@ -4,10 +4,11 @@ import { useEffect, useState, FormEvent, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getNewsBySlug, createNews, updateNews } from '@/lib/api';
+import AdminPageHeader from '@/components/admin/ui/AdminPageHeader';
+import ImageUrlInput from '@/components/shared/ImageUrlInput';
+import RichTextEditor from '@/components/admin/ui/RichTextEditor';
 import type { NewsDetail } from '@/types';
 
-// Use a separate utility or simply fallback gracefully if it's admin id instead of slug.
-// Actually, backend might use getNewsById for admin but if we only have getNewsBySlug, we can update it in api.ts or use getNewsBySlug and backend needs to handle finding by ID or Slug.
 import { getNewsById } from '@/lib/api';
 
 function TinTucEditContent() {
@@ -76,7 +77,7 @@ function TinTucEditContent() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
+    <div className="w-full max-w-5xl space-y-5">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-stone-500">
         <Link href="/admin/tin-tuc" className="hover:text-stone-800 transition-colors">
@@ -88,15 +89,13 @@ function TinTucEditContent() {
         </span>
       </div>
 
-      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6">
-        <h1 className="text-xl font-bold text-stone-900 mb-2">
-          {isNew ? 'Thêm bài viết mới' : 'Sửa bài viết'}
-        </h1>
+      <AdminPageHeader
+        title={isNew ? 'Thêm bài viết mới' : 'Sửa bài viết'}
+        eyebrow="Quản trị nội dung"
+        description={isNew ? 'Tạo bài viết mới cho trang tin tức.' : 'Cập nhật tiêu đề, nội dung và trạng thái ghim của bài viết.'}
+      />
 
-        {/* Tiptap note */}
-        <div className="mb-5 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700">
-          Lưu ý: Tích hợp Tiptap Editor sẽ được thêm sau. Hiện tại sử dụng ô soạn thảo thuần túy.
-        </div>
+      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6">
 
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
@@ -137,31 +136,21 @@ function TinTucEditContent() {
 
             {/* Content */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--t-text-2)' }}>
                 Nội dung
               </label>
-              <textarea
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={12}
-                placeholder="Nhập nội dung bài viết..."
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors resize-none font-mono"
+                onChange={setContent}
               />
             </div>
 
             {/* Thumbnail */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                URL ảnh đại diện
-              </label>
-              <input
-                type="url"
-                value={thumbnail}
-                onChange={(e) => setThumbnail(e.target.value)}
-                placeholder="https://..."
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors"
-              />
-            </div>
+            <ImageUrlInput
+              value={thumbnail || null}
+              onChange={(url) => setThumbnail(url ?? '')}
+              label="Ảnh đại diện bài viết"
+            />
 
             {/* isPinned */}
             <div className="flex items-center gap-3">
@@ -182,7 +171,7 @@ function TinTucEditContent() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-700 to-amber-600 text-white font-semibold text-sm hover:from-red-800 hover:to-amber-700 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full py-2.5 rounded-xl bg-red-800 text-white font-semibold text-sm hover:bg-red-900 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {saving ? 'Đang lưu...' : isNew ? 'Đăng bài viết' : 'Cập nhật bài viết'}
               </button>

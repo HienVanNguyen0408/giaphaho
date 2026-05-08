@@ -23,6 +23,7 @@ export interface Member {
   bio: string | null;
   achievements: string[];
   parentId: string | null;
+  siblingOrder: number | null;
   chiId: string | null;
   descendantsCount: number | null;
   generation: number | null;
@@ -59,6 +60,7 @@ export interface NewsListItem {
   slug: string;
   thumbnail: string | null;
   isPinned: boolean;
+  order: number | null;
   publishedAt: string;
   updatedAt: string;
 }
@@ -85,10 +87,21 @@ export interface Video {
   createdAt: string;
 }
 
+export interface PaginatedVideo {
+  items: Video[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 // ====== SECTION ======
+export type SectionType = 'TIN_NOI_BAT' | 'THANH_TICH' | 'TIN_TUC' | 'VIDEO' | 'CUSTOM';
+
 export interface Section {
   id: string;
   name: string;
+  type: SectionType | null;
   newsId: string | null;
   isActive: boolean;
   order: number;
@@ -101,15 +114,6 @@ export interface FooterConfig {
   contact: string;
   description: string;
   copyright: string;
-}
-
-// ====== NOTIFICATION ======
-export interface Notification {
-  id: string;
-  message: string;
-  type: string;
-  isRead: boolean;
-  createdAt: string;
 }
 
 // ====== ACTIVITY LOG ======
@@ -143,7 +147,6 @@ export interface DashboardStats {
   totalMembers: number;
   totalNews: number;
   totalVideos: number;
-  unreadNotifications: number;
   recentLogs: ActivityLog[];
 }
 

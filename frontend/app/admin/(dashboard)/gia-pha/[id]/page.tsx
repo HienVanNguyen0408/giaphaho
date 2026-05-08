@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getMember, getMembers, createMember, updateMember } from '@/lib/api';
 import { invalidateMembersCache } from '@/lib/memberCache';
 import MemberForm from '@/components/admin/gia-pha/MemberForm';
+import AdminPageHeader from '@/components/admin/ui/AdminPageHeader';
 import type { Member } from '@/types';
 
 function MemberEditContent() {
@@ -55,7 +56,7 @@ function MemberEditContent() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5">
+    <div className="w-full max-w-5xl space-y-5">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm">
         <Link
@@ -73,6 +74,16 @@ function MemberEditContent() {
           {isNew ? 'Thêm thành viên' : 'Sửa thành viên'}
         </span>
       </nav>
+
+      <AdminPageHeader
+        title={isNew ? 'Thêm thành viên mới' : 'Chỉnh sửa thành viên'}
+        eyebrow="Quản trị thành viên"
+        description={
+          isNew
+            ? 'Điền thông tin thành viên và gán quan hệ trong gia phả.'
+            : 'Cập nhật hồ sơ thành viên và quan hệ gia đình.'
+        }
+      />
 
       {/* Card */}
       <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
@@ -94,9 +105,9 @@ function MemberEditContent() {
             </svg>
           </div>
           <div>
-            <h1 className="text-base font-bold text-stone-900">
+            <h2 className="text-base font-bold text-stone-900">
               {isNew ? 'Thêm thành viên mới' : 'Chỉnh sửa thành viên'}
-            </h1>
+            </h2>
             <p className="text-xs text-stone-400 mt-0.5">
               {isNew
                 ? 'Điền đầy đủ thông tin để thêm vào gia phả'

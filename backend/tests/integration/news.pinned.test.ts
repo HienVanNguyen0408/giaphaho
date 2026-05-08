@@ -23,6 +23,7 @@ const mockPinnedNews = [
     content: 'Nội dung tin ghim 1',
     thumbnail: null,
     isPinned: true,
+    order: 0,
     publishedAt: new Date('2024-01-02T00:00:00.000Z'),
     updatedAt: new Date('2024-01-02T00:00:00.000Z'),
   },
@@ -33,6 +34,7 @@ const mockPinnedNews = [
     content: 'Nội dung tin ghim 2',
     thumbnail: 'https://example.com/img.jpg',
     isPinned: true,
+    order: 1,
     publishedAt: new Date('2024-01-01T00:00:00.000Z'),
     updatedAt: new Date('2024-01-01T00:00:00.000Z'),
   },
@@ -65,14 +67,14 @@ describe('GET /api/news/pinned', () => {
     }
   });
 
-  it('calls findMany with isPinned: true filter and desc order', async () => {
+  it('calls findMany with isPinned: true filter and manual order', async () => {
     vi.mocked(prisma.news.findMany).mockResolvedValue([] as never);
 
     await request(app).get('/api/news/pinned');
 
     expect(prisma.news.findMany).toHaveBeenCalledWith({
       where: { isPinned: true },
-      orderBy: { publishedAt: 'desc' },
+      orderBy: [{ order: 'asc' }, { publishedAt: 'desc' }],
     });
   });
 

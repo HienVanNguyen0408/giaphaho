@@ -6,7 +6,7 @@ import { Role } from '@prisma/client';
 
 const router = Router();
 
-router.get('/', VideoController.getAll);
+router.get('/', VideoController.getList);
 router.post('/', authenticate, requireRole(Role.SUPER_ADMIN), VideoController.create);
 router.patch('/reorder', authenticate, requireRole(Role.SUPER_ADMIN), VideoController.reorder);
 router.put('/:id', authenticate, requireRole(Role.SUPER_ADMIN), VideoController.update);

@@ -15,7 +15,7 @@ export const SectionService = {
     });
   },
 
-  async create(data: { name: string; newsId?: string; isActive?: boolean; order?: number }): Promise<Section> {
+  async create(data: { name: string; type?: string; newsId?: string; isActive?: boolean; order?: number }): Promise<Section> {
     return prisma.section.create({ data });
   },
 

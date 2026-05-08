@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { cacheLife } from 'next/cache';
 import { getNewsBySlug } from '@/lib/api';
+import { normalizeImageUrl } from '@/lib/imageUrl';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -68,13 +68,12 @@ export default async function ArticlePage({ params }: PageProps) {
         <article className="bg-white rounded-3xl shadow-lg overflow-hidden">
           {/* Thumbnail */}
           {article.thumbnail && (
-            <div className="relative h-64 sm:h-80 w-full">
-              <Image
-                src={article.thumbnail}
+            <div className="relative h-64 sm:h-80 w-full overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={normalizeImageUrl(article.thumbnail)}
                 alt={article.title}
-                fill
-                className="object-cover"
-                priority
+                className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
           )}

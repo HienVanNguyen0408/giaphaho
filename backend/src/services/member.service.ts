@@ -198,6 +198,7 @@ export const MemberService = {
         gender: true,
         chiId: true,
         parentId: true,
+        siblingOrder: true,
         achievements: true,
         descendantsCount: true,
         generation: true,
@@ -216,10 +217,7 @@ export const MemberService = {
   },
 
   async getPage(page: number, limit: number, name?: string) {
-    // Exclude female members; keep null-gender members (not yet categorised)
-    const genderFilter = { OR: [{ gender: null }, { gender: { not: 'Nữ' as string } }] };
     const nameFilter = name ? { fullName: { contains: name, mode: 'insensitive' as const } } : {};
-    const where = { AND: [genderFilter, nameFilter] };
     const skip = (page - 1) * limit;
     const select = {
       id: true,
@@ -232,6 +230,7 @@ export const MemberService = {
       gender: true,
       chiId: true,
       parentId: true,
+      siblingOrder: true,
       achievements: true,
       descendantsCount: true,
       generation: true,
@@ -247,7 +246,7 @@ export const MemberService = {
       contributions: true,
     };
     // Fetch all matching docs so we can sort nulls-last on generation (MongoDB nulls-first by default)
-    const allItems = await prisma.member.findMany({ where, select });
+    const allItems = await prisma.member.findMany({ where: nameFilter, select });
     const sorted = allItems.sort((a, b) => {
       const ga = a.generation ?? Infinity;
       const gb = b.generation ?? Infinity;
@@ -287,6 +286,7 @@ export const MemberService = {
       bio?: string;
       achievements?: string[];
       parentId?: string;
+      siblingOrder?: number | null;
       chiId?: string;
       residence?: string;
       nationalId?: string;
@@ -323,6 +323,7 @@ export const MemberService = {
       bio?: string;
       achievements?: string[];
       parentId?: string;
+      siblingOrder?: number | null;
       chiId?: string;
       residence?: string;
       nationalId?: string;
@@ -370,5 +371,107 @@ export const MemberService = {
     // Fire-and-forget — does not block the request
     setImmediate(() => runRecalculation(jobId));
     return jobId;
+  },
+
+  async exportAll() {
+    return prisma.member.findMany({
+      orderBy: [
+        { generation: { sort: 'asc', nulls: 'last' } },
+        { siblingOrder: { sort: 'asc', nulls: 'last' } },
+        { fullName: 'asc' },
+      ],
+    });
+  },
+
+  async importMembers(
+    members: unknown[],
+    mode: 'merge' | 'replace',
+  ): Promise<{ created: number; updated: number; total: number }> {
+    type Raw = Record<string, unknown>;
+
+    const valid = members.filter(
+      (m): m is Raw =>
+        typeof m === 'object' && m !== null && typeof (m as Raw)['fullName'] === 'string',
+    );
+
+    const str = (v: unknown): string | null => (v != null && v !== '' ? String(v) : null);
+    const num = (v: unknown): number | null => {
+      const n = Number(v);
+      return v != null && v !== '' && !isNaN(n) ? n : null;
+    };
+    const arr = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
+
+    const extract = (m: Raw) => ({
+      fullName: String(m['fullName']),
+      avatar: str(m['avatar']),
+      birthYear: num(m['birthYear']),
+      birthDate: str(m['birthDate']),
+      deathYear: num(m['deathYear']),
+      deathDate: str(m['deathDate']),
+      gender: str(m['gender']),
+      bio: str(m['bio']),
+      achievements: arr(m['achievements']),
+      parentId: str(m['parentId']),
+      siblingOrder: num(m['siblingOrder']),
+      chiId: str(m['chiId']),
+      residence: str(m['residence']),
+      nationalId: str(m['nationalId']),
+      phone: str(m['phone']),
+      email: str(m['email']),
+      bankAccount: str(m['bankAccount']),
+      burialPlace: str(m['burialPlace']),
+      fieldConfig: m['fieldConfig'] != null ? (m['fieldConfig'] as Record<string, boolean>) : undefined,
+      spouses: arr(m['spouses']),
+      motherName: str(m['motherName']),
+      contributions: arr(m['contributions']),
+    });
+
+    if (mode === 'replace') {
+      await prisma.member.updateMany({ data: { parentId: null } });
+      await prisma.member.deleteMany({});
+      let created = 0;
+      for (let i = 0; i < valid.length; i += BATCH_SIZE) {
+        const batch = valid.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+          batch.map((m) => {
+            const id = str(m['id']);
+            const data = extract(m);
+            return id
+              ? prisma.member.create({ data: { id, ...data }, select: { id: true } })
+              : prisma.member.create({ data, select: { id: true } });
+          }),
+        );
+        created += batch.length;
+      }
+      return { created, updated: 0, total: valid.length };
+    }
+
+    // Merge: check which IDs already exist
+    const existingIds = new Set(
+      (await prisma.member.findMany({ select: { id: true } })).map((m) => m.id),
+    );
+
+    let created = 0;
+    let updated = 0;
+
+    for (let i = 0; i < valid.length; i += BATCH_SIZE) {
+      const batch = valid.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map((m) => {
+          const id = str(m['id']);
+          const data = extract(m);
+          if (id && existingIds.has(id)) {
+            updated++;
+            return prisma.member.update({ where: { id }, data, select: { id: true } });
+          }
+          created++;
+          return id
+            ? prisma.member.create({ data: { id, ...data }, select: { id: true } })
+            : prisma.member.create({ data, select: { id: true } });
+        }),
+      );
+    }
+
+    return { created, updated, total: valid.length };
   },
 };

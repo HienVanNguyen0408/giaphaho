@@ -38,6 +38,7 @@ model Member {
   parentId     String?   @db.ObjectId
   parent       Member?   @relation("MemberChildren", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children     Member[]  @relation("MemberChildren")
+  siblingOrder Int?
   chiId            String?   @db.ObjectId
   descendantsCount Int?      @default(0)
   generation       Int?      @default(0)
@@ -66,10 +67,12 @@ model Member {
 model News {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
+  titleSearch String?
   slug        String   @unique
   content     String
   thumbnail   String?
   isPinned    Boolean  @default(false)
+  order       Int?     @default(0)
   publishedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -78,6 +81,7 @@ model News {
 model Video {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   title        String
+  titleSearch  String?
   youtubeUrl   String
   thumbnailUrl String?
   order        Int      @default(0)
@@ -85,9 +89,11 @@ model Video {
 }
 
 // ====== SECTION ĐỘNG ======
+// type values: TIN_NOI_BAT | THANH_TICH | TIN_TUC | VIDEO | CUSTOM
 model Section {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
+  type      String   @default("CUSTOM")
   newsId    String?  @db.ObjectId
   isActive  Boolean  @default(true)
   order     Int      @default(0)

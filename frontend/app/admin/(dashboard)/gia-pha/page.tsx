@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { deleteMember, recalculateMemberStats, subscribeRecalculateEvents } from '@/lib/api';
+import { deleteMember, exportMembers, importMembers, recalculateMemberStats, subscribeRecalculateEvents } from '@/lib/api';
+import { AdminActionButton, AdminActionLink } from '@/components/admin/ui/AdminActionButton';
+import AdminPageHeader, { AdminMetaChip } from '@/components/admin/ui/AdminPageHeader';
 import {
   getCachedAllMembers,
   getPageCache,
@@ -14,7 +16,18 @@ import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import FamilyTree from '@/components/public/gia-pha/FamilyTree';
 import LineageModal from '@/components/public/gia-pha/LineageModal';
 import EditMemberDrawer from '@/components/admin/gia-pha/EditMemberDrawer';
+import SiblingReorderModal from '@/components/admin/gia-pha/SiblingReorderModal';
 import type { Member, PaginatedResponse } from '@/types';
+
+function compareSiblings(a: Member, b: Member): number {
+  const aOrder = a.siblingOrder ?? Infinity;
+  const bOrder = b.siblingOrder ?? Infinity;
+  if (aOrder !== bOrder) return aOrder - bOrder;
+  const aBirth = a.birthYear ?? Infinity;
+  const bBirth = b.birthYear ?? Infinity;
+  if (aBirth !== bBirth) return aBirth - bBirth;
+  return a.fullName.localeCompare(b.fullName, 'vi');
+}
 
 function AvatarCell({ member }: { member: Member }) {
   if (member.avatar) {
@@ -23,7 +36,7 @@ function AvatarCell({ member }: { member: Member }) {
       <img
         src={member.avatar}
         alt={member.fullName}
-        className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
+        className="h-10 w-10 rounded-xl object-cover flex-shrink-0"
         style={{ border: '1px solid var(--t-border)' }}
       />
     );
@@ -38,7 +51,7 @@ function AvatarCell({ member }: { member: Member }) {
   const color = colors[member.fullName.charCodeAt(0) % colors.length];
   return (
     <div
-      className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+      className="h-10 w-10 rounded-xl flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
       style={{ background: color }}
     >
       {initials}
@@ -58,22 +71,124 @@ function formatDayMonth(str: string | null | undefined): string {
 function DateCell({ date, year }: { date: string | null; year: number | null }) {
   const val = date ? formatDayMonth(date) : year ? String(year) : null;
   if (!val) return <span className="text-stone-300">—</span>;
-  return <span className="text-stone-600 text-xs tabular-nums">{val}</span>;
+  return <span className="text-stone-700 text-xs font-medium tabular-nums">{val}</span>;
 }
 
 function GenderBadge({ gender }: { gender: string | null }) {
   if (!gender) return <span className="text-stone-300">—</span>;
   return (
     <span
-      className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+      className="inline-flex h-6 items-center rounded-full px-2.5 text-[11px] font-semibold"
       style={
         gender === 'Nam'
-          ? { background: 'color-mix(in oklch, var(--t-info) 10%, transparent)', color: 'var(--t-info)' }
-          : { background: 'rgba(236,72,153,0.1)', color: '#ec4899' }
+          ? { background: 'color-mix(in oklch, var(--t-info) 12%, white)', color: '#1d4ed8' }
+          : { background: '#fdf2f8', color: '#be185d' }
       }
     >
       {gender}
     </span>
+  );
+}
+
+type IconProps = { className?: string };
+
+function TreeIcon({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v4m0 0a3 3 0 100 6 3 3 0 000-6zm0 6v3m-4 3h8M8 19a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z" />
+    </svg>
+  );
+}
+
+function EditIcon({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 7.125 16.875 4.5M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+    </svg>
+  );
+}
+
+function SortIcon({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M7 12h10M11 17h2" />
+    </svg>
+  );
+}
+
+function TrashIcon({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-1.827L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+    </svg>
+  );
+}
+
+function GenerationBadge({ generation }: { generation: number | null }) {
+  if (!generation) return <span className="text-xs text-stone-300">Chưa rõ đời</span>;
+  return (
+    <span className="inline-flex h-6 items-center rounded-full bg-red-50 px-2.5 text-[11px] font-semibold text-red-800 ring-1 ring-inset ring-red-100">
+      Đời {generation}
+    </span>
+  );
+}
+
+function StatChip({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number | null;
+  tone: 'red' | 'amber' | 'emerald' | 'blue';
+}) {
+  const toneClass = {
+    red: 'bg-red-50 text-red-800 ring-red-100',
+    amber: 'bg-amber-50 text-amber-800 ring-amber-100',
+    emerald: 'bg-emerald-50 text-emerald-800 ring-emerald-100',
+    blue: 'bg-blue-50 text-blue-800 ring-blue-100',
+  }[tone];
+
+  return (
+    <span className={`inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-semibold ring-1 ring-inset ${toneClass}`}>
+      <span className="tabular-nums">{value ?? 0}</span>
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function FamilyStats({ member }: { member: Member }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      <StatChip label="con" value={(member.sonsCount ?? 0) + (member.daughtersCount ?? 0)} tone="red" />
+      <StatChip label="cháu" value={member.descendantsCount} tone="amber" />
+      <StatChip label="anh em" value={member.siblingsCount} tone="emerald" />
+    </div>
+  );
+}
+
+function LifeSummary({ member }: { member: Member }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-xs">
+      <span className="text-stone-400">Sinh</span>
+      <DateCell date={member.birthDate} year={member.birthYear} />
+      <span className="h-1 w-1 rounded-full bg-stone-300" />
+      <span className="text-stone-400">Mất</span>
+      <DateCell date={member.deathDate} year={member.deathYear} />
+    </div>
+  );
+}
+
+function ContactSummary({ member }: { member: Member }) {
+  const primary = member.phone || member.email || member.residence;
+  if (!primary) return <span className="text-xs text-stone-300">Chưa cập nhật liên hệ</span>;
+  return (
+    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-stone-500">
+      {member.phone && <span className="font-medium text-stone-700">{member.phone}</span>}
+      {member.email && <span className="truncate">{member.email}</span>}
+      {member.residence && <span className="truncate">{member.residence}</span>}
+    </div>
   );
 }
 
@@ -119,6 +234,209 @@ function RecalcProgressBanner({
   );
 }
 
+function ImportModal({
+  onClose,
+  onImported,
+}: {
+  onClose: () => void;
+  onImported: () => void;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [parsed, setParsed] = useState<{ members: unknown[]; exportedAt?: string } | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'merge' | 'replace'>('merge');
+  const [importing, setImporting] = useState(false);
+  const [result, setResult] = useState<{ created: number; updated: number; total: number } | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+
+  const handleFile = (f: File) => {
+    setFile(f);
+    setParseError(null);
+    setParsed(null);
+    setResult(null);
+    setImportError(null);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target?.result as string);
+        if (Array.isArray(json)) {
+          setParsed({ members: json });
+        } else if (Array.isArray(json.members)) {
+          setParsed({ members: json.members, exportedAt: json.exportedAt as string | undefined });
+        } else {
+          setParseError('File không đúng định dạng. Cần file JSON xuất từ hệ thống.');
+        }
+      } catch {
+        setParseError('File JSON không hợp lệ');
+      }
+    };
+    reader.onerror = () => setParseError('Không thể đọc file');
+    reader.readAsText(f);
+  };
+
+  const handleImport = async () => {
+    if (!parsed) return;
+    setImporting(true);
+    setImportError(null);
+    try {
+      const res = await importMembers({ members: parsed.members, mode });
+      setResult(res.data);
+      onImported();
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Nhập thất bại');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.45)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-bold" style={{ color: 'var(--t-text)' }}>Nhập dữ liệu gia phả</h2>
+            <p className="text-sm mt-1" style={{ color: 'var(--t-text-3)' }}>Chọn file JSON đã xuất từ hệ thống</p>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-stone-100 transition-colors" style={{ color: 'var(--t-text-2)' }}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {!result && (
+          <label
+            className="flex flex-col items-center gap-2 border-2 border-dashed rounded-xl p-6 cursor-pointer transition-colors"
+            style={{ borderColor: file ? 'var(--t-accent)' : 'var(--t-border)', background: file ? 'color-mix(in oklch, var(--t-accent) 5%, transparent)' : 'transparent' }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
+          >
+            <input
+              type="file"
+              accept=".json,application/json"
+              className="sr-only"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+            />
+            <svg className="w-8 h-8" style={{ color: file ? 'var(--t-accent)' : 'var(--t-text-3)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            {file ? (
+              <span className="text-sm font-medium" style={{ color: 'var(--t-accent)' }}>{file.name}</span>
+            ) : (
+              <span className="text-sm" style={{ color: 'var(--t-text-3)' }}>Kéo thả hoặc click để chọn file .json</span>
+            )}
+          </label>
+        )}
+
+        {parseError && (
+          <div className="text-sm rounded-xl px-3 py-2" style={{ color: 'var(--t-error)', background: 'color-mix(in oklch, var(--t-error) 8%, white)' }}>
+            {parseError}
+          </div>
+        )}
+
+        {parsed && !result && (
+          <div className="space-y-4">
+            <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'color-mix(in oklch, var(--t-info) 8%, white)', border: '1px solid color-mix(in oklch, var(--t-info) 25%, transparent)' }}>
+              <div className="font-semibold" style={{ color: 'var(--t-info)' }}>
+                {parsed.members.length} thành viên trong file
+              </div>
+              {parsed.exportedAt && (
+                <div className="text-xs mt-0.5" style={{ color: 'var(--t-text-2)' }}>
+                  Xuất ngày: {new Date(parsed.exportedAt).toLocaleDateString('vi-VN')}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--t-text-3)' }}>Chế độ nhập</p>
+              {([
+                { id: 'merge', label: 'Gộp (Merge)', desc: 'Cập nhật thành viên có sẵn, thêm mới nếu chưa có. Khuyên dùng.' },
+                { id: 'replace', label: 'Thay thế (Replace)', desc: 'Xóa toàn bộ dữ liệu hiện tại rồi nhập lại từ file. Không thể hoàn tác!' },
+              ] as const).map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setMode(m.id)}
+                  className="w-full text-left px-4 py-3 rounded-xl border-2 transition-colors"
+                  style={{
+                    borderColor: mode === m.id ? (m.id === 'replace' ? 'var(--t-error)' : 'var(--t-info)') : 'var(--t-border)',
+                    background: mode === m.id ? (m.id === 'replace' ? 'color-mix(in oklch, var(--t-error) 6%, white)' : 'color-mix(in oklch, var(--t-info) 6%, white)') : 'white',
+                  }}
+                >
+                  <div className="text-sm font-semibold" style={{ color: mode === m.id && m.id === 'replace' ? 'var(--t-error)' : 'var(--t-text)' }}>{m.label}</div>
+                  <div className="text-xs mt-0.5" style={{ color: 'var(--t-text-3)' }}>{m.desc}</div>
+                </button>
+              ))}
+            </div>
+
+            {mode === 'replace' && (
+              <div className="text-sm rounded-xl px-4 py-3" style={{ color: 'var(--t-error)', background: 'color-mix(in oklch, var(--t-error) 8%, white)', border: '1px solid color-mix(in oklch, var(--t-error) 25%, transparent)' }}>
+                Cảnh báo: Toàn bộ dữ liệu gia phả hiện tại sẽ bị xóa và không thể khôi phục!
+              </div>
+            )}
+          </div>
+        )}
+
+        {result && (
+          <div className="rounded-xl px-4 py-4 space-y-1" style={{ background: 'color-mix(in oklch, var(--t-success) 8%, white)', border: '1px solid color-mix(in oklch, var(--t-success) 25%, transparent)' }}>
+            <div className="flex items-center gap-2 font-semibold" style={{ color: 'var(--t-success)' }}>
+              <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Nhập thành công
+            </div>
+            <div className="text-sm" style={{ color: 'var(--t-text-2)' }}>
+              {result.created} thêm mới · {result.updated} cập nhật · Tổng {result.total} thành viên
+            </div>
+            <div className="text-xs mt-1" style={{ color: 'var(--t-text-3)' }}>
+              Chạy &ldquo;Tính lại số liệu&rdquo; để cập nhật thống kê (đời, con cháu...).
+            </div>
+          </div>
+        )}
+
+        {importError && (
+          <div className="text-sm rounded-xl px-3 py-2" style={{ color: 'var(--t-error)', background: 'color-mix(in oklch, var(--t-error) 8%, white)' }}>
+            {importError}
+          </div>
+        )}
+
+        <div className="flex gap-3 pt-1">
+          {result ? (
+            <button
+              onClick={onClose}
+              className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-opacity"
+              style={{ background: 'var(--t-accent)' }}
+            >
+              Đóng
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={onClose}
+                className="flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors"
+                style={{ background: 'var(--t-surface-2)', color: 'var(--t-text)' }}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleImport}
+                disabled={!parsed || importing}
+                className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-opacity disabled:opacity-50"
+                style={{ background: mode === 'replace' ? 'var(--t-error)' : 'var(--t-accent)' }}
+              >
+                {importing ? 'Đang nhập...' : 'Nhập dữ liệu'}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function GiaPhaAdminPage() {
   const [pagedData, setPagedData] = useState<PaginatedResponse<Member> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -142,6 +460,7 @@ export default function GiaPhaAdminPage() {
   const [recalcDone, setRecalcDone] = useState<{ updated: number; durationMs: number } | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [editMemberId, setEditMemberId] = useState<string | null>(null);
+  const [reorderTarget, setReorderTarget] = useState<{ anchor: Member; siblings: Member[] } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const esRef = useRef<EventSource | null>(null);
 
@@ -190,6 +509,15 @@ export default function GiaPhaAdminPage() {
   const triggerRefresh = useCallback(() => {
     invalidateMembersCache();
     setRefreshKey((k) => k + 1);
+  }, []);
+
+  const handleOpenReorder = useCallback(async (member: Member) => {
+    if (!member.parentId) return;
+    const all = await getCachedAllMembers();
+    const siblings = all
+      .filter((m) => m.parentId === member.parentId)
+      .sort(compareSiblings);
+    setReorderTarget({ anchor: member, siblings });
   }, []);
 
   const handleOpenLineage = useCallback(async (id: string, name: string) => {
@@ -268,40 +596,19 @@ export default function GiaPhaAdminPage() {
   const totalPages = pagedData?.totalPages ?? 1;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-5">
-      {/* ── Header ── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'var(--t-accent)' }}
-            >
-              <svg className="w-5 h-5 text-amber-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-stone-900">Gia phả</h1>
-          </div>
-          <div className="flex items-center gap-3 pl-12 flex-wrap">
-            {!loading && pagedData && (
-              <span className="text-sm text-stone-500">
-                <span className="font-semibold text-stone-700">{total}</span> thành viên
-              </span>
-            )}
-            {isRevalidating && !loading && (
-              <span className="flex items-center gap-1 text-xs text-stone-400">
-                <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Đang làm mới...
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:flex-shrink-0">
+    <div className="w-full space-y-5">
+      <AdminPageHeader
+        title="Gia phả"
+        eyebrow="Quản trị thành viên"
+        description="Quản lý hồ sơ thành viên, quan hệ gia đình và sơ đồ cây gia phả."
+        meta={
+          <>
+            {!loading && pagedData && <AdminMetaChip label="Tổng" value={`${total} thành viên`} tone="blue" />}
+            {isRevalidating && !loading && <AdminMetaChip label="Trạng thái" value="Đang làm mới" tone="amber" />}
+          </>
+        }
+        actions={
+          <>
           <button
             onClick={handleRecalculate}
             disabled={recalculating || loading}
@@ -327,8 +634,9 @@ export default function GiaPhaAdminPage() {
             </svg>
             Thêm thành viên
           </Link>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* ── Recalculate progress banner ── */}
       {recalculating && recalcProgress && (
@@ -444,34 +752,30 @@ export default function GiaPhaAdminPage() {
       {/* ── Table View ── */}
       {viewMode === 'table' && (
         <>
-        <div className="hidden bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden sm:block">
+        <div className="hidden w-full overflow-hidden rounded-2xl border border-stone-200 bg-white sm:block">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ background: 'var(--t-surface-2)', borderBottom: '1px solid var(--t-border)' }}>
-                  <th className="px-5 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '35%' }}>Thành viên</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '80px' }}>Ngày sinh</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '80px' }}>Ngày mất</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider hidden sm:table-cell">Giới tính</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-bold text-stone-500 uppercase tracking-wider hidden sm:table-cell" style={{ width: '70px' }}>Đời thứ</th>
-                  <th className="px-5 py-3 text-right text-[10px] font-bold text-stone-500 uppercase tracking-wider" style={{ width: '160px' }}>Thao tác</th>
+                <tr className="border-b border-stone-200 bg-stone-50/80">
+                  <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-stone-500" style={{ width: '34%' }}>Thành viên</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-stone-500" style={{ width: '180px' }}>Đời / sinh mất</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-stone-500">Gia đình</th>
+                  <th className="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-stone-500" style={{ width: '148px' }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
                 {loading ? (
                   [...Array(4)].map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-5 py-4"><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-stone-100 flex-shrink-0" /><div className="h-4 w-36 bg-stone-100 rounded" /></div></td>
-                      <td className="px-4 py-4"><div className="h-3 w-14 bg-stone-100 rounded" /></td>
-                      <td className="px-4 py-4"><div className="h-3 w-14 bg-stone-100 rounded" /></td>
-                      <td className="px-4 py-4 hidden sm:table-cell"><div className="h-4 w-10 bg-stone-100 rounded-full" /></td>
-                      <td className="px-4 py-4 hidden sm:table-cell"><div className="h-3 w-8 bg-stone-100 rounded" /></td>
+                      <td className="px-5 py-4"><div className="flex items-center gap-3"><div className="h-10 w-10 flex-shrink-0 rounded-xl bg-stone-100" /><div className="space-y-2"><div className="h-4 w-36 rounded bg-stone-100" /><div className="h-3 w-48 rounded bg-stone-100" /></div></div></td>
+                      <td className="px-4 py-4"><div className="h-6 w-20 rounded-full bg-stone-100" /></td>
+                      <td className="px-4 py-4"><div className="h-7 w-64 rounded-full bg-stone-100" /></td>
                       <td className="px-5 py-4"><div className="h-3 w-16 bg-stone-100 rounded ml-auto" /></td>
                     </tr>
                   ))
                 ) : members.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-5 py-16 text-center">
+                    <td colSpan={4} className="px-5 py-16 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <svg className="w-10 h-10 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -482,52 +786,59 @@ export default function GiaPhaAdminPage() {
                   </tr>
                 ) : (
                   members.map((member) => (
-                    <tr key={member.id} className="hover:bg-stone-50/60 transition-colors group">
-                      <td className="px-5 py-3.5">
+                    <tr key={member.id} className="transition-colors hover:bg-red-50/20">
+                      <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <AvatarCell member={member} />
-                          <div>
-                            <p className="font-semibold text-stone-900 group-hover:text-red-700 transition-colors">{member.fullName}</p>
+                          <div className="min-w-0">
+                            <p className="truncate text-[15px] font-semibold text-stone-950 transition-colors">{member.fullName}</p>
+                            <div className="mt-1 max-w-xl">
+                              <ContactSummary member={member} />
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3.5"><DateCell date={member.birthDate} year={member.birthYear} /></td>
-                      <td className="px-4 py-3.5"><DateCell date={member.deathDate} year={member.deathYear} /></td>
-                      <td className="px-4 py-3.5 hidden sm:table-cell"><GenderBadge gender={member.gender} /></td>
-                      <td className="px-4 py-3.5 hidden sm:table-cell text-xs text-stone-500 font-medium">
-                        {member.generation ? `Đời ${member.generation}` : <span className="text-stone-300">—</span>}
+                      <td className="px-4 py-4">
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <GenerationBadge generation={member.generation} />
+                            <GenderBadge gender={member.gender} />
+                          </div>
+                          <LifeSummary member={member} />
+                        </div>
                       </td>
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
+                      <td className="px-4 py-4">
+                        <FamilyStats member={member} />
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center justify-end gap-1.5 overflow-visible">
+                          <AdminActionButton
+                            label="Xem cây trực hệ"
+                            tone="amber"
                             onClick={() => handleOpenLineage(member.id, member.fullName)}
                             disabled={lineageLoading}
-                            className="px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
-                            style={{ color: 'var(--t-warning)', background: 'color-mix(in oklch, var(--t-warning) 6%, transparent)' }}
-                            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in oklch, var(--t-warning) 12%, transparent)')}
-                            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in oklch, var(--t-warning) 6%, transparent)')}
-                            title="Xem cây trực hệ"
                           >
-                            {lineageLoading ? '...' : 'Cây trực hệ'}
-                          </button>
-                          <Link
+                            {lineageLoading ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-amber-700" /> : <TreeIcon />}
+                          </AdminActionButton>
+                          {(member.siblingsCount ?? 0) > 0 && (
+                            <AdminActionButton
+                              label="Sắp xếp thứ tự anh chị em"
+                              tone="green"
+                              onClick={() => handleOpenReorder(member)}
+                            >
+                              <SortIcon />
+                            </AdminActionButton>
+                          )}
+                          <AdminActionLink
                             href={`/admin/gia-pha/${member.id}`}
-                            className="px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors"
-                            style={{ color: 'var(--t-info)', background: 'color-mix(in oklch, var(--t-info) 6%, transparent)' }}
-                            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = 'color-mix(in oklch, var(--t-info) 12%, transparent)')}
-                            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = 'color-mix(in oklch, var(--t-info) 6%, transparent)')}
+                            label="Sửa thành viên"
+                            tone="blue"
                           >
-                            Sửa
-                          </Link>
-                          <button
-                            onClick={() => setDeleteTarget(member)}
-                            className="px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors"
-                            style={{ color: 'var(--t-error)', background: 'color-mix(in oklch, var(--t-error) 6%, transparent)' }}
-                            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in oklch, var(--t-error) 12%, transparent)')}
-                            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in oklch, var(--t-error) 6%, transparent)')}
-                          >
-                            Xóa
-                          </button>
+                            <EditIcon />
+                          </AdminActionLink>
+                          <AdminActionButton label="Xóa thành viên" tone="red" onClick={() => setDeleteTarget(member)}>
+                            <TrashIcon />
+                          </AdminActionButton>
                         </div>
                       </td>
                     </tr>
@@ -579,42 +890,50 @@ export default function GiaPhaAdminPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                  <div className="rounded-xl bg-stone-50 px-3 py-2">
-                    <span className="block text-stone-400">Ngày sinh</span>
-                    <span className="mt-0.5 block font-medium text-stone-700">
-                      {member.birthDate ? formatDayMonth(member.birthDate) : member.birthYear ?? '—'}
-                    </span>
+                <div className="mt-4 space-y-2 rounded-xl bg-stone-50 px-3 py-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <GenerationBadge generation={member.generation} />
+                    <GenderBadge gender={member.gender} />
                   </div>
-                  <div className="rounded-xl bg-stone-50 px-3 py-2">
-                    <span className="block text-stone-400">Ngày mất</span>
-                    <span className="mt-0.5 block font-medium text-stone-700">
-                      {member.deathDate ? formatDayMonth(member.deathDate) : member.deathYear ?? '—'}
-                    </span>
-                  </div>
+                  <LifeSummary member={member} />
                 </div>
+                <div className="mt-2 rounded-xl bg-white">
+                  <FamilyStats member={member} />
+                </div>
+                {(member.phone || member.email || member.residence) && (
+                  <div className="mt-2 rounded-xl bg-stone-50 px-3 py-2">
+                    <ContactSummary member={member} />
+                  </div>
+                )}
 
-                <div className="mt-4 grid grid-cols-3 gap-2 border-t border-stone-100 pt-3">
-                  <button
+                <div className="mt-4 flex justify-end gap-2 border-t border-stone-100 pt-3">
+                  <AdminActionButton
+                    label="Xem cây trực hệ"
+                    tone="amber"
                     onClick={() => handleOpenLineage(member.id, member.fullName)}
                     disabled={lineageLoading}
-                    className="min-h-9 rounded-lg bg-amber-50 px-2 text-center text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50"
-                    title="Xem cây trực hệ"
                   >
-                    {lineageLoading ? '...' : 'Trực hệ'}
-                  </button>
-                  <Link
+                    {lineageLoading ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-amber-700" /> : <TreeIcon className="h-3.5 w-3.5" />}
+                  </AdminActionButton>
+                  {(member.siblingsCount ?? 0) > 0 && (
+                    <AdminActionButton
+                      label="Sắp xếp thứ tự anh chị em"
+                      tone="green"
+                      onClick={() => handleOpenReorder(member)}
+                    >
+                      <SortIcon className="h-3.5 w-3.5" />
+                    </AdminActionButton>
+                  )}
+                  <AdminActionLink
                     href={`/admin/gia-pha/${member.id}`}
-                    className="flex min-h-9 items-center justify-center rounded-lg bg-blue-50 px-2 text-center text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100"
+                    label="Sửa thành viên"
+                    tone="blue"
                   >
-                    Sửa
-                  </Link>
-                  <button
-                    onClick={() => setDeleteTarget(member)}
-                    className="min-h-9 rounded-lg bg-red-50 px-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
-                  >
-                    Xóa
-                  </button>
+                    <EditIcon className="h-3.5 w-3.5" />
+                  </AdminActionLink>
+                  <AdminActionButton label="Xóa thành viên" tone="red" onClick={() => setDeleteTarget(member)}>
+                    <TrashIcon className="h-3.5 w-3.5" />
+                  </AdminActionButton>
                 </div>
               </article>
             ))
@@ -625,7 +944,7 @@ export default function GiaPhaAdminPage() {
 
       {/* ── Grid View ── */}
       {viewMode === 'grid' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {loading ? (
             [...Array(8)].map((_, i) => (
               <div key={i} className="bg-white rounded-2xl border border-stone-200 p-4 animate-pulse">
@@ -640,38 +959,60 @@ export default function GiaPhaAdminPage() {
             <div className="col-span-full py-16 text-center"><p className="text-stone-400 text-sm">Không tìm thấy thành viên nào</p></div>
           ) : (
             members.map((member) => (
-              <div key={member.id} className="bg-white rounded-2xl border border-stone-200 p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+              <article key={member.id} className="flex min-h-[260px] flex-col rounded-2xl border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:border-red-200">
                 <div className="flex items-start gap-3 mb-3">
                   <AvatarCell member={member} />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-stone-900 truncate" title={member.fullName}>{member.fullName}</h3>
-                    <div className="mt-1"><GenderBadge gender={member.gender} /></div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <GenerationBadge generation={member.generation} />
+                      <GenderBadge gender={member.gender} />
+                    </div>
                   </div>
                 </div>
-                <div className="text-xs text-stone-500 space-y-1 mb-4 flex-1">
-                  <p><span className="text-stone-400">Ngày sinh:</span> {member.birthDate ? formatDayMonth(member.birthDate) : member.birthYear ?? '—'}</p>
-                  <p><span className="text-stone-400">Ngày mất:</span> {member.deathDate ? formatDayMonth(member.deathDate) : member.deathYear ?? '—'}</p>
-                  {member.generation ? (
-                    <p><span className="text-stone-400">Đời thứ:</span> <span className="font-semibold text-stone-700">{member.generation}</span></p>
-                  ) : null}
+
+                <div className="rounded-xl bg-stone-50 px-3 py-2">
+                  <LifeSummary member={member} />
                 </div>
-                <div className="flex items-center gap-1.5 pt-3 border-t border-stone-100 mt-auto">
-                  <button
+
+                <div className="mt-2">
+                  <FamilyStats member={member} />
+                </div>
+
+                <div className="mt-2 min-h-12 rounded-xl bg-stone-50 px-3 py-2">
+                  <ContactSummary member={member} />
+                </div>
+
+                <div className="mt-auto flex items-center justify-end gap-2 border-t border-stone-100 pt-3">
+                  <AdminActionButton
+                    label="Xem cây trực hệ"
+                    tone="amber"
                     onClick={() => handleOpenLineage(member.id, member.fullName)}
                     disabled={lineageLoading}
-                    className="flex-1 text-center px-2 py-1.5 text-xs font-medium rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors disabled:opacity-50"
-                    title="Xem cây trực hệ"
                   >
-                    {lineageLoading ? '...' : 'Cây trực hệ'}
-                  </button>
-                  <Link href={`/admin/gia-pha/${member.id}`} className="flex-1 text-center px-2 py-1.5 text-xs font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">
-                    Sửa
-                  </Link>
-                  <button onClick={() => setDeleteTarget(member)} className="px-2 py-1.5 text-xs font-medium rounded-lg text-red-700 bg-red-50 hover:bg-red-100 transition-colors">
-                    Xóa
-                  </button>
+                    {lineageLoading ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-amber-700" /> : <TreeIcon />}
+                  </AdminActionButton>
+                  {(member.siblingsCount ?? 0) > 0 && (
+                    <AdminActionButton
+                      label="Sắp xếp thứ tự anh chị em"
+                      tone="green"
+                      onClick={() => handleOpenReorder(member)}
+                    >
+                      <SortIcon />
+                    </AdminActionButton>
+                  )}
+                  <AdminActionLink
+                    href={`/admin/gia-pha/${member.id}`}
+                    label="Sửa thành viên"
+                    tone="blue"
+                  >
+                    <EditIcon />
+                  </AdminActionLink>
+                  <AdminActionButton label="Xóa thành viên" tone="red" onClick={() => setDeleteTarget(member)}>
+                    <TrashIcon />
+                  </AdminActionButton>
                 </div>
-              </div>
+              </article>
             ))
           )}
         </div>
@@ -691,6 +1032,7 @@ export default function GiaPhaAdminPage() {
               refreshKey={refreshKey}
               onEditMember={(id) => setEditMemberId(id)}
               onDeleteMember={async (id) => { await deleteMember(id); triggerRefresh(); }}
+              onReorderSiblings={handleOpenReorder}
             />
           </div>
         </div>
@@ -720,6 +1062,15 @@ export default function GiaPhaAdminPage() {
         />
       )}
 
+      {reorderTarget && (
+        <SiblingReorderModal
+          anchor={reorderTarget.anchor}
+          siblings={reorderTarget.siblings}
+          onClose={() => setReorderTarget(null)}
+          onSaved={triggerRefresh}
+        />
+      )}
+
       <ConfirmDialog
         open={!!deleteTarget}
         title="Xóa thành viên"
@@ -739,6 +1090,7 @@ export default function GiaPhaAdminPage() {
           onClose={() => setLineageTarget(null)}
           onEditMember={(id) => setEditMemberId(id)}
           onDeleteMember={async (id) => { await deleteMember(id); triggerRefresh(); setLineageTarget(null); }}
+          onReorderSiblings={handleOpenReorder}
         />
       )}
     </div>

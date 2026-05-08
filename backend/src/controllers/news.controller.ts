@@ -11,7 +11,8 @@ export const NewsController = {
   async getList(req: Request, res: Response): Promise<void> {
     const page = Math.max(1, parseInt(String(req.query.page ?? '1'), 10) || 1);
     const limit = Math.max(1, parseInt(String(req.query.limit ?? '10'), 10) || 10);
-    const result = await NewsService.getList(page, limit);
+    const keyword = req.query.keyword ? String(req.query.keyword).trim() : undefined;
+    const result = await NewsService.getList(page, limit, keyword);
     sendSuccess(res, result);
   },
 
@@ -66,5 +67,11 @@ export const NewsController = {
     const id = String(req.params.id);
     const result = await NewsService.togglePin(id);
     sendSuccess(res, result);
+  },
+
+  async reorder(req: Request, res: Response): Promise<void> {
+    const { orderedIds, startIndex } = req.body as { orderedIds: string[]; startIndex?: number };
+    await NewsService.reorder(orderedIds, startIndex ?? 0);
+    sendSuccess(res, null, 'Reordered successfully');
   },
 };
