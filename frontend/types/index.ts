@@ -59,6 +59,7 @@ export interface NewsListItem {
   slug: string;
   thumbnail: string | null;
   isPinned: boolean;
+  order: number | null;
   publishedAt: string;
   updatedAt: string;
 }

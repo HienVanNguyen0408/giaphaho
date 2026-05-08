@@ -14,7 +14,7 @@ export const NewsService = {
   async getPinned() {
     return prisma.news.findMany({
       where: { isPinned: true },
-      orderBy: { publishedAt: 'desc' },
+      orderBy: [{ order: 'asc' }, { publishedAt: 'desc' }],
     });
   },
 
@@ -22,7 +22,7 @@ export const NewsService = {
     const skip = (page - 1) * limit;
     const [items, total] = await prisma.$transaction([
       prisma.news.findMany({
-        orderBy: { publishedAt: 'desc' },
+        orderBy: [{ order: 'asc' }, { publishedAt: 'desc' }],
         skip,
         take: limit,
       }),
@@ -60,12 +60,14 @@ export const NewsService = {
       slug = `${baseSlug}-${counter}`;
       counter++;
     }
+    const last = await prisma.news.findFirst({ orderBy: { order: 'desc' } });
     return prisma.news.create({
       data: {
         title: data.title,
         content: data.content,
         thumbnail: data.thumbnail,
         isPinned: data.isPinned ?? false,
+        order: (last?.order ?? -1) + 1,
         slug,
       },
     });
@@ -88,5 +90,13 @@ export const NewsService = {
     }
     const updated = await prisma.news.update({ where: { id }, data: { isPinned: !news.isPinned } });
     return { isPinned: updated.isPinned };
+  },
+
+  async reorder(orderedIds: string[]): Promise<void> {
+    await prisma.$transaction(
+      orderedIds.map((id, index) =>
+        prisma.news.update({ where: { id }, data: { order: index } }),
+      ),
+    );
   },
 };

@@ -9,6 +9,7 @@ const mockNews: NewsListItem = {
   slug: 'le-gio-to-ho-phung-2025',
   thumbnail: null,
   isPinned: true,
+  order: 0,
   publishedAt: '2025-04-01T08:00:00.000Z',
   updatedAt: '2025-04-01T08:00:00.000Z',
 };
@@ -20,7 +21,7 @@ describe('TinNoiBat', () => {
   });
 
   it('renders an empty state when no news is provided', () => {
-    render(<TinNoiBat news={[]} />);
-    expect(screen.getByText(/Chưa có tin nổi bật/i)).toBeDefined();
+    const { container } = render(<TinNoiBat news={[]} />);
+    expect(container.firstChild).toBeNull();
   });
 });

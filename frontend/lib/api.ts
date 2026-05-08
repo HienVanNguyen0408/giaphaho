@@ -99,6 +99,9 @@ export const deleteNews = (id: string) => apiFetch<null>(`/api/news/${id}`, { me
 export const togglePin = (id: string) =>
   apiFetch<{ isPinned: boolean }>(`/api/news/${id}/pin`, { method: 'PATCH' });
 
+export const reorderNews = (orderedIds: string[]) =>
+  apiFetch<null>('/api/news/reorder', { method: 'PATCH', body: JSON.stringify({ orderedIds }) });
+
 // ====== VIDEOS ======
 export const getVideos = () => apiFetch<Video[]>('/api/videos');
 

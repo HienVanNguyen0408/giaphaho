@@ -67,4 +67,10 @@ export const NewsController = {
     const result = await NewsService.togglePin(id);
     sendSuccess(res, result);
   },
+
+  async reorder(req: Request, res: Response): Promise<void> {
+    const { orderedIds } = req.body as { orderedIds: string[] };
+    await NewsService.reorder(orderedIds);
+    sendSuccess(res, null, 'Reordered successfully');
+  },
 };
