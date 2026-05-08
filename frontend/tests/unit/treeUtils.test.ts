@@ -15,6 +15,7 @@ function makeMember(overrides: Partial<Member> & { id: string; fullName: string 
     bio: null,
     achievements: [],
     parentId: null,
+    siblingOrder: null,
     chiId: null,
     descendantsCount: null,
     generation: null,
@@ -105,5 +106,20 @@ describe('flatToFlowGraph', () => {
     const member = makeMember({ id: '1', fullName: 'A' });
     const result = flatToFlowGraph([member]);
     expect(result.nodes[0].type).toBe('memberNode');
+  });
+
+  it('places older siblings with smaller siblingOrder further left', () => {
+    const root = makeMember({ id: 'root', fullName: 'Root', parentId: null });
+    const youngest = makeMember({ id: 'youngest', fullName: 'Youngest', parentId: 'root', siblingOrder: 3 });
+    const oldest = makeMember({ id: 'oldest', fullName: 'Oldest', parentId: 'root', siblingOrder: 1 });
+    const middle = makeMember({ id: 'middle', fullName: 'Middle', parentId: 'root', siblingOrder: 2 });
+
+    const result = flatToFlowGraph([root, youngest, oldest, middle]);
+
+    const oldestNode = result.nodes.find((n) => n.id === 'oldest')!;
+    const middleNode = result.nodes.find((n) => n.id === 'middle')!;
+    const youngestNode = result.nodes.find((n) => n.id === 'youngest')!;
+    expect(oldestNode.position.x).toBeLessThan(middleNode.position.x);
+    expect(middleNode.position.x).toBeLessThan(youngestNode.position.x);
   });
 });

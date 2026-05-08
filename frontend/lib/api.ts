@@ -7,10 +7,10 @@ import type {
   NewsListItem,
   NewsDetail,
   PaginatedNews,
+  PaginatedVideo,
   Video,
   Section,
   FooterConfig,
-  Notification,
   ActivityLog,
   DashboardStats,
   SearchResults,
@@ -73,8 +73,11 @@ export const deleteMember = (id: string) =>
   apiFetch<null>(`/api/members/${id}`, { method: 'DELETE' });
 
 // ====== NEWS ======
-export const getNewsList = (page = 1, limit = 10) =>
-  apiFetch<PaginatedNews>(`/api/news?page=${page}&limit=${limit}`);
+export const getNewsList = (page = 1, limit = 10, keyword?: string) => {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (keyword) params.set('keyword', keyword);
+  return apiFetch<PaginatedNews>(`/api/news?${params}`);
+};
 
 export const getPinnedNews = () => apiFetch<NewsListItem[]>('/api/news/pinned');
 
@@ -99,11 +102,12 @@ export const deleteNews = (id: string) => apiFetch<null>(`/api/news/${id}`, { me
 export const togglePin = (id: string) =>
   apiFetch<{ isPinned: boolean }>(`/api/news/${id}/pin`, { method: 'PATCH' });
 
-export const reorderNews = (orderedIds: string[]) =>
-  apiFetch<null>('/api/news/reorder', { method: 'PATCH', body: JSON.stringify({ orderedIds }) });
-
 // ====== VIDEOS ======
-export const getVideos = () => apiFetch<Video[]>('/api/videos');
+export const getVideoList = (page = 1, limit = 12, keyword?: string) => {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (keyword) params.set('keyword', keyword);
+  return apiFetch<PaginatedVideo>(`/api/videos?${params}`);
+};
 
 export const createVideo = (data: { title: string; youtubeUrl: string; thumbnailUrl?: string }) =>
   apiFetch<Video>('/api/videos', { method: 'POST', body: JSON.stringify(data) });
@@ -114,8 +118,11 @@ export const updateVideo = (id: string, data: Partial<Video>) =>
 export const deleteVideo = (id: string) =>
   apiFetch<null>(`/api/videos/${id}`, { method: 'DELETE' });
 
-export const reorderVideos = (orderedIds: string[]) =>
-  apiFetch<null>('/api/videos/reorder', { method: 'PATCH', body: JSON.stringify({ orderedIds }) });
+export const reorderVideos = (orderedIds: string[], startIndex = 0) =>
+  apiFetch<null>('/api/videos/reorder', { method: 'PATCH', body: JSON.stringify({ orderedIds, startIndex }) });
+
+export const reorderNews = (orderedIds: string[], startIndex = 0) =>
+  apiFetch<null>('/api/news/reorder', { method: 'PATCH', body: JSON.stringify({ orderedIds, startIndex }) });
 
 // ====== SECTIONS ======
 export const getSections = (all = false) =>
@@ -142,17 +149,39 @@ export const getFooter = () => apiFetch<FooterConfig>('/api/footer');
 export const updateFooter = (data: Omit<FooterConfig, 'id'>) =>
   apiFetch<FooterConfig>('/api/footer', { method: 'PUT', body: JSON.stringify(data) });
 
-// ====== NOTIFICATIONS ======
-export const getNotifications = () => apiFetch<Notification[]>('/api/notifications');
-
-export const markNotificationRead = (id: string) =>
-  apiFetch<Notification>(`/api/notifications/${id}/read`, { method: 'PATCH' });
-
 // ====== ACTIVITY LOGS ======
 export const getActivityLogs = (page = 1, limit = 20) =>
   apiFetch<{ items: ActivityLog[]; total: number; page: number; totalPages: number }>(
     `/api/activity-logs?page=${page}&limit=${limit}`,
   );
+
+export const exportMembers = async (format: 'json' | 'md' | 'html'): Promise<void> => {
+  const res = await fetch(`${BASE_URL}/api/members/export?format=${format}`, {
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let message = 'Export thất bại';
+    try { message = (JSON.parse(text) as ApiResponse).message ?? message; } catch { /* noop */ }
+    throw new Error(message);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `giaphaho-${date}.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+export const importMembers = (data: { members: unknown[]; mode?: 'merge' | 'replace' }) =>
+  apiFetch<{ created: number; updated: number; total: number }>('/api/members/import', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 
 export const recalculateMemberStats = () =>
   apiFetch<{ jobId: string }>('/api/members/recalculate-stats', { method: 'POST' });

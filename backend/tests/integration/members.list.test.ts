@@ -86,6 +86,27 @@ describe('GET /api/members', () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual([]);
   });
+
+  it('includes female members in paginated list', async () => {
+    const pagedMembers = [
+      { ...mockMembers[0], gender: 'Nam', generation: 1 },
+      {
+        ...mockMembers[1],
+        fullName: 'Nguyen Thi C',
+        gender: 'Nữ',
+        generation: 1,
+      },
+    ];
+    vi.mocked(prisma.member.findMany).mockResolvedValue(pagedMembers as never);
+
+    const res = await request(app).get('/api/members?page=1&limit=12');
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.items).toHaveLength(2);
+    expect(res.body.data.items.map((member: { gender: string }) => member.gender)).toContain('Nữ');
+    expect(vi.mocked(prisma.member.findMany).mock.calls[0]?.[0]).toMatchObject({ where: {} });
+  });
 });
 
 describe('GET /api/members/:id', () => {

@@ -101,7 +101,6 @@ const navItems: NavItem[] = [
   { href: '/admin/video', label: 'Video', icon: <PlayIcon /> },
   { href: '/admin/section', label: 'Mục trang chủ', icon: <LayoutIcon /> },
   { href: '/admin/footer', label: 'Footer', icon: <FooterIcon /> },
-  { href: '/admin/notification', label: 'Thông báo', icon: <BellIcon /> },
   // { href: '/admin/activity-log', label: 'Nhật ký hoạt động', icon: <LogIcon />, superAdminOnly: true },
 ];
 

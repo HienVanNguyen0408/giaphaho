@@ -131,7 +131,7 @@ function LoginContent() {
   }
 
   const inputStyle = {
-    background: 'var(--t-surface-2)',
+    background: 'color-mix(in oklch, var(--t-surface-2) 88%, var(--t-surface))',
     border: '1px solid var(--t-border)',
     color: 'var(--t-text)',
     caretColor: 'var(--t-accent)',
@@ -168,13 +168,13 @@ function LoginContent() {
             <div
               className="relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl"
               style={{
-                background: 'linear-gradient(145deg, var(--t-accent), var(--t-warning))',
-                boxShadow: '0 8px 40px color-mix(in oklch, var(--t-accent) 45%, transparent)',
+                background: 'var(--t-nav-active-bg)',
+                boxShadow: '0 8px 40px color-mix(in oklch, var(--t-accent) 20%, transparent)',
               }}
             >
               <span
-                className="text-[1.8rem] text-amber-100"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600, lineHeight: 1 }}
+                className="text-[1.8rem]"
+                style={{ color: 'var(--t-nav-active-text)', fontFamily: 'var(--t-display-font)', fontWeight: 600, lineHeight: 1 }}
               >
                 P
               </span>
@@ -215,10 +215,10 @@ function LoginContent() {
         <div
           className="rounded-2xl overflow-hidden"
           style={{
-            background: 'rgba(18,12,7,0.88)',
+            background: 'color-mix(in oklch, var(--t-surface) 94%, var(--t-accent))',
             backdropFilter: 'blur(16px)',
-            border: '1px solid color-mix(in oklch, var(--t-warning) 35%, transparent)',
-            boxShadow: '0 0 0 1px color-mix(in oklch, var(--t-gold) 7%, transparent), 0 28px 70px rgba(0,0,0,0.65)',
+            border: '1px solid color-mix(in oklch, var(--t-accent) 20%, var(--t-border))',
+            boxShadow: '0 0 0 1px color-mix(in oklch, var(--t-gold) 7%, transparent), 0 28px 70px color-mix(in oklch, var(--t-text) 12%, transparent)',
           }}
         >
           {/* top accent line */}
@@ -232,7 +232,7 @@ function LoginContent() {
           <div className="p-7 pb-6">
             <p
               className="text-[10px] font-semibold uppercase mb-6"
-              style={{ color: 'rgba(168,162,158,0.6)', letterSpacing: '0.2em' }}
+              style={{ color: 'var(--t-text-3)', letterSpacing: '0.2em' }}
             >
               Đăng nhập
             </p>
@@ -243,7 +243,7 @@ function LoginContent() {
                 <label
                   htmlFor="username"
                   className="block text-[10px] font-semibold uppercase mb-1.5"
-                  style={{ color: 'rgba(168,162,158,0.6)', letterSpacing: '0.15em' }}
+                  style={{ color: 'var(--t-text-3)', letterSpacing: '0.15em' }}
                 >
                   Tên đăng nhập
                 </label>
@@ -255,7 +255,7 @@ function LoginContent() {
                   required
                   autoComplete="username"
                   placeholder="Nhập tên đăng nhập"
-                  className="w-full text-sm rounded-xl py-3 px-4 outline-none transition-all placeholder-stone-700"
+                  className="w-full text-sm rounded-xl py-3 px-4 outline-none transition-all"
                   style={inputStyle}
                   onFocus={(e) => {
                     e.target.style.borderColor = 'color-mix(in oklch, var(--t-warning) 55%, transparent)';
@@ -273,7 +273,7 @@ function LoginContent() {
                 <label
                   htmlFor="password"
                   className="block text-[10px] font-semibold uppercase mb-1.5"
-                  style={{ color: 'rgba(168,162,158,0.6)', letterSpacing: '0.15em' }}
+                  style={{ color: 'var(--t-text-3)', letterSpacing: '0.15em' }}
                 >
                   Mật khẩu
                 </label>
@@ -286,7 +286,7 @@ function LoginContent() {
                     required
                     autoComplete="current-password"
                     placeholder="Nhập mật khẩu"
-                    className="w-full text-sm rounded-xl py-3 pl-4 pr-11 outline-none transition-all placeholder-stone-700"
+                    className="w-full text-sm rounded-xl py-3 pl-4 pr-11 outline-none transition-all"
                     style={inputStyle}
                     onFocus={(e) => {
                       e.target.style.borderColor = 'color-mix(in oklch, var(--t-warning) 55%, transparent)';
@@ -334,9 +334,9 @@ function LoginContent() {
                 disabled={loading}
                 className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
                 style={{
-                  background: loading ? 'color-mix(in oklch, var(--t-accent) 80%, transparent)' : 'linear-gradient(135deg, var(--t-accent) 0%, var(--t-warning) 100%)',
+                  background: loading ? 'color-mix(in oklch, var(--t-accent) 80%, var(--t-surface))' : 'var(--t-nav-active-bg)',
                   color: 'var(--t-nav-active-text)',
-                  boxShadow: '0 4px 24px color-mix(in oklch, var(--t-accent) 28%, transparent)',
+                  boxShadow: '0 4px 24px color-mix(in oklch, var(--t-accent) 16%, transparent)',
                   letterSpacing: '0.05em',
                 }}
               >
@@ -356,7 +356,7 @@ function LoginContent() {
                 {!loading && (
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: 'linear-gradient(135deg, var(--t-accent-soft) 0%, var(--t-warning) 100%)' }}
+                    style={{ background: 'var(--t-accent-soft)' }}
                   />
                 )}
               </button>
@@ -373,34 +373,34 @@ function LoginContent() {
               <div
                 className="rounded-xl p-3"
                 style={{
-                  background: 'rgba(18,12,7,0.7)',
-                  border: '1px solid color-mix(in oklch, var(--t-warning) 20%, transparent)',
+                  background: 'color-mix(in oklch, var(--t-surface-2) 70%, var(--t-surface))',
+                  border: '1px solid color-mix(in oklch, var(--t-accent) 14%, var(--t-border))',
                 }}
               >
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-                  <span className="text-[11px] font-semibold" style={{ color: 'rgba(214,211,209,0.85)' }}>
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--t-accent)' }} />
+                  <span className="text-[11px] font-semibold" style={{ color: 'var(--t-text-2)' }}>
                     Admin tổng
                   </span>
                 </div>
-                <p className="text-[10px] leading-relaxed" style={{ color: 'color-mix(in oklch, var(--t-warning) 75%, transparent)' }}>
+                <p className="text-[10px] leading-relaxed" style={{ color: 'var(--t-text-3)' }}>
                   Toàn quyền quản trị hệ thống
                 </p>
               </div>
               <div
                 className="rounded-xl p-3"
                 style={{
-                  background: 'rgba(18,12,7,0.7)',
-                  border: '1px solid color-mix(in oklch, var(--t-warning) 20%, transparent)',
+                  background: 'color-mix(in oklch, var(--t-surface-2) 70%, var(--t-surface))',
+                  border: '1px solid color-mix(in oklch, var(--t-info) 14%, var(--t-border))',
                 }}
               >
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500 flex-shrink-0" />
-                  <span className="text-[11px] font-semibold" style={{ color: 'rgba(214,211,209,0.85)' }}>
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--t-info)' }} />
+                  <span className="text-[11px] font-semibold" style={{ color: 'var(--t-text-2)' }}>
                     Quản trị chi
                   </span>
                 </div>
-                <p className="text-[10px] leading-relaxed" style={{ color: 'color-mix(in oklch, var(--t-warning) 75%, transparent)' }}>
+                <p className="text-[10px] leading-relaxed" style={{ color: 'var(--t-text-3)' }}>
                   Quản lý trong phạm vi chi họ
                 </p>
               </div>

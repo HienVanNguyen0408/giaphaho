@@ -8,6 +8,8 @@ const router = Router();
 
 router.get('/', MemberController.getAll);
 // Static sub-routes must come before /:id to avoid the wildcard catching them
+router.get('/export', authenticate, requireRole(Role.SUPER_ADMIN), MemberController.exportData);
+router.post('/import', authenticate, requireRole(Role.SUPER_ADMIN), MemberController.importData);
 router.post('/recalculate-stats', authenticate, requireRole(Role.SUPER_ADMIN), MemberController.recalculateStats);
 router.get('/recalculate-stats/events', authenticate, requireRole(Role.SUPER_ADMIN), MemberController.recalculateStatsEvents);
 router.get('/:id', MemberController.getById);

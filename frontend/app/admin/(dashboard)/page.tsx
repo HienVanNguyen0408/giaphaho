@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getDashboard } from '@/lib/api';
 import { useAdminAuth } from '@/components/admin/providers/AdminAuthProvider';
+import AdminPageHeader from '@/components/admin/ui/AdminPageHeader';
 import type { DashboardStats } from '@/types';
 
 function StatCard({
@@ -48,14 +49,16 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Greeting */}
-      <div>
-        <h1 className="text-2xl font-bold text-stone-900">Tổng quan</h1>
-        <p className="text-stone-500 text-sm mt-0.5">
-          Chào mừng trở lại, <span className="font-medium">{user?.username}</span>
-        </p>
-      </div>
+    <div className="w-full space-y-6">
+      <AdminPageHeader
+        title="Tổng quan"
+        eyebrow="Bảng điều khiển"
+        description={
+          <>
+            Chào mừng trở lại, <span className="font-medium text-stone-700">{user?.username}</span>
+          </>
+        }
+      />
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
@@ -64,7 +67,7 @@ export default function DashboardPage() {
       )}
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           label="Thành viên"
           value={stats?.totalMembers}
@@ -82,12 +85,6 @@ export default function DashboardPage() {
           value={stats?.totalVideos}
           icon="▶️"
           color="bg-purple-100 text-purple-700"
-        />
-        <StatCard
-          label="Thông báo chưa đọc"
-          value={stats?.unreadNotifications}
-          icon="🔔"
-          color="bg-amber-100 text-amber-700"
         />
       </div>
 

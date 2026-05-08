@@ -1,7 +1,11 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { getVideoList } from '@/lib/api';
 import type { Video } from '@/types';
 
 function extractVideoId(url: string): string | null {
-  // Handles: youtu.be/ID, youtube.com/watch?v=ID, youtube.com/embed/ID, youtube.com/shorts/ID
   const patterns = [
     /youtu\.be\/([^?&/#]+)/,
     /[?&]v=([^?&/#]+)/,
@@ -20,7 +24,6 @@ function VideoCard({ video }: { video: Video }) {
 
   return (
     <div className="group bg-white rounded-xl overflow-hidden shadow-sm shadow-stone-200 border border-stone-100 hover:shadow-md hover:shadow-amber-100/40 hover:border-amber-200 transition-all duration-300">
-      {/* Embed */}
       <div className="relative w-full aspect-video bg-stone-900">
         {videoId ? (
           <iframe
@@ -37,7 +40,6 @@ function VideoCard({ video }: { video: Video }) {
           </div>
         )}
       </div>
-      {/* Title */}
       <div className="px-4 py-3 sm:py-4">
         <h3 className="text-stone-800 font-medium text-sm sm:text-base leading-snug line-clamp-2">{video.title}</h3>
       </div>
@@ -45,8 +47,29 @@ function VideoCard({ video }: { video: Video }) {
   );
 }
 
-export default function VideoSection({ videos }: { videos: Video[] }) {
-  const displayVideos = videos.slice(0, 3);
+interface Props {
+  initialVideos: Video[];
+  totalPages: number;
+}
+
+export default function VideoSection({ initialVideos, totalPages }: Props) {
+  const [videos, setVideos] = useState<Video[]>(initialVideos);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const goToPage = async (nextPage: number) => {
+    if (loading || nextPage < 1 || nextPage > totalPages || nextPage === page) return;
+    setLoading(true);
+    try {
+      const res = await getVideoList(nextPage, 3);
+      setVideos(res.data.items);
+      setPage(nextPage);
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="py-10 bg-white sm:py-14" aria-label="Video dòng họ">
@@ -67,15 +90,57 @@ export default function VideoSection({ videos }: { videos: Video[] }) {
         </div>
 
         {/* Grid */}
-        {displayVideos.length === 0 ? (
+        {videos.length === 0 ? (
           <div className="bg-stone-50 border border-stone-200 rounded-xl p-10 text-center">
             <p className="text-stone-500 text-sm">Chưa có video nào.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-            {displayVideos.map((video) => (
+          <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 transition-opacity duration-200 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
+            {videos.map((video) => (
               <VideoCard key={video.id} video={video} />
             ))}
+          </div>
+        )}
+
+        {/* Pagination + actions */}
+        {videos.length > 0 && (
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => goToPage(page - 1)}
+                  disabled={loading || page <= 1}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 disabled:opacity-40"
+                  aria-label="Trang trước"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+                <span className="text-sm text-stone-500">
+                  <strong className="text-stone-800">{page}</strong> / {totalPages}
+                </span>
+                <button
+                  onClick={() => goToPage(page + 1)}
+                  disabled={loading || page >= totalPages}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 disabled:opacity-40"
+                  aria-label="Trang sau"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              </div>
+            )}
+            <Link
+              href="/video"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-5 py-2.5 text-sm font-medium text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50"
+            >
+              Xem tất cả video
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
           </div>
         )}
       </div>

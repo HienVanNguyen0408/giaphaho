@@ -1,10 +1,30 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type DragEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import Link from 'next/link';
 import { deleteNews, getNewsList, reorderNews, togglePin } from '@/lib/api';
+import { AdminActionButton, AdminActionLink } from '@/components/admin/ui/AdminActionButton';
+import AdminPageHeader, { AdminMetaChip } from '@/components/admin/ui/AdminPageHeader';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import type { NewsListItem } from '@/types';
+
+function SearchIcon({ className = 'w-4 h-4' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+    </svg>
+  );
+}
+
+function XIcon({ className = 'w-4 h-4' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
+const PAGE_LIMIT = 15;
 
 type IconProps = { className?: string };
 
@@ -57,48 +77,27 @@ function TrashIcon({ className = 'w-4 h-4' }: IconProps) {
   );
 }
 
+function ChevronLeftIcon({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+    </svg>
+  );
+}
+
 function ImageIcon({ className = 'w-5 h-5' }: IconProps) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5zm10.5-11.25h.008v.008h-.008V8.25z" />
     </svg>
-  );
-}
-
-function IconButton({
-  label,
-  children,
-  onClick,
-  disabled,
-  tone = 'neutral',
-}: {
-  label: string;
-  children: ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  tone?: 'neutral' | 'red' | 'amber' | 'blue';
-}) {
-  const toneClass = {
-    neutral: 'text-stone-600 hover:bg-stone-100',
-    red: 'text-red-700 hover:bg-red-50',
-    amber: 'text-amber-700 hover:bg-amber-50',
-    blue: 'text-blue-700 hover:bg-blue-50',
-  }[tone];
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      title={label}
-      className={`group relative grid h-9 w-9 place-items-center rounded-lg border border-stone-200 bg-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${toneClass}`}
-    >
-      {children}
-      <span className="pointer-events-none absolute -top-9 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-md bg-stone-900 px-2 py-1 text-[11px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-        {label}
-      </span>
-    </button>
   );
 }
 
@@ -108,6 +107,9 @@ function formatDate(value: string) {
 
 export default function TinTucAdminPage() {
   const [items, setItems] = useState<NewsListItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<NewsListItem | null>(null);
@@ -117,27 +119,54 @@ export default function TinTucAdminPage() {
   const [reordering, setReordering] = useState(false);
   const draggedId = useRef<string | null>(null);
 
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const pinnedCount = useMemo(() => items.filter((item) => item.isPinned).length, [items]);
 
-  const fetchNews = () => {
+  const fetchNews = (page: number, keyword?: string) => {
     setLoading(true);
     setError(null);
-    getNewsList(1, 100)
-      .then((res) => setItems(res.data.items))
+    getNewsList(page, PAGE_LIMIT, keyword || undefined)
+      .then((res) => {
+        setItems(res.data.items);
+        setTotal(res.data.total);
+        setTotalPages(res.data.totalPages);
+        setCurrentPage(res.data.page);
+      })
       .catch((err) => setError(err instanceof Error ? err.message : 'Lỗi tải dữ liệu'))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    fetchNews();
+    fetchNews(1);
   }, []);
+
+  const handleSearchChange = (value: string) => {
+    setSearchInput(value);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setSearchQuery(value);
+      fetchNews(1, value.trim() || undefined);
+    }, 400);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearchQuery('');
+    fetchNews(1, undefined);
+  };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
       await deleteNews(deleteTarget.id);
-      setItems((current) => current.filter((item) => item.id !== deleteTarget.id));
+      const newTotal = total - 1;
+      const newTotalPages = Math.max(1, Math.ceil(newTotal / PAGE_LIMIT));
+      const nextPage = currentPage > newTotalPages ? newTotalPages : currentPage;
+      fetchNews(nextPage);
       setDeleteTarget(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Xóa thất bại');
@@ -165,7 +194,8 @@ export default function TinTucAdminPage() {
     setReordering(true);
     setError(null);
     try {
-      await reorderNews(ordered.map((item) => item.id));
+      const startIndex = (currentPage - 1) * PAGE_LIMIT;
+      await reorderNews(ordered.map((item) => item.id), startIndex);
     } catch (err) {
       setItems(previous);
       setError(err instanceof Error ? err.message : 'Sắp xếp thất bại');
@@ -210,24 +240,36 @@ export default function TinTucAdminPage() {
     setDragOverId(null);
   };
 
+  const goToPage = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    fetchNews(page, searchQuery.trim() || undefined);
+  };
+
+  const startIndex = (currentPage - 1) * PAGE_LIMIT;
+
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-700">Quản trị nội dung</p>
-          <h1 className="mt-1 text-2xl font-bold text-stone-950">Tin tức</h1>
-          <p className="mt-1 text-sm text-stone-500">
-            {items.length} bài viết · {pinnedCount} bài đang ghim · kéo thả để sắp xếp thứ tự hiển thị
-          </p>
-        </div>
-        <Link
-          href="/admin/tin-tuc/new"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-800 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-900"
-        >
-          <PlusIcon />
-          Thêm bài viết
-        </Link>
-      </div>
+    <div className="w-full space-y-5">
+      <AdminPageHeader
+        title="Tin tức"
+        eyebrow="Quản trị nội dung"
+        description="Quản lý bài viết hiển thị trên trang chủ và trang tin tức."
+        meta={
+          <>
+            <AdminMetaChip label="Tổng" value={`${total} bài viết`} tone="blue" />
+            <AdminMetaChip label="Ghim (trang này)" value={`${pinnedCount} bài`} tone="amber" />
+            <AdminMetaChip label="Sắp xếp" value="Kéo thả trong trang" />
+          </>
+        }
+        actions={
+          <Link
+            href="/admin/tin-tuc/new"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-800 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-900"
+          >
+            <PlusIcon />
+            Thêm bài viết
+          </Link>
+        }
+      />
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -235,8 +277,30 @@ export default function TinTucAdminPage() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
-        <div className="grid grid-cols-[48px_1fr_128px_124px] gap-4 border-b border-stone-200 bg-stone-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-stone-500 max-md:hidden">
+      <div className="relative">
+        <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-stone-400">
+          <SearchIcon />
+        </span>
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          placeholder="Tìm kiếm theo tiêu đề..."
+          className="w-full rounded-xl border border-stone-200 bg-white py-2.5 pl-10 pr-10 text-sm text-stone-900 placeholder-stone-400 focus:border-[var(--t-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--t-accent)]"
+        />
+        {searchInput && (
+          <button
+            onClick={handleClearSearch}
+            className="absolute inset-y-0 right-3 flex items-center text-stone-400 hover:text-stone-600"
+            aria-label="Xóa tìm kiếm"
+          >
+            <XIcon />
+          </button>
+        )}
+      </div>
+
+      <div className="w-full overflow-hidden rounded-2xl border border-stone-200 bg-white">
+        <div className="grid grid-cols-[64px_minmax(0,1.7fr)_160px_148px] gap-5 border-b border-stone-200 bg-stone-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-stone-500 max-md:hidden lg:px-5">
           <span>STT</span>
           <span>Bài viết</span>
           <span>Ngày đăng</span>
@@ -268,26 +332,37 @@ export default function TinTucAdminPage() {
             <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-stone-100 text-stone-400">
               <ImageIcon />
             </div>
-            <p className="mt-3 text-sm font-medium text-stone-700">Chưa có bài viết nào</p>
-            <p className="mt-1 text-xs text-stone-400">Tạo bài viết đầu tiên để hiển thị trên trang tin tức.</p>
+            {searchQuery ? (
+              <>
+                <p className="mt-3 text-sm font-medium text-stone-700">Không tìm thấy bài viết nào</p>
+                <p className="mt-1 text-xs text-stone-400">Thử tìm kiếm với từ khóa khác.</p>
+              </>
+            ) : (
+              <>
+                <p className="mt-3 text-sm font-medium text-stone-700">Chưa có bài viết nào</p>
+                <p className="mt-1 text-xs text-stone-400">Tạo bài viết đầu tiên để hiển thị trên trang tin tức.</p>
+              </>
+            )}
           </div>
         ) : (
           <ul className="divide-y divide-stone-100">
             {items.map((item, index) => (
               <li
                 key={item.id}
-                draggable
-                onDragStart={() => handleDragStart(item.id)}
-                onDragOver={(event) => handleDragOver(event, item.id)}
-                onDrop={(event) => handleDrop(event, item.id)}
-                onDragEnd={handleDragEnd}
-                className={`grid cursor-grab grid-cols-[48px_1fr_128px_124px] items-center gap-4 px-5 py-4 transition-colors active:cursor-grabbing max-md:grid-cols-[1fr_auto] max-md:gap-3 ${
+                draggable={!searchQuery}
+                onDragStart={searchQuery ? undefined : () => handleDragStart(item.id)}
+                onDragOver={searchQuery ? undefined : (event) => handleDragOver(event, item.id)}
+                onDrop={searchQuery ? undefined : (event) => handleDrop(event, item.id)}
+                onDragEnd={searchQuery ? undefined : handleDragEnd}
+                className={`grid grid-cols-[64px_minmax(0,1.7fr)_160px_148px] items-center gap-5 px-4 py-4 transition-colors max-md:grid-cols-[1fr_auto] max-md:gap-3 lg:px-5 ${
+                  searchQuery ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
+                } ${
                   dragOverId === item.id ? 'bg-red-50 ring-1 ring-inset ring-red-200' : 'hover:bg-stone-50'
                 }`}
               >
                 <div className="flex items-center gap-2 text-stone-400 max-md:hidden">
                   <GripIcon className="h-4 w-4" />
-                  <span className="font-mono text-xs">{index + 1}</span>
+                  <span className="font-mono text-xs">{startIndex + index + 1}</span>
                 </div>
 
                 <div className="flex min-w-0 items-center gap-4">
@@ -323,29 +398,25 @@ export default function TinTucAdminPage() {
 
                 <div className="text-sm text-stone-600 max-md:hidden">{formatDate(item.publishedAt)}</div>
 
-                <div className="flex justify-end gap-2">
-                  <Link
+                <div className="flex justify-end gap-2 overflow-visible">
+                  <AdminActionLink
                     href={`/admin/tin-tuc/${item.id}`}
-                    aria-label={`Sửa ${item.title}`}
-                    title="Sửa bài viết"
-                    className="group relative grid h-9 w-9 place-items-center rounded-lg border border-stone-200 bg-white text-blue-700 transition-colors hover:bg-blue-50"
+                    label="Sửa bài viết"
+                    tone="blue"
                   >
                     <EditIcon />
-                    <span className="pointer-events-none absolute -top-9 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-md bg-stone-900 px-2 py-1 text-[11px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                      Sửa bài viết
-                    </span>
-                  </Link>
-                  <IconButton
+                  </AdminActionLink>
+                  <AdminActionButton
                     label={item.isPinned ? 'Bỏ ghim bài viết' : 'Ghim bài viết'}
                     tone="amber"
                     disabled={togglingId === item.id}
                     onClick={() => handleTogglePin(item)}
                   >
                     {item.isPinned ? <PinOffIcon /> : <PinIcon />}
-                  </IconButton>
-                  <IconButton label="Xóa bài viết" tone="red" onClick={() => setDeleteTarget(item)}>
+                  </AdminActionButton>
+                  <AdminActionButton label="Xóa bài viết" tone="red" onClick={() => setDeleteTarget(item)}>
                     <TrashIcon />
-                  </IconButton>
+                  </AdminActionButton>
                 </div>
               </li>
             ))}
@@ -354,8 +425,57 @@ export default function TinTucAdminPage() {
       </div>
 
       {!loading && items.length > 0 && (
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white px-4 py-3">
+          <span className="text-xs text-stone-500">
+            Trang <strong className="text-stone-800">{currentPage}</strong> / {totalPages}
+            <span className="ml-2 text-stone-400">({total} bài viết)</span>
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200 text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronLeftIcon />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+              .reduce<(number | 'ellipsis')[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('ellipsis');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === 'ellipsis' ? (
+                  <span key={`ellipsis-${i}`} className="px-1 text-xs text-stone-400">…</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => goToPage(p as number)}
+                    className={`inline-flex h-8 min-w-[2rem] items-center justify-center rounded-lg border px-2 text-xs font-medium transition-colors ${
+                      currentPage === p
+                        ? 'border-[var(--t-accent)] bg-[var(--t-accent)] text-white'
+                        : 'border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ),
+              )}
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200 text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronRightIcon />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!loading && items.length > 0 && (
         <p className="text-center text-xs text-stone-400">
-          Giữ chuột trên một dòng rồi kéo lên/xuống để thay đổi thứ tự. Thứ tự sẽ được lưu ngay sau khi thả.
+          Kéo thả để thay đổi thứ tự trong trang hiện tại. Thứ tự sẽ được lưu ngay sau khi thả.
         </p>
       )}
 

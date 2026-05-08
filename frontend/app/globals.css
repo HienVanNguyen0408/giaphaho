@@ -111,6 +111,8 @@ h1, h2, h3 {
   color: var(--t-text);
 }
 
+
+
 /* Deal card hover */
 .deal-card {
   transition: border-color 0.2s ease, transform 0.25s ease;

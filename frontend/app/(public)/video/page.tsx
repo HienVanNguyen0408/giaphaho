@@ -1,105 +1,23 @@
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
-import { getVideos } from '@/lib/api';
+import VideoListClient from '@/components/public/video/VideoListClient';
 
 export const metadata: Metadata = {
   title: 'Video',
   description: 'Thư viện video về dòng họ Phùng Bát Tràng — tư liệu hình ảnh quý giá qua các thế hệ.',
 };
 
-async function getVideoData() {
-  'use cache';
-  cacheLife('hours');
-  try {
-    return await getVideos();
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Extract YouTube video ID from various URL formats:
- * - https://www.youtube.com/watch?v=VIDEO_ID
- * - https://youtu.be/VIDEO_ID
- * - https://www.youtube.com/embed/VIDEO_ID
- */
-function extractYouTubeId(url: string): string | null {
-  try {
-    const parsed = new URL(url);
-
-    if (parsed.hostname.includes('youtu.be')) {
-      return parsed.pathname.slice(1).split('?')[0] || null;
-    }
-
-    if (parsed.pathname.startsWith('/embed/')) {
-      return parsed.pathname.replace('/embed/', '').split('?')[0] || null;
-    }
-
-    if (parsed.pathname.startsWith('/watch') || parsed.pathname === '/') {
-      return parsed.searchParams.get('v');
-    }
-
-    return null;
-  } catch {
-    // Handle non-URL strings — try regex fallback
-    const m = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
-    return m?.[1] ?? null;
-  }
-}
-
-export default async function VideoPage() {
-  const res = await getVideoData();
-  const videos = res?.data ?? [];
-
+export default function VideoPage() {
   return (
     <div className="min-h-screen bg-stone-50 px-4 py-8 sm:py-12">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-2xl sm:text-4xl font-bold text-stone-900 mb-3">Thư viện Video</h1>
           <p className="text-sm leading-6 text-stone-500 max-w-xl mx-auto sm:text-base">
             Những thước phim lưu giữ ký ức và truyền thống dòng họ Phùng Bát Tràng qua các thế hệ.
           </p>
-          <div className="mt-4 w-16 h-1 bg-red-700 mx-auto rounded-full" />
+          <div className="mt-4 w-16 h-1 mx-auto rounded-full" style={{ background: 'var(--t-accent)' }} />
         </div>
-
-        {videos.length === 0 ? (
-          <div className="text-center py-20 text-stone-400">Chưa có video nào.</div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-            {videos.map((video) => {
-              const videoId = extractYouTubeId(video.youtubeUrl);
-              return (
-                <div
-                  key={video.id}
-                  className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-stone-100 flex flex-col"
-                >
-                  <div className="relative w-full aspect-video bg-stone-900">
-                    {videoId ? (
-                      <iframe
-                        className="absolute inset-0 w-full h-full"
-                        src={`https://www.youtube.com/embed/${videoId}`}
-                        title={video.title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-stone-100 flex items-center justify-center text-stone-400 text-sm">
-                        Không thể tải video
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4 sm:p-5">
-                    <h2 className="text-sm sm:text-base font-semibold text-stone-800 leading-snug line-clamp-2">
-                      {video.title}
-                    </h2>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <VideoListClient />
       </div>
     </div>
   );

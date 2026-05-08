@@ -6,8 +6,17 @@ function slugify(title: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
+    .replace(/đ/g, 'd')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+}
+
+function normalizeSearch(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/đ/g, 'd');
 }
 
 export const NewsService = {
@@ -18,17 +27,26 @@ export const NewsService = {
     });
   },
 
-  async getList(page: number, limit: number) {
+  async getList(page: number, limit: number, keyword?: string) {
     const skip = (page - 1) * limit;
+    const where = keyword
+      ? {
+          OR: [
+            { titleSearch: { contains: normalizeSearch(keyword), mode: 'insensitive' as const } },
+            { title: { contains: keyword, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
     const [items, total] = await prisma.$transaction([
       prisma.news.findMany({
+        where,
         orderBy: [{ order: 'asc' }, { publishedAt: 'desc' }],
         skip,
         take: limit,
       }),
-      prisma.news.count(),
+      prisma.news.count({ where }),
     ]);
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.max(1, Math.ceil(total / limit));
     return { items, total, page, limit, totalPages };
   },
 
@@ -64,6 +82,7 @@ export const NewsService = {
     return prisma.news.create({
       data: {
         title: data.title,
+        titleSearch: normalizeSearch(data.title),
         content: data.content,
         thumbnail: data.thumbnail,
         isPinned: data.isPinned ?? false,
@@ -74,7 +93,8 @@ export const NewsService = {
   },
 
   async update(id: string, data: Partial<{ title: string; content: string; thumbnail: string; isPinned: boolean }>): Promise<News> {
-    return prisma.news.update({ where: { id }, data });
+    const updateData = { ...data, ...(data.title ? { titleSearch: normalizeSearch(data.title) } : {}) };
+    return prisma.news.update({ where: { id }, data: updateData });
   },
 
   async delete(id: string): Promise<void> {
@@ -92,10 +112,10 @@ export const NewsService = {
     return { isPinned: updated.isPinned };
   },
 
-  async reorder(orderedIds: string[]): Promise<void> {
+  async reorder(orderedIds: string[], startIndex = 0): Promise<void> {
     await prisma.$transaction(
       orderedIds.map((id, index) =>
-        prisma.news.update({ where: { id }, data: { order: index } }),
+        prisma.news.update({ where: { id }, data: { order: startIndex + index } }),
       ),
     );
   },

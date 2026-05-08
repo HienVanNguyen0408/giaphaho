@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent } from 'react';
 import { getFooter, updateFooter } from '@/lib/api';
+import AdminPageHeader from '@/components/admin/ui/AdminPageHeader';
 
 export default function FooterAdminPage() {
   const [contact, setContact] = useState('');
@@ -41,13 +42,14 @@ export default function FooterAdminPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-stone-900">Footer</h1>
-        <p className="text-stone-500 text-sm mt-0.5">Chỉnh sửa nội dung phần cuối trang</p>
-      </div>
+    <div className="w-full space-y-5">
+      <AdminPageHeader
+        title="Footer"
+        eyebrow="Quản trị giao diện"
+        description="Chỉnh sửa thông tin liên hệ, mô tả và bản quyền ở phần cuối website."
+      />
 
-      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6">
+      <div className="w-full bg-white rounded-2xl border border-stone-200 shadow-sm p-5 lg:p-6">
         {loading ? (
           <div className="space-y-4 animate-pulse">
             {[...Array(3)].map((_, i) => (
@@ -60,42 +62,44 @@ export default function FooterAdminPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm lg:col-span-2">
                 {error}
               </div>
             )}
             {success && (
-              <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm">
+              <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm lg:col-span-2">
                 {success}
               </div>
             )}
 
-            {/* Contact */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Thông tin liên hệ
-              </label>
-              <textarea
-                value={contact}
-                onChange={(e) => setContact(e.target.value)}
-                rows={4}
-                placeholder="Địa chỉ, số điện thoại, email..."
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors resize-none"
-              />
-            </div>
+            <div className="grid gap-5 lg:grid-cols-2">
+              {/* Contact */}
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                  Thông tin liên hệ
+                </label>
+                <textarea
+                  value={contact}
+                  onChange={(e) => setContact(e.target.value)}
+                  rows={6}
+                  placeholder="Địa chỉ, số điện thoại, email..."
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors resize-none"
+                />
+              </div>
 
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Mô tả
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-                placeholder="Mô tả ngắn về dòng họ..."
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors resize-none"
-              />
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                  Mô tả
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={6}
+                  placeholder="Mô tả ngắn về dòng họ..."
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-colors resize-none"
+                />
+              </div>
             </div>
 
             {/* Copyright */}
@@ -112,11 +116,11 @@ export default function FooterAdminPage() {
               />
             </div>
 
-            <div className="pt-2">
+            <div className="flex justify-end pt-2">
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-700 to-amber-600 text-white font-semibold text-sm hover:from-red-800 hover:to-amber-700 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto sm:min-w-44 px-6 py-2.5 rounded-xl bg-red-800 text-white font-semibold text-sm hover:bg-red-900 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {saving ? 'Đang lưu...' : 'Lưu cấu hình'}
               </button>

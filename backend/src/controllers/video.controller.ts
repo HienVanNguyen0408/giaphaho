@@ -3,9 +3,12 @@ import { VideoService } from '../services/video.service';
 import { sendSuccess, sendCreated } from '../utils/response';
 
 export const VideoController = {
-  async getAll(_req: Request, res: Response): Promise<void> {
-    const videos = await VideoService.getAllOrdered();
-    sendSuccess(res, videos);
+  async getList(req: Request, res: Response): Promise<void> {
+    const page = Math.max(1, parseInt(String(req.query.page ?? '1'), 10) || 1);
+    const limit = Math.max(1, parseInt(String(req.query.limit ?? '12'), 10) || 12);
+    const keyword = req.query.keyword ? String(req.query.keyword).trim() : undefined;
+    const result = await VideoService.getList(page, limit, keyword);
+    sendSuccess(res, result);
   },
 
   async create(req: Request, res: Response): Promise<void> {
@@ -26,8 +29,8 @@ export const VideoController = {
   },
 
   async reorder(req: Request, res: Response): Promise<void> {
-    const { orderedIds } = req.body as { orderedIds: string[] };
-    await VideoService.reorder(orderedIds);
+    const { orderedIds, startIndex } = req.body as { orderedIds: string[]; startIndex?: number };
+    await VideoService.reorder(orderedIds, startIndex ?? 0);
     sendSuccess(res, null, 'Reordered successfully');
   },
 };

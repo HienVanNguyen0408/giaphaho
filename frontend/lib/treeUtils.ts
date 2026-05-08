@@ -15,6 +15,22 @@ export interface FlowGraph {
 const nodeWidth = 200;
 const nodeHeight = 140;
 
+function compareTreeOrder(a: Member, b: Member): number {
+  const aParent = a.parentId ?? '';
+  const bParent = b.parentId ?? '';
+  if (aParent !== bParent) return aParent.localeCompare(bParent);
+
+  const aOrder = a.siblingOrder ?? Infinity;
+  const bOrder = b.siblingOrder ?? Infinity;
+  if (aOrder !== bOrder) return aOrder - bOrder;
+
+  const aBirth = a.birthYear ?? Infinity;
+  const bBirth = b.birthYear ?? Infinity;
+  if (aBirth !== bBirth) return aBirth - bBirth;
+
+  return a.fullName.localeCompare(b.fullName, 'vi');
+}
+
 /**
  * Convert a flat array of Members into ReactFlow nodes and edges
  * using Dagre for automatic hierarchical layout.
@@ -34,11 +50,12 @@ export function flatToFlowGraph(members: Member[]): FlowGraph {
 
   const nodes: Node<MemberNodeData>[] = [];
   const edges: Edge[] = [];
-  const memberMap = new Map<string, Member>(members.map((m) => [m.id, m]));
+  const orderedMembers = [...members].sort(compareTreeOrder);
+  const memberMap = new Map<string, Member>(orderedMembers.map((m) => [m.id, m]));
 
   // Build children adjacency list
   const childrenOf = new Map<string, string[]>();
-  members.forEach((m) => {
+  orderedMembers.forEach((m) => {
     if (m.parentId && memberMap.has(m.parentId)) {
       if (!childrenOf.has(m.parentId)) childrenOf.set(m.parentId, []);
       childrenOf.get(m.parentId)!.push(m.id);
@@ -65,12 +82,12 @@ export function flatToFlowGraph(members: Member[]): FlowGraph {
   };
 
   // Add nodes to dagre
-  members.forEach((m) => {
+  orderedMembers.forEach((m) => {
     dagreGraph.setNode(m.id, { width: nodeWidth, height: nodeHeight });
   });
 
   // Add edges to dagre
-  members.forEach((m) => {
+  orderedMembers.forEach((m) => {
     if (m.parentId && memberMap.has(m.parentId)) {
       dagreGraph.setEdge(m.parentId, m.id);
       edges.push({
@@ -88,7 +105,7 @@ export function flatToFlowGraph(members: Member[]): FlowGraph {
   dagre.layout(dagreGraph);
 
   // Get positioned nodes
-  members.forEach((m) => {
+  orderedMembers.forEach((m) => {
     const nodeWithPosition = dagreGraph.node(m.id);
     nodes.push({
       id: m.id,
@@ -135,5 +152,5 @@ export function getLineageMembers(targetId: string, allMembers: Member[]): Membe
     }
   }
 
-  return allMembers.filter((m) => lineageIds.has(m.id));
+  return allMembers.filter((m) => lineageIds.has(m.id)).sort(compareTreeOrder);
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getActivityLogs } from '@/lib/api';
 import DataTable, { Column } from '@/components/shared/DataTable';
 import { useAdminAuth } from '@/components/admin/providers/AdminAuthProvider';
+import AdminPageHeader, { AdminMetaChip } from '@/components/admin/ui/AdminPageHeader';
 import type { ActivityLog } from '@/types';
 
 const ACTION_LABELS: Record<string, string> = {
@@ -161,11 +162,13 @@ export default function ActivityLogPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-stone-900">Nhật ký hoạt động</h1>
-        <p className="text-stone-500 text-sm mt-0.5">{total} bản ghi</p>
-      </div>
+    <div className="w-full space-y-5">
+      <AdminPageHeader
+        title="Nhật ký hoạt động"
+        eyebrow="Quản trị hệ thống"
+        description="Theo dõi các thay đổi và thao tác quản trị trong hệ thống."
+        meta={<AdminMetaChip label="Tổng" value={`${total} bản ghi`} tone="blue" />}
+      />
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
