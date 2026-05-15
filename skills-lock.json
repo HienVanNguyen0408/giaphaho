@@ -2,10 +2,10 @@
   "version": 1,
   "skills": {
     "frontend-design": {
-      "source": "anthropics/skills",
+      "source": "mrgoonie/claudekit-skills",
       "sourceType": "github",
-      "skillPath": "skills/frontend-design/SKILL.md",
-      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+      "skillPath": ".claude/skills/frontend-design/SKILL.md",
+      "computedHash": "6574cb74a0c931cdb6551729bbaafb6ca3d0a8f31fb9ecf08e7fd21c4638e803"
     },
     "nodejs-backend-patterns": {
       "source": "wshobson/agents",
@@ -13,11 +13,23 @@
       "skillPath": "plugins/javascript-typescript/skills/nodejs-backend-patterns/SKILL.md",
       "computedHash": "c6a99966c2565acc388e574039127abc770bb9a3338be761e421e16f023f702b"
     },
+    "threejs": {
+      "source": "mrgoonie/claudekit-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/threejs/SKILL.md",
+      "computedHash": "65ad764d7d68a258052061cc5526d329875a459b759a486536015e3f03ec00e8"
+    },
+    "ui-styling": {
+      "source": "mrgoonie/claudekit-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-styling/SKILL.md",
+      "computedHash": "a40b5b7fb4bc69139996e8f009c9d3b46bf9d28b800115e9b93b7e2902039c64"
+    },
     "ui-ux-pro-max": {
       "source": "nextlevelbuilder/ui-ux-pro-max-skill",
       "sourceType": "github",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
-      "computedHash": "0a413bf988d06481f69bb81df2070741c3ba12dd9f1be2706d57f259c905992d"
+      "computedHash": "6337038fe1fe6bbe1b9f252ab678ee575859190bab6f0f246f4061824eb40875"
     }
   }
 }

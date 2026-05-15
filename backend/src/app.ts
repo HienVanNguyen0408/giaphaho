@@ -74,8 +74,16 @@ app.use(errorHandler);
 const PORT = Number(process.env.PORT ?? 8080);
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.warn(`Backend running on http://localhost:${PORT}`);
+  import('./middlewares/license').then(({ validateLicense }) => {
+    validateLicense().then(() => {
+      app.listen(PORT, () => {
+        console.warn(`Backend running on http://localhost:${PORT}`);
+      });
+    });
+  }).catch(() => {
+    app.listen(PORT, () => {
+      console.warn(`Backend running on http://localhost:${PORT}`);
+    });
   });
 }
 

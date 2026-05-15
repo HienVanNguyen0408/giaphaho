@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model PlatformAdmin {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  email        String        @unique
+  password     String
+  name         String
+  role         String        @default("SUPER_ADMIN")
+  activityLogs ActivityLog[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Clan {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  code         String        @unique
+  licenseType  String
+  status       String        @default("ACTIVE")
+  subdomain    String?
+  contactName  String?
+  contactEmail String?
+  contactPhone String?
+  address      String?
+  notes        String?
+  licenses     License[]
+  theme        Theme?
+  activityLogs ActivityLog[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model License {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  clan          Clan          @relation(fields: [clanId], references: [id])
+  clanId        String        @db.ObjectId
+  type          String
+  key           String        @unique
+  activatedAt   DateTime?
+  expiresAt     DateTime?
+  isRevoked     Boolean       @default(false)
+  downloadCount Int           @default(0)
+  maxDownloads  Int           @default(3)
+  downloadLogs  DownloadLog[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model DownloadLog {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  license   License   @relation(fields: [licenseId], references: [id])
+  licenseId String    @db.ObjectId
+  ip        String?
+  userAgent String?
+  token     String    @unique
+  usedAt    DateTime?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+}
+
+model Theme {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  clan         Clan     @relation(fields: [clanId], references: [id])
+  clanId       String   @unique @db.ObjectId
+  primaryColor String   @default("#8B0000")
+  accentColor  String   @default("#6B0000")
+  logo         String?
+  favicon      String?
+  fontFamily   String   @default("Be Vietnam Pro")
+  customCss    String?
+  updatedAt    DateTime @updatedAt
+}
+
+model ActivityLog {
+  id        String         @id @default(auto()) @map("_id") @db.ObjectId
+  clan      Clan?          @relation(fields: [clanId], references: [id])
+  clanId    String?        @db.ObjectId
+  admin     PlatformAdmin? @relation(fields: [adminId], references: [id])
+  adminId   String?        @db.ObjectId
+  action    String
+  detail    Json?
+  createdAt DateTime       @default(now())
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  clanId    String?  @db.ObjectId
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  sentEmail Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

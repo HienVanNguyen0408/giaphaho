@@ -1,8 +1,137 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
 at `specs/001-gia-pha-ho-phung-bat-trang/plan.md`
 <!-- SPECKIT END -->
+
+## Project Overview
+
+Fullstack genealogy website for the Phùng Bát Tràng family clan. Git monorepo with two independent sub-projects:
+
+- **`backend/`** — Express 5 + TypeScript REST API, MongoDB Atlas via Prisma ORM, JWT auth (HTTP-only cookies)
+- **`frontend/`** — Next.js 16 (App Router), Tailwind CSS 4, React 19
+
+Deploy targets: Frontend → Vercel; Backend → Railway/VPS.
+
+## Commands
+
+### Backend (`cd backend`)
+```bash
+npm run dev           # ts-node-dev, loads .env.dev
+npm run build         # prisma generate + tsc → dist/
+npm run test          # vitest run (unit + integration)
+npm run test:watch    # vitest interactive
+npm run lint          # eslint src --ext .ts
+npm run db:push       # push schema to MongoDB Atlas
+npm run db:seed       # seed with ts-node prisma/seed.ts
+npm run db:seed-chinhanh  # seed branch (chi) data
+```
+
+Run a single test file:
+```bash
+npx vitest run tests/unit/member.service.test.ts
+```
+
+### Frontend (`cd frontend`)
+```bash
+npm run dev           # next dev (port 3000)
+npm run build         # next build
+npm run test          # vitest run (unit/component tests in tests/unit/)
+npm run test:e2e      # playwright test
+npm run lint          # next lint
+```
+
+## Architecture
+
+### Backend request flow
+```
+Express app (src/app.ts)
+  → activityLogger middleware (logs all mutating requests)
+  → routes/  (thin routers, apply authenticate + requireRole)
+  → controllers/  (parse req, call service, sendSuccess/sendError)
+  → services/  (all business logic; directly testable)
+  → Prisma client (src/lib/prisma.ts)
+```
+
+Auth uses JWT stored in an HTTP-only cookie (`token`). The `authenticate` middleware reads `req.cookies.token`. Role guard is `requireRole(Role.SUPER_ADMIN)` or `requireRole(Role.CHI_ADMIN)`.
+
+Env loading: `src/app.ts` loads `.env.dev` in development and `.env` in production, then falls back to `.env` for anything not already set.
+
+Required env vars (see `backend/.env.example`):
+```
+DATABASE_URL          # MongoDB Atlas connection string
+JWT_SECRET            # min 32 chars
+CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET
+PORT                  # default 8080
+FRONTEND_URL          # comma-separated list for CORS
+```
+
+### Frontend request flow
+
+Browser calls go through a transparent Next.js API proxy at `app/proxy/[...path]/route.ts` (`/proxy/*` → backend). Server-side calls hit the backend directly via `NEXT_PUBLIC_API_URL`. All calls use the typed wrapper in `frontend/lib/api.ts` (`apiFetch<T>`).
+
+SSE (Server-Sent Events) for long-running jobs (e.g. member stats recalculation) goes via `subscribeRecalculateEvents()` in `lib/api.ts`.
+
+### App Router layout
+```
+app/
+  layout.tsx                  # root: ThemeProvider, Be Vietnam Pro font
+  (public)/                   # header + footer layout
+    layout.tsx
+    gia-pha/                  # interactive family tree (ReactFlow + dagre)
+    thanh-vien/               # member listing
+    tim-kiem/                 # search
+    tin-tuc/                  # news
+    video/                    # videos
+  admin/                      # protected admin area
+    login/
+    (dashboard)/              # dashboard layout, requires auth
+      ...
+```
+
+Admin auth is enforced by `frontend/middleware.ts` (JWT check on `/admin/*`).
+
+### Components
+```
+components/
+  public/    # public-facing UI
+  admin/     # admin dashboard UI
+  shared/    # used in both
+  providers/ # ThemeProvider (wraps root layout)
+```
+
+### Data models (Prisma / MongoDB)
+Key models: `User` (auth, roles), `Member` (tree nodes — self-referential via `parentId`), `News`, `Video`, `Section` (homepage blocks), `FooterConfig`, `Notification`, `ActivityLog`, `AnalyticsEvent`.
+
+`Member` tree is a self-referential MongoDB document tree. `generation` and `descendantsCount` are denormalized counters recalculated via the `/api/members/recalculate-stats` SSE endpoint.
+
+## Frontend color rules (enforced)
+
+**Never hardcode colors.** Always use CSS custom properties from `app/globals.css`. Key variables:
+
+| Variable | Purpose |
+|---|---|
+| `--t-accent` | Primary brand red (#8B0000) |
+| `--t-bg` / `--t-surface` / `--t-surface-2` | Backgrounds |
+| `--t-text` / `--t-text-2` / `--t-text-3` | Text hierarchy |
+| `--t-border` | Borders |
+| `--t-success` / `--t-warning` / `--t-error` / `--t-info` | Semantic colors |
+| `--t-nav-*` / `--t-footer-*` | Nav and footer tokens |
+
+For alpha variants use `color-mix(in oklch, var(--t-accent) 25%, transparent)` instead of raw `rgba`.
+
+Tailwind brand colors (e.g. `bg-red-700`) must use `bg-[var(--t-accent)]` instead.
+
+## Important notes
+
+- **Next.js version**: This is Next.js 16 — APIs and conventions may differ from training data. Read `node_modules/next/dist/docs/` before writing Next.js-specific code.
+- **TypeScript**: strict mode, no untyped `any`.
+- **Prisma provider**: `mongodb` — no migrations, use `prisma db push`.
+- **Tests**: backend uses Vitest + Supertest; frontend uses Vitest + React Testing Library + jsdom; E2E uses Playwright.
 
 <!-- rtk-instructions v2 -->
 # RTK (Rust Token Killer) - Token-Optimized Commands
